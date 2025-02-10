@@ -34,7 +34,13 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "include/*.h")
 include_directories("include")
 
 # Build SableEngine as a shared library
-add_library(${PROJECT_NAME} SHARED ${SOURCES})
+add_library(${PROJECT_NAME} STATIC ${SOURCES})
 
 # Link libraries
 target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES})
+
+# Copy dependencies' .lib files to the output directory
+foreach(dep IN LISTS GLEW_LIBRARIES GLFW_LIBRARIES ASSIMP_LIBRARIES)
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${dep}> $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+endforeach()
