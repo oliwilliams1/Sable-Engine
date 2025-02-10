@@ -14,4 +14,5 @@ private:
 
 	int width, height;
 	void InitWindow();
+	void InitImGui();
 };

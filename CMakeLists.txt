@@ -16,6 +16,31 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.h")
 # GLFW
 add_subdirectory("vendor/glfw")
 
+# ImGui
+set(IMGUI_DIR "vendor/imgui")
+# Specify the backend directory
+set(IMGUI_BACKEND_DIR "${IMGUI_DIR}/backends")
+include_directories(${IMGUI_DIR} ${IMGUI_BACKEND_DIR})
+
+
+# Collect ImGui source files
+file(GLOB IMGUI_SOURCE "${IMGUI_DIR}/*.cpp" "${IMGUI_DIR}/*.h")
+
+# Collect backend include files (if needed, typically not necessary for linking)
+file(GLOB IMGUI_BACKENDS_INCLUDE
+    "${IMGUI_BACKEND_DIR}/imgui_impl_glfw.h"
+    "${IMGUI_BACKEND_DIR}/imgui_impl_opengl3.h"
+)
+
+# Collect backend source files
+file(GLOB IMGUI_BACKENDS_SOURCE
+    "${IMGUI_BACKEND_DIR}/imgui_impl_glfw.cpp"
+    "${IMGUI_BACKEND_DIR}/imgui_impl_opengl3.cpp"
+)
+
+# Create the ImGui library, including both ImGui and backend source files
+add_library(imgui ${IMGUI_SOURCE} ${IMGUI_BACKENDS_SOURCE})
+
 # Sable Engine
 add_subdirectory("engine")
 include_directories("engine/include")
@@ -25,9 +50,9 @@ add_executable(SableEditor ${SOURCES})
 
 # Link the SableEngine library
 target_link_libraries(SableEditor 
-	SableEngine 
-	glfw
+	SableEngine
 	glew
+    imgui
 )
 
 # Copy DLLs to output directory

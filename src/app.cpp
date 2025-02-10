@@ -1,4 +1,7 @@
 #include <iostream>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 #include "app.h"
 
 static void error_callback(int error, const char* description)
@@ -12,6 +15,7 @@ App::App()
 	height = 900;
 
 	InitWindow();
+	InitImGui();
 }
 
 void App::InitWindow()
@@ -47,18 +51,62 @@ void App::InitWindow()
 	std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 }
 
+void App::InitImGui()
+{
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
+
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init("#version 330");
+
+}
+
 void App::Mainloop()
 {
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
 
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+
+		ImGui::DockSpaceOverViewport();
+
+		ImGui::Begin("dokcing");
+		ImGui::Text("Helo!");
+		ImGui::End();
+
+		ImGui::Begin("dokcing 1");
+		ImGui::Text("Helo!");
+		ImGui::End();
+
+		ImGui::Begin("dokcing 2");
+		ImGui::Text("Helo!");
+		ImGui::End();
+
+		ImGui::Render();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			GLFWwindow* backup_current_window = glfwGetCurrentContext();
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			glfwMakeContextCurrent(backup_current_window);
+		}
 
 		glfwSwapBuffers(window);
 	}
 }
-
 App::~App()
 {
 	glfwDestroyWindow(window);
