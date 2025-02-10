@@ -52,7 +52,8 @@ add_executable(SableEditor ${SOURCES})
 target_link_libraries(SableEditor 
 	SableEngine
 	glew
-    imgui
+  glfw
+  imgui
 )
 
 # Copy DLLs to output directory
