@@ -1,8 +1,9 @@
 #include <iostream>
-#include "SableEngine.h"
+#include "App.h"
 
 int main()
 {
-	Test();
+	App app = App();
+	app.Mainloop();
 	return 0;
 }

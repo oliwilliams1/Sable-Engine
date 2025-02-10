@@ -15,9 +15,6 @@ include_directories("vendor/glm")
 add_subdirectory("vendor/glew/build/cmake")
 include_directories("vendor/glew/include")
 
-# GLFW
-add_subdirectory("vendor/glfw")
-
 # Stb Image
 set(STB_DIR "vendor/stb")
 include_directories(${STB_DIR})
@@ -37,10 +34,17 @@ include_directories("include")
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 
 # Link libraries
-target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} glew)
 
 # Copy dependencies' .lib files to the output directory
 foreach(dep IN LISTS GLEW_LIBRARIES GLFW_LIBRARIES ASSIMP_LIBRARIES)
     add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${dep}> $<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endforeach()
+
+# Copy GLEW DLL to output directory
+add_custom_command(TARGET SableEngine POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:glew> $<TARGET_FILE_DIR:SableEngine>)
+
+add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:glew> $<TARGET_FILE_DIR:${PROJECT_NAME}>)
