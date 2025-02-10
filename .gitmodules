@@ -1,16 +1,9 @@
 [submodule "engine/vendor/glm"]
 	path = engine/vendor/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "engine/vendor/glfw"]
-	path = engine/vendor/glfw
-	url = https://github.com/glfw/glfw.git
 [submodule "engine/vendor/glew"]
 	path = engine/vendor/glew
 	url = https://github.com/Perlmint/glew-cmake.git
-[submodule "engine/vendor/imgui"]
-	path = engine/vendor/imgui
-	url = https://github.com/ocornut/imgui.git
-	branch = docking
 [submodule "engine/vendor/stb"]
 	path = engine/vendor/stb
 	url = https://github.com/nothings/stb.git
