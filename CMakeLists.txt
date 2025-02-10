@@ -58,4 +58,5 @@ target_link_libraries(SableEditor
 # Copy DLLs to output directory
 add_custom_command(TARGET SableEditor POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:glew> $<TARGET_FILE_DIR:SableEditor>
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:glfw> $<TARGET_FILE_DIR:SableEditor>)
+    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:glfw> $<TARGET_FILE_DIR:SableEditor>
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources $<TARGET_FILE_DIR:SableEditor>/resources)

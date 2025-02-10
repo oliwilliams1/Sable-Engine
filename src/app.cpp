@@ -3,6 +3,7 @@
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
 #include "app.h"
+#include "utils.h"
 
 static void error_callback(int error, const char* description)
 {
@@ -16,6 +17,7 @@ App::App()
 
 	InitWindow();
 	InitImGui();
+	SetupImGuiStyle();
 }
 
 void App::InitWindow()
