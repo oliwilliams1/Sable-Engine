@@ -125,14 +125,20 @@ void FileBrowser::RenderDirectory(const File& file)
 
 void FileBrowser::Render()
 {
+	ImGui::Text("%s", m_CurrentPath.string().c_str());
+
 	ImVec2 window_size = ImGui::GetWindowSize();
 	int width = (int)window_size.x;
 
 	int padding = ImGui::GetStyle().ItemSpacing.x;
 	int fileWidth = 125;
 	int fileHeight = 150;
-	assert(fileWidth > 0 && "fileWidth must be greater than zero!");
 	int amntWide = (width - padding) / (fileWidth + padding);
+
+	if (amntWide == 0)
+	{
+		amntWide = 1;
+	}
 
 	for (int i = 0; i < m_Files.size(); ++i)
 	{
