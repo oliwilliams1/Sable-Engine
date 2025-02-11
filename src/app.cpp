@@ -14,7 +14,6 @@ App::App()
 {
 	width = 1600;
 	height = 900;
-  std::cout << "App init\n";
 	InitWindow();
 	InitImGui();
 	SetupImGuiStyle();

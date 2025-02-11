@@ -27,7 +27,7 @@ FileBrowser::SB_FILE_TYPE FileBrowser::GetFileType(const std::filesystem::path& 
 {
 	if (std::filesystem::is_directory(path)) 
 	{
-		return SB_FOLDER;
+		return SB_ASSET_FOLDER;
 	}
 
 	std::string extension = path.extension().string();
@@ -44,7 +44,7 @@ FileBrowser::SB_FILE_TYPE FileBrowser::GetFileType(const std::filesystem::path& 
 	{
 		return SB_ASSET_FBX;
 	}
-	else if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp" || extension == ".gif") 
+	else if (extension == ".png" || extension == ".jpg" || extension == ".jpeg" || extension == ".bmp" || extension == "webp") 
 	{
 		return SB_ASSET_IMAGE;
 	}
@@ -54,14 +54,18 @@ FileBrowser::SB_FILE_TYPE FileBrowser::GetFileType(const std::filesystem::path& 
 	}
 	else if (extension == ".txt")
 	{
-		return SB_ASSET_TEXT;
+		return SB_ASSET_DOCUMENT;
 	}
-	else if (extension == ".ttf" || extension == ".otf")
+	else if (extension == ".vert" || extension == ".frag" || extension == ".comp" || extension == ".geom" || extension == ".tese" || extension == ".tesc" || extension == ".glsl")
 	{
-		return SB_ASSET_FONT;
+		return SB_ASSET_SHADER;
+	}
+	else if (extension == ".json" || extension == ".yaml" || extension == ".conf" || extension == ".ini")
+	{
+		return SB_ASSET_CONFIG;
 	}
 
-	return SB_UNKNOWN;
+	return SB_ASSET_UNKNOWN;
 }
 
 void FileBrowser::UpdateCacheDirectoryFiles(const std::filesystem::path& path)
@@ -90,7 +94,7 @@ void FileBrowser::UpdateCacheDirectoryFiles(const std::filesystem::path& path)
 	std::vector<File> p_Directories;
 	for (const File& file : p_Files)
 	{
-		if (file.type == SB_FOLDER)
+		if (file.type == SB_ASSET_FOLDER)
 		{
 			p_Directories.emplace_back(file);
 		}
@@ -98,7 +102,7 @@ void FileBrowser::UpdateCacheDirectoryFiles(const std::filesystem::path& path)
 
 	// Remove directories from p_Files
 	p_Files.erase(std::remove_if(p_Files.begin(), p_Files.end(), [](const File& file) {
-		return file.type == SB_FOLDER;
+		return file.type == SB_ASSET_FOLDER;
 		}), p_Files.end());
 
 	// Sort directories by first char in lowercase
@@ -113,7 +117,7 @@ void FileBrowser::UpdateCacheDirectoryFiles(const std::filesystem::path& path)
 
 	// Update files vector
 	m_Files.clear();
-	m_Files.push_back({ "..", m_CurrentPath.parent_path(), SB_FOLDER}); // Add parent dir button at start of vector
+	m_Files.push_back({ "..", m_CurrentPath.parent_path(), SB_ASSET_FOLDER }); // Add parent dir button at start of vector
 	m_Files.insert(m_Files.end(), p_Directories.begin(), p_Directories.end());
 	m_Files.insert(m_Files.end(), p_Files.begin(), p_Files.end());
 }

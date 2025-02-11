@@ -17,15 +17,19 @@ private:
 
     enum SB_FILE_TYPE
     {
-        SB_FOLDER = 0,
-        SB_UNKNOWN = 1,
-        SB_ASSET_OBJ = 2,
-        SB_ASSET_MTL = 3,
-        SB_ASSET_FBX = 4,
+        SB_ASSET_UNKNOWN = -1,
+        SB_ASSET_FOLDER = 0,
+        SB_ASSET_OBJ = 1,
+        SB_ASSET_MTL = 2,
+        SB_ASSET_FBX = 3,
+        SB_ASSET_GLTF = 4,
         SB_ASSET_IMAGE = 5,
-        SB_ASSET_AUDIO = 6,
-        SB_ASSET_TEXT = 7,
-		SB_ASSET_FONT = 8
+        SB_ASSET_SCRIPT = 6,
+        SB_ASSET_DOCUMENT = 7,
+        SB_ASSET_AUDIO = 8,
+        SB_ASSET_CONFIG = 9,
+        SB_ASSET_SHADER = 10,
+        SB_ASSET_COMP_FOLDER = 11
     };
 
     struct File
