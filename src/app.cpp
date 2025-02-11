@@ -73,7 +73,6 @@ void App::Mainloop()
 
 	while (!glfwWindowShouldClose(window))
 	{
-    std::cout << "Rendering\n";
 		glfwPollEvents();
 
 		ImGui_ImplOpenGL3_NewFrame();
@@ -86,6 +85,7 @@ void App::Mainloop()
 		ImGui::Text("Helo!");
 		ImGui::End();
 
+		ImGui::SetNextWindowSizeConstraints(ImVec2(400, 200), ImVec2(FLT_MAX, FLT_MAX));
 		ImGui::Begin("Asset Browser");
 		fileBrowser.Render();
 		ImGui::End();

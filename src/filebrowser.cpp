@@ -5,19 +5,19 @@
 FileBrowser::FileBrowser()
 {
 	std::filesystem::path exec_path = std::filesystem::current_path().parent_path();
-	std::filesystem::path font_path("resources/");
+	std::filesystem::path other_path("resources/");
 
-	std::filesystem::path full_font_path = exec_path / font_path;
+	std::filesystem::path full_other_path = exec_path / other_path;
 
-	if (std::filesystem::exists(full_font_path))
+	if (std::filesystem::exists(full_other_path))
 	{
 		// If in a build dir
-		m_CurrentPath = full_font_path;
+		m_CurrentPath = full_other_path;
 	}
 	else
 	{
 		// Relative to executable
-		m_CurrentPath = font_path;
+		m_CurrentPath = other_path;
 	}
 
 	UpdateCacheDirectoryFiles(m_CurrentPath);
@@ -126,11 +126,12 @@ void FileBrowser::RenderDirectory(const File& file)
 void FileBrowser::Render()
 {
 	ImVec2 window_size = ImGui::GetWindowSize();
-	int width = static_cast<int>(window_size.x);
+	int width = (int)window_size.x;
 
 	int padding = ImGui::GetStyle().ItemSpacing.x;
 	int fileWidth = 125;
 	int fileHeight = 150;
+	assert(fileWidth > 0 && "fileWidth must be greater than zero!");
 	int amntWide = (width - padding) / (fileWidth + padding);
 
 	for (int i = 0; i < m_Files.size(); ++i)
@@ -139,7 +140,6 @@ void FileBrowser::Render()
 
 		if (ImGui::Button(file.name.c_str(), ImVec2(fileWidth, fileHeight)))
 		{
-
 			UpdateCacheDirectoryFiles(file.path);
 		}
 
