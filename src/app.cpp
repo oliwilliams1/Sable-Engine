@@ -14,7 +14,7 @@ App::App()
 {
 	width = 1600;
 	height = 900;
-
+  std::cout << "App init\n";
 	InitWindow();
 	InitImGui();
 	SetupImGuiStyle();
@@ -47,7 +47,6 @@ void App::InitWindow()
 	if (err != GLEW_OK)
 	{
 		std::cout << "Failed to initialize GLEW: " << glewGetErrorString(err) << std::endl;
-		exit(1);
 	}
 
 	std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
@@ -74,6 +73,7 @@ void App::Mainloop()
 
 	while (!glfwWindowShouldClose(window))
 	{
+    std::cout << "Rendering\n";
 		glfwPollEvents();
 
 		ImGui_ImplOpenGL3_NewFrame();
