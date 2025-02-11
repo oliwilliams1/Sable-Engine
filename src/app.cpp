@@ -86,8 +86,8 @@ void App::Mainloop()
 		ImGui::Text("Helo!");
 		ImGui::End();
 
-		ImGui::Begin("dokcing 1");
-		ImGui::Text("Helo!");
+		ImGui::Begin("Asset Browser");
+		fileBrowser.Render();
 		ImGui::End();
 
 		ImGui::Begin("dokcing 2");
@@ -109,6 +109,7 @@ void App::Mainloop()
 		glfwSwapBuffers(window);
 	}
 }
+
 App::~App()
 {
 	glfwDestroyWindow(window);
