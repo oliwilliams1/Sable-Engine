@@ -1,7 +1,8 @@
 #pragma once
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-#include "filebrowser.h"
+#include "FileBrowser.h"
+#include "SableEngine.h"
 
 class App
 {
@@ -14,6 +15,7 @@ private:
 	GLFWwindow* window;
 
 	FileBrowser fileBrowser;
+	SBEngine engine;
 
 	int width, height;
 	void InitWindow();

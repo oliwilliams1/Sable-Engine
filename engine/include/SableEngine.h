@@ -1,3 +1,15 @@
 #pragma once
+#include <GL/glew.h>
+#include <string>
 
-void Test();
+class SBEngine
+{
+public:
+    SBEngine();
+    ~SBEngine();
+
+    bool LoadTextureFromFile(const std::string& filename, GLuint& id);
+
+private:
+
+};

@@ -1,7 +1,7 @@
 #include <filesystem>
 #include <iostream>
 #include <imgui.h>
-#include "utils.h"
+#include "Utils.h"
 
 void SetupImGuiStyle()
 {

@@ -1,0 +1,83 @@
+#include "AssetManager.h"
+#include <iostream>
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
+using namespace SableEngine;
+
+static AssetManager* s_Instance = nullptr;
+
+AssetManager::AssetManager()
+{
+	std::cout << "Asset manager init" << std::endl;
+}
+
+AssetManager::~AssetManager()
+{
+	for (const auto& pair : ms_TextureMap)
+	{
+		glDeleteTextures(1, &pair.second.id);
+	}
+
+	ms_TextureMap.clear();
+	std::cout << "Asset manager shutdown" << std::endl;
+}
+
+void AssetManager::Init()
+{
+	s_Instance = new AssetManager();
+}
+
+void AssetManager::Shutdown()
+{
+	delete s_Instance;
+	s_Instance = nullptr;
+}
+
+bool AssetManager::LoadTextureFromFile(const std::string& filename, SB_TEXTURE& texture)
+{
+	stbi_set_flip_vertically_on_load(true);
+
+	int width, height, channels;
+	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &channels, 0);
+
+	if (data == nullptr)
+	{
+		std::cout << "Failed to load texture: " << filename << std::endl;
+		return false;
+	}
+
+	if (texture.id == -1)
+	{
+		texture.id = 0;
+	}
+	else
+	{
+		std::cout << "Better hope you dont get this error, means texture id already in use" << std::endl;
+		return false;
+	}
+
+	glGenTextures(1, &texture.id);
+	glBindTexture(GL_TEXTURE_2D, texture.id);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	GLenum format = (channels == 3) ? GL_RGB : GL_RGBA;
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+
+	stbi_image_free(data);
+
+	ms_TextureMap[filename] = texture;
+
+	return true;
+}
+
+bool AssetManager::LoadMeshFromFile(const std::string& filename, SB_MESH& mesh)
+{
+	return false;
+}

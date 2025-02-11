@@ -1,7 +1,24 @@
-#include <iostream>
 #include "SableEngine.h"
+#include "AssetManager.h"
 
-void Test() 
+using namespace SableEngine;
+
+SBEngine::SBEngine()
 {
-	std::cout << "Test" << std::endl;
+    AssetManager::Init();
+}
+
+SBEngine::~SBEngine()
+{
+    AssetManager::Shutdown();
+}
+
+bool SBEngine::LoadTextureFromFile(const std::string& filename, GLuint& id)
+{
+    SB_TEXTURE tempTexture;
+
+    bool res = AssetManager::LoadTextureFromFile(filename, tempTexture);
+
+    id = tempTexture.id;
+    return res;
 }

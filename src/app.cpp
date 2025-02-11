@@ -2,8 +2,8 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include "app.h"
-#include "utils.h"
+#include "App.h"
+#include "Utils.h"
 
 static void error_callback(int error, const char* description)
 {
