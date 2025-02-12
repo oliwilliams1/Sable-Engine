@@ -6,7 +6,7 @@
 FileBrowser::FileBrowser()
 {
 	std::filesystem::path exec_path = std::filesystem::current_path().parent_path();
-	std::filesystem::path other_path("resources/");
+	std::filesystem::path other_path("resources");
 
 	std::filesystem::path full_other_path = exec_path / other_path;
 
@@ -196,10 +196,13 @@ void FileBrowser::Render()
 		{
 			drawList->AddRect(pos, size, IM_COL32(255, 255, 255, 70));
 			drawList->AddRectFilled(pos, size, IM_COL32(255, 255, 255, 20));
+
+			if (ImGui::IsMouseClicked(0))
+			{
+				UpdateCacheDirectoryFiles(file.path);
+			}
 		}
 
-		// UpdateCacheDirectoryFiles(file.path);
-		
 		ImGui::EndGroup();
 
 		ImGui::SameLine();
