@@ -42,13 +42,16 @@ private:
         GLuint icon;
     };
 
+    int fileWidth = 125, fileHeight = 150;
+
     GLuint GetFileTexture(SB_FILE_TYPE type) const;
 
     SB_FILE_TYPE GetFileType(const std::filesystem::path& path);
-    void RenderDirectory(const File& file);
     void UpdateCacheDirectoryFiles(const std::filesystem::path& path);
 	std::filesystem::path m_CurrentPath;
 	std::vector<File> m_Files;
 
-    GLuint m_FolderTexture, m_ImageFileTexture, m_UnknownFileTexture;
+    GLuint m_FolderTexture, m_ImageFileTexture, m_UnknownFileTexture, m_FolderCompressedTexture,
+        m_DocumentFileTexture, m_ConfigFileTexture, m_ScriptFileTexture, m_AudioFileTexture,
+        m_FBX_FileTexture, m_GLTF_FileTexture, m_OBJ_FileTexture, m_MTL_FileTexture;
 };

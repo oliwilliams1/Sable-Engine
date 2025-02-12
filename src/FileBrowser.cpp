@@ -21,9 +21,20 @@ FileBrowser::FileBrowser()
 		m_CurrentPath = other_path;
 	}
 
-	SBEngine::GetInstance().LoadTextureFromFile("icons/sb-icon-folder.png", m_FolderTexture);
-	SBEngine::GetInstance().LoadTextureFromFile("icons/sb-icon-image.png", m_ImageFileTexture);
-	SBEngine::GetInstance().LoadTextureFromFile("icons/sb-icon-unknown.png", m_UnknownFileTexture);
+	// Load all textures
+	SBEngine& engine = SBEngine::GetInstance();
+	engine.LoadTextureFromFile("icons/sb-icon-folder.png", m_FolderTexture);
+	engine.LoadTextureFromFile("icons/sb-icon-image.png", m_ImageFileTexture);
+	engine.LoadTextureFromFile("icons/sb-icon-unknown.png", m_UnknownFileTexture);
+	engine.LoadTextureFromFile("icons/sb-icon-folder-compressed.png", m_FolderCompressedTexture);
+	engine.LoadTextureFromFile("icons/sb-icon-document.png", m_DocumentFileTexture);
+	engine.LoadTextureFromFile("icons/sb-icon-config.png", m_ConfigFileTexture);
+	engine.LoadTextureFromFile("icons/sb-icon-code.png", m_ScriptFileTexture);
+	engine.LoadTextureFromFile("icons/sb-icon-audio.png", m_AudioFileTexture);
+	engine.LoadTextureFromFile("icons/sb-icon-fbx.png", m_FBX_FileTexture);
+	engine.LoadTextureFromFile("icons/sb-icon-gltf.png", m_GLTF_FileTexture);
+	engine.LoadTextureFromFile("icons/sb-icon-obj.png", m_OBJ_FileTexture);
+	engine.LoadTextureFromFile("icons/sb-icon-mtl.png", m_MTL_FileTexture);
 	
 	UpdateCacheDirectoryFiles(m_CurrentPath);
 }
@@ -37,6 +48,33 @@ GLuint FileBrowser::GetFileTexture(SB_FILE_TYPE type) const
 
 	case SB_ASSET_IMAGE:
 		return m_ImageFileTexture;
+
+	case SB_ASSET_OBJ:
+		return m_OBJ_FileTexture;
+
+	case SB_ASSET_MTL:
+		return m_MTL_FileTexture;
+
+	case SB_ASSET_FBX:
+		return m_FBX_FileTexture;
+
+	case SB_ASSET_GLTF:
+		return m_GLTF_FileTexture;
+
+	case SB_ASSET_SCRIPT:
+		return m_ScriptFileTexture;
+
+	case SB_ASSET_DOCUMENT:
+		return m_DocumentFileTexture;
+
+	case SB_ASSET_AUDIO:
+		return m_AudioFileTexture;
+
+	case SB_ASSET_CONFIG:
+		return m_ConfigFileTexture;
+
+	case SB_ASSET_COMP_FOLDER:
+		return m_FolderCompressedTexture;
 
 	default:
 		return m_UnknownFileTexture;
@@ -138,14 +176,9 @@ void FileBrowser::UpdateCacheDirectoryFiles(const std::filesystem::path& path)
 
 	// Update files vector
 	m_Files.clear();
-	m_Files.push_back({ "..", m_CurrentPath.parent_path(), SB_ASSET_FOLDER, GetFileTexture(SB_ASSET_FOLDER) }); // Add parent dir button at start of vector
+	m_Files.push_back({ "..", m_CurrentPath.parent_path(), SB_ASSET_FOLDER, GetFileTexture(SB_ASSET_FOLDER)}); // Add parent dir button at start of vector
 	m_Files.insert(m_Files.end(), p_Directories.begin(), p_Directories.end());
 	m_Files.insert(m_Files.end(), p_Files.begin(), p_Files.end());
-}
-
-void FileBrowser::RenderDirectory(const File& file)
-{
-	
 }
 
 void FileBrowser::Render()
@@ -156,8 +189,6 @@ void FileBrowser::Render()
 	int width = (int)window_size.x;
 
 	int padding = ImGui::GetStyle().ItemSpacing.x;
-	int fileWidth = 125;
-	int fileHeight = 150;
 	int amntWide = (width - padding) / (fileWidth + padding);
 
 	if (amntWide == 0)
@@ -165,11 +196,12 @@ void FileBrowser::Render()
 		amntWide = 1;
 	}
 
+	// Draw list to add some of my own pizazz (hover effect on a group)
 	ImDrawList* drawList = ImGui::GetWindowDrawList();
 
 	float pady = ImGui::GetStyle().ItemSpacing.y;
 
-	for (int i = 0; i < m_Files.size(); ++i)
+	for (int i = 0; i < m_Files.size(); i++)
 	{
 		const File& file = m_Files[i];
 
@@ -180,23 +212,35 @@ void FileBrowser::Render()
 		ImVec2 pos = ImGui::GetItemRectMin();
 		ImVec2 sizeImage = ImGui::GetItemRectSize();
 
+		// Check if the image is hovered, and set the draw to true
 		bool drawHover = false;
 		if (ImGui::IsItemHovered())
 		{
 			drawHover = true;
 		}
 
+		ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + fileWidth);
+
+		// Render the text
 		ImGui::TextWrapped(file.name.c_str());
 
+		// Restore the previous wrap position
+		ImGui::PopTextWrapPos();
+
+		// Only need for height of text
 		ImVec2 sizeText = ImGui::GetItemRectSize();
 
+		// Size of rect = width of group (image & text), height of group (image + text + paddingy)
 		ImVec2 size = ImVec2(pos.x + sizeImage.x, pos.y + sizeImage.y + sizeText.y + pady);
 
+		// Draw hover after image and text
 		if (drawHover)
 		{
+			// Outline + light fill (alpha blended)
 			drawList->AddRect(pos, size, IM_COL32(255, 255, 255, 70));
 			drawList->AddRectFilled(pos, size, IM_COL32(255, 255, 255, 20));
 
+			// Basically see if the user clicked a button, but image is button
 			if (ImGui::IsMouseClicked(0))
 			{
 				UpdateCacheDirectoryFiles(file.path);
@@ -205,8 +249,10 @@ void FileBrowser::Render()
 
 		ImGui::EndGroup();
 
+		// Draw on same line till newLine is called
 		ImGui::SameLine();
 
+		// Draw a new line every amntWide
 		if ((i + 1) % amntWide == 0)
 		{
 			ImGui::NewLine();
