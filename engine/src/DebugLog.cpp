@@ -8,6 +8,24 @@
 
 using namespace SB;
 
+enum LogColourANSI
+{
+	RESET = 0,
+	RED = 31,
+	YELLOW = 33
+};
+
+
+static void SetConsoleColour(LogColourANSI colour)
+{
+	std::cout << "\033[" << colour << "m";
+}
+
+static void ResetColour()
+{
+	std::cout << "\033[" << RESET << "m";
+}
+
 static Console* s_ConsoleInstance = nullptr;
 
 void Console::Init()
@@ -84,8 +102,10 @@ void Console::Warn(const char* format, ...)
 
 	std::string finalMessage = time + buffer;
 
+	SetConsoleColour(YELLOW);
 	std::cout << EnumToString(SB_WARNING) << finalMessage << std::endl;
 	m_Logs.push_back({ SB_WARNING, finalMessage });
+	ResetColour();
 }
 
 void Console::Error(const char* format, ...)
@@ -100,8 +120,11 @@ void Console::Error(const char* format, ...)
 
 	std::string finalMessage = time + buffer;
 
+	SetConsoleColour(RED);
 	std::cout << EnumToString(SB_ERROR) << finalMessage << std::endl;
 	m_Logs.push_back({ SB_ERROR, finalMessage });
+	ResetColour();
+
 }
 
 void Console::Clear()

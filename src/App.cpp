@@ -70,6 +70,13 @@ void App::DisplayMenuBar()
 			}
 			ImGui::SameLine(checkboxWidth);
 			ImGui::TextUnformatted((assetManagerWindowOpen ? "[x]" : "[ ]"));
+
+			if (ImGui::MenuItem("Console"))
+			{
+				consoleWindowOpen = !consoleWindowOpen;
+			}
+			ImGui::SameLine(checkboxWidth);
+			ImGui::TextUnformatted((consoleWindowOpen ? "[x]" : "[ ]"));
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();
