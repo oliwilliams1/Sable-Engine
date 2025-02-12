@@ -3,6 +3,8 @@
 
 using namespace SB;
 
+static size_t prevLogSize = 0;
+
 static ImVec4 LogTypeToColour(LogType type)
 {
 	switch (type)
@@ -23,16 +25,25 @@ static ImVec4 LogTypeToColour(LogType type)
 
 void SB_EditorConsole::DisplayConsole()
 {
-	std::vector<LogData> logs = Console::GetLogs();
+    std::vector<LogData> logs = Console::GetLogs();
 
-	ImGui::SetNextWindowSizeConstraints(ImVec2(400, 200), ImVec2(FLT_MAX, FLT_MAX));
-	ImGui::Begin("Console");
+    ImGui::SetNextWindowSizeConstraints(ImVec2(400, 200), ImVec2(FLT_MAX, FLT_MAX));
+    ImGui::Begin("Console");
 
-	for (const LogData& log : logs)
-	{
-		ImVec4 colour = LogTypeToColour(log.type);
-		ImGui::TextColored(colour, "%s", log.message.c_str());
-	}
+    ImGui::BeginChild("LogChild", ImVec2(0, 0), true);
 
-	ImGui::End();
+    for (const LogData& log : logs)
+    {
+        ImVec4 logColour = LogTypeToColour(log.type);
+        ImGui::TextColored(logColour, "%s", log.message.c_str());
+    }
+
+    if (prevLogSize < logs.size())
+    {
+        ImGui::SetScrollHereY(1.0f);
+        prevLogSize = logs.size();
+    }
+
+    ImGui::EndChild();
+    ImGui::End();
 }
