@@ -5,6 +5,7 @@
 #include "App.h"
 #include "Utils.h"
 #include "DebugLog.h"
+#include "ConsoleDisplay.h"
 
 static void error_callback(int error, const char* description)
 {
@@ -158,6 +159,11 @@ void App::Mainloop()
 		if (assetManagerWindowOpen)
 		{
 			fileBrowser->Render();
+		}
+
+		if (consoleWindowOpen)
+		{
+			SB_EditorConsole::DisplayConsole();
 		}
 
 		ImGui::Render();
