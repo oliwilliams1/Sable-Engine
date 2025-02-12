@@ -1,9 +1,10 @@
 #pragma once
+#include <GL/glew.h>
 
+#include <filesystem>
 #include <map>
 #include <string>
 #include <memory>
-#include <GL/glew.h>
 
 namespace SableEngine
 {
@@ -46,6 +47,7 @@ namespace SableEngine
 		AssetManager();
 		~AssetManager();
 		
+		static inline std::filesystem::path ms_ResourcePath;
 		// Possible but not thought through
 		static inline std::map<std::string, SB_TEXTURE> ms_TextureMap;
 		static inline std::map<std::string, SB_MESH> ms_MeshMap;

@@ -3,6 +3,8 @@
 
 using namespace SableEngine;
 
+static SBEngine* s_Instance = nullptr;
+
 SBEngine::SBEngine()
 {
     AssetManager::Init();
@@ -21,4 +23,20 @@ bool SBEngine::LoadTextureFromFile(const std::string& filename, GLuint& id)
 
     id = tempTexture.id;
     return res;
+}
+
+void SBEngine::Init()
+{
+	s_Instance = new SBEngine();
+}
+
+void SBEngine::Shutdown()
+{
+	delete s_Instance;
+	s_Instance = nullptr;
+}
+
+SBEngine& SBEngine::GetInstance()
+{
+    return *s_Instance;
 }

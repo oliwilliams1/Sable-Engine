@@ -10,7 +10,22 @@ static AssetManager* s_Instance = nullptr;
 
 AssetManager::AssetManager()
 {
-	std::cout << "Asset manager init" << std::endl;
+	std::filesystem::path exec_path = std::filesystem::current_path().parent_path();
+	std::filesystem::path other_path("resources");
+
+	std::filesystem::path full_other_path = exec_path / other_path;
+
+	if (std::filesystem::exists(full_other_path))
+	{
+		// If in a build dir
+		ms_ResourcePath = full_other_path;
+	}
+	else
+	{
+		// Relative to executable
+		ms_ResourcePath = other_path;
+	}
+	std::cout << "Asset manager initialiseed for path: " << ms_ResourcePath << std::endl;
 }
 
 AssetManager::~AssetManager()
@@ -37,14 +52,14 @@ void AssetManager::Shutdown()
 
 bool AssetManager::LoadTextureFromFile(const std::string& filename, SB_TEXTURE& texture)
 {
-	stbi_set_flip_vertically_on_load(true);
+	std::filesystem::path path = ms_ResourcePath / filename;
 
 	int width, height, channels;
-	unsigned char* data = stbi_load(filename.c_str(), &width, &height, &channels, 0);
+	unsigned char* data = stbi_load(path.string().c_str(), &width, &height, &channels, 0);
 
 	if (data == nullptr)
 	{
-		std::cout << "Failed to load texture: " << filename << std::endl;
+		std::cout << "Failed to load texture: " << path << std::endl;
 		return false;
 	}
 

@@ -1,4 +1,6 @@
 #pragma once
+#include <GL/glew.h>
+
 #include <filesystem>
 #include <vector>
 #include <string>
@@ -37,11 +39,16 @@ private:
         std::string name;
         std::filesystem::path path;
         SB_FILE_TYPE type;
+        GLuint icon;
     };
+
+    GLuint GetFileTexture(SB_FILE_TYPE type) const;
 
     SB_FILE_TYPE GetFileType(const std::filesystem::path& path);
     void RenderDirectory(const File& file);
     void UpdateCacheDirectoryFiles(const std::filesystem::path& path);
 	std::filesystem::path m_CurrentPath;
 	std::vector<File> m_Files;
+
+    GLuint m_FolderTexture, m_ImageFileTexture, m_UnknownFileTexture;
 };

@@ -14,8 +14,7 @@ public:
 private:
 	GLFWwindow* window;
 
-	FileBrowser fileBrowser;
-	SBEngine engine;
+	FileBrowser* fileBrowser;
 
 	int width, height;
 	void InitWindow();

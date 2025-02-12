@@ -1,6 +1,7 @@
 #include <iostream>
 #include <imgui.h>
 #include "FileBrowser.h"
+#include "SableEngine.h"
 
 FileBrowser::FileBrowser()
 {
@@ -20,7 +21,26 @@ FileBrowser::FileBrowser()
 		m_CurrentPath = other_path;
 	}
 
+	SBEngine::GetInstance().LoadTextureFromFile("icons/sb-icon-folder.png", m_FolderTexture);
+	SBEngine::GetInstance().LoadTextureFromFile("icons/sb-icon-image.png", m_ImageFileTexture);
+	SBEngine::GetInstance().LoadTextureFromFile("icons/sb-icon-unknown.png", m_UnknownFileTexture);
+	
 	UpdateCacheDirectoryFiles(m_CurrentPath);
+}
+
+GLuint FileBrowser::GetFileTexture(SB_FILE_TYPE type) const
+{
+	switch (type)
+	{
+	case SB_ASSET_FOLDER:
+		return m_FolderTexture;
+
+	case SB_ASSET_IMAGE:
+		return m_ImageFileTexture;
+
+	default:
+		return m_UnknownFileTexture;
+	}
 }
 
 FileBrowser::SB_FILE_TYPE FileBrowser::GetFileType(const std::filesystem::path& path)
@@ -80,6 +100,7 @@ void FileBrowser::UpdateCacheDirectoryFiles(const std::filesystem::path& path)
 			file.name = entry.path().filename().string();
 			file.path = entry.path();
 			file.type = GetFileType(entry.path());
+			file.icon = GetFileTexture(file.type);
 
 			p_Files.emplace_back(file);
 		}
@@ -117,7 +138,7 @@ void FileBrowser::UpdateCacheDirectoryFiles(const std::filesystem::path& path)
 
 	// Update files vector
 	m_Files.clear();
-	m_Files.push_back({ "..", m_CurrentPath.parent_path(), SB_ASSET_FOLDER }); // Add parent dir button at start of vector
+	m_Files.push_back({ "..", m_CurrentPath.parent_path(), SB_ASSET_FOLDER, GetFileTexture(SB_ASSET_FOLDER) }); // Add parent dir button at start of vector
 	m_Files.insert(m_Files.end(), p_Directories.begin(), p_Directories.end());
 	m_Files.insert(m_Files.end(), p_Files.begin(), p_Files.end());
 }
@@ -144,14 +165,42 @@ void FileBrowser::Render()
 		amntWide = 1;
 	}
 
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+	float pady = ImGui::GetStyle().ItemSpacing.y;
+
 	for (int i = 0; i < m_Files.size(); ++i)
 	{
 		const File& file = m_Files[i];
 
-		if (ImGui::Button(file.name.c_str(), ImVec2(fileWidth, fileHeight)))
+		ImGui::BeginGroup();
+
+		ImGui::Image((ImTextureID)(intptr_t)file.icon, ImVec2(fileWidth, fileWidth));
+
+		ImVec2 pos = ImGui::GetItemRectMin();
+		ImVec2 sizeImage = ImGui::GetItemRectSize();
+
+		bool drawHover = false;
+		if (ImGui::IsItemHovered())
 		{
-			UpdateCacheDirectoryFiles(file.path);
+			drawHover = true;
 		}
+
+		ImGui::TextWrapped(file.name.c_str());
+
+		ImVec2 sizeText = ImGui::GetItemRectSize();
+
+		ImVec2 size = ImVec2(pos.x + sizeImage.x, pos.y + sizeImage.y + sizeText.y + pady);
+
+		if (drawHover)
+		{
+			drawList->AddRect(pos, size, IM_COL32(255, 255, 255, 70));
+			drawList->AddRectFilled(pos, size, IM_COL32(255, 255, 255, 20));
+		}
+
+		// UpdateCacheDirectoryFiles(file.path);
+		
+		ImGui::EndGroup();
 
 		ImGui::SameLine();
 

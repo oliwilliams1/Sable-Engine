@@ -17,6 +17,10 @@ App::App()
 	InitWindow();
 	InitImGui();
 	SetupImGuiStyle();
+
+	SBEngine::Init();
+
+	fileBrowser = new FileBrowser();
 }
 
 void App::InitWindow()
@@ -86,7 +90,7 @@ void App::Mainloop()
 
 		ImGui::SetNextWindowSizeConstraints(ImVec2(400, 200), ImVec2(FLT_MAX, FLT_MAX));
 		ImGui::Begin("Asset Browser");
-		fileBrowser.Render();
+		fileBrowser->Render();
 		ImGui::End();
 
 		ImGui::Begin("dokcing 2");
@@ -113,4 +117,8 @@ App::~App()
 {
 	glfwDestroyWindow(window);
 	glfwTerminate();
+
+	delete fileBrowser;
+
+	SBEngine::Shutdown();
 }
