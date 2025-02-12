@@ -1,17 +1,20 @@
 #include "SableEngine.h"
 #include "AssetManager.h"
+#include "DebugLog.h"
 
-using namespace SableEngine;
+using namespace SB;
 
 static SBEngine* s_Instance = nullptr;
 
 SBEngine::SBEngine()
 {
+    Console::Init();
     AssetManager::Init();
 }
 
 SBEngine::~SBEngine()
 {
+    Console::Shutdown();
     AssetManager::Shutdown();
 }
 

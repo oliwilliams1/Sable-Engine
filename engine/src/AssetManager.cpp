@@ -1,10 +1,11 @@
+#include "DebugLog.h"
 #include "AssetManager.h"
 #include <iostream>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
-using namespace SableEngine;
+using namespace SB;
 
 static AssetManager* s_Instance = nullptr;
 
@@ -25,7 +26,7 @@ AssetManager::AssetManager()
 		// Relative to executable
 		ms_ResourcePath = other_path;
 	}
-	std::cout << "Asset manager initialiseed for path: " << ms_ResourcePath << std::endl;
+	Console::Log("Asset manager loaded for path: %s", ms_ResourcePath.string().c_str());
 }
 
 AssetManager::~AssetManager()
@@ -36,7 +37,7 @@ AssetManager::~AssetManager()
 	}
 
 	ms_TextureMap.clear();
-	std::cout << "Asset manager shutdown" << std::endl;
+	Console::Log("Asset manager shutdown");
 }
 
 void AssetManager::Init()
@@ -59,7 +60,7 @@ bool AssetManager::LoadTextureFromFile(const std::string& filename, SB_TEXTURE& 
 
 	if (data == nullptr)
 	{
-		std::cout << "Failed to load texture: " << path << std::endl;
+		Console::Error("Failed to load texture: %s", path.string().c_str());
 		return false;
 	}
 
@@ -69,7 +70,8 @@ bool AssetManager::LoadTextureFromFile(const std::string& filename, SB_TEXTURE& 
 	}
 	else
 	{
-		std::cout << "Better hope you dont get this error, means texture id already in use" << std::endl;
+		// Better hope you dont get this error, means texture id already in use
+		assert(texture.id != 0);
 		return false;
 	}
 

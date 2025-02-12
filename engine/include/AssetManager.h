@@ -6,7 +6,7 @@
 #include <string>
 #include <memory>
 
-namespace SableEngine
+namespace SB
 {
 	enum SB_ASSET_TYPE
 	{

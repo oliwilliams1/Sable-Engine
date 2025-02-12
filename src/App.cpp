@@ -4,6 +4,7 @@
 #include <imgui_impl_opengl3.h>
 #include "App.h"
 #include "Utils.h"
+#include "DebugLog.h"
 
 static void error_callback(int error, const char* description)
 {
@@ -18,45 +19,28 @@ void App::DisplayMenuBar()
 		{
 			const float keybindHintWidth = 120.0f;
 
-			if (ImGui::MenuItem("New Project..."))
-			{
-
-			}
+			if (ImGui::MenuItem("New Project...")) {}
 			ImGui::SameLine(keybindHintWidth);
 			ImGui::TextUnformatted("CTRL+N");
 
-			if (ImGui::MenuItem("Open Project..."))
-			{
-
-			}
+			if (ImGui::MenuItem("Open Project...")) {}
 			ImGui::SameLine(keybindHintWidth);
 			ImGui::TextUnformatted("CTRL+O");
 
-			if (ImGui::MenuItem("Save Project"))
-			{
-
-			}
+			if (ImGui::MenuItem("Save Project")) {}
 			ImGui::SameLine(keybindHintWidth);
 			ImGui::TextUnformatted("CTRL+S");
 
-			if (ImGui::MenuItem("Save Project As..."))
-			{
+			if (ImGui::MenuItem("Save Project As...")) {}
 
-			}
 			ImGui::SameLine(keybindHintWidth);
 			ImGui::TextUnformatted("CTRL+SHIFT+S");
 
 			ImGui::Separator();
 
-			if (ImGui::MenuItem("Import Asset..."))
-			{
+			if (ImGui::MenuItem("Import Asset...")) {}
 
-			}
-
-			if (ImGui::MenuItem("Build Asset Pack"))
-			{
-
-			}
+			if (ImGui::MenuItem("Build Asset Pack")) {}
 
 			ImGui::Separator();
 
@@ -108,7 +92,7 @@ void App::InitWindow()
 {
 	if (!glfwInit())
 	{
-		std::cout << "Failed to initialize GLFW" << std::endl;
+		SB::Console::Error("Failed to initialize GLFW");
 		exit(1);
 	}
 
@@ -116,7 +100,7 @@ void App::InitWindow()
 
 	if (!window)
 	{
-		std::cout << "Failed to create GLFW window" << std::endl;
+		SB::Console::Error("Failed to create GLFW window");
 		glfwTerminate();
 		exit(1);
 	}
@@ -130,10 +114,10 @@ void App::InitWindow()
 	GLenum err = glewInit();
 	if (err != GLEW_OK)
 	{
-		std::cout << "Failed to initialize GLEW: " << glewGetErrorString(err) << std::endl;
+		SB::Console::Error("Failed to initialize GLEW: %s", glewGetErrorString(err));
 	}
 
-	std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
+	SB::Console::Log("OpenGL version: %s", glGetString(GL_VERSION));
 }
 
 void App::InitImGui()
