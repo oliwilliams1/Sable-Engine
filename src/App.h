@@ -19,4 +19,7 @@ private:
 	int width, height;
 	void InitWindow();
 	void InitImGui();
+	void DisplayMenuBar();
+
+	bool assetManagerWindowOpen = true, consoleWindowOpen = true;
 };

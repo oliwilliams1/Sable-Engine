@@ -10,6 +10,87 @@ static void error_callback(int error, const char* description)
 	std::cout << "GLFW::ERROR_CALLBACK: " << error << ": " << description << std::endl;
 }
 
+void App::DisplayMenuBar()
+{
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			const float keybindHintWidth = 120.0f;
+
+			if (ImGui::MenuItem("New Project..."))
+			{
+
+			}
+			ImGui::SameLine(keybindHintWidth);
+			ImGui::TextUnformatted("CTRL+N");
+
+			if (ImGui::MenuItem("Open Project..."))
+			{
+
+			}
+			ImGui::SameLine(keybindHintWidth);
+			ImGui::TextUnformatted("CTRL+O");
+
+			if (ImGui::MenuItem("Save Project"))
+			{
+
+			}
+			ImGui::SameLine(keybindHintWidth);
+			ImGui::TextUnformatted("CTRL+S");
+
+			if (ImGui::MenuItem("Save Project As..."))
+			{
+
+			}
+			ImGui::SameLine(keybindHintWidth);
+			ImGui::TextUnformatted("CTRL+SHIFT+S");
+
+			ImGui::Separator();
+
+			if (ImGui::MenuItem("Import Asset..."))
+			{
+
+			}
+
+			if (ImGui::MenuItem("Build Asset Pack"))
+			{
+
+			}
+
+			ImGui::Separator();
+
+			if (ImGui::MenuItem("Exit"))
+			{
+				glfwSetWindowShouldClose(window, true);
+			}
+			ImGui::SameLine(keybindHintWidth);
+			ImGui::TextUnformatted("CTRL+Q");
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Edit"))
+		{
+			ImGui::MenuItem("haha nothing here");
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("View"))
+		{
+			const float checkboxWidth = 120.0f;
+			if (ImGui::MenuItem("Asset manager"))
+			{
+				assetManagerWindowOpen = !assetManagerWindowOpen;
+			}
+			ImGui::SameLine(checkboxWidth);
+			ImGui::TextUnformatted((assetManagerWindowOpen ? "[x]" : "[ ]"));
+			ImGui::EndMenu();
+		}
+		ImGui::EndMainMenuBar();
+	}
+}
+
 App::App()
 {
 	width = 1600;
@@ -82,20 +163,18 @@ void App::Mainloop()
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+		DisplayMenuBar();
+
 		ImGui::DockSpaceOverViewport();
 
-		ImGui::Begin("dokcing");
-		ImGui::Text("Helo!");
+		ImGui::Begin("Docking");
+		ImGui::Text("Hello!");
 		ImGui::End();
 
-		ImGui::SetNextWindowSizeConstraints(ImVec2(400, 200), ImVec2(FLT_MAX, FLT_MAX));
-		ImGui::Begin("Asset Browser");
-		fileBrowser->Render();
-		ImGui::End();
-
-		ImGui::Begin("dokcing 2");
-		ImGui::Text("Helo!");
-		ImGui::End();
+		if (assetManagerWindowOpen)
+		{
+			fileBrowser->Render();
+		}
 
 		ImGui::Render();
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

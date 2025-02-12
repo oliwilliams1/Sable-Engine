@@ -6,7 +6,7 @@
 FileBrowser::FileBrowser()
 {
 	std::filesystem::path exec_path = std::filesystem::current_path().parent_path();
-	std::filesystem::path other_path("resources");
+	std::filesystem::path other_path("projects");
 
 	std::filesystem::path full_other_path = exec_path / other_path;
 
@@ -183,6 +183,9 @@ void FileBrowser::UpdateCacheDirectoryFiles(const std::filesystem::path& path)
 
 void FileBrowser::Render()
 {
+	ImGui::SetNextWindowSizeConstraints(ImVec2(400, 200), ImVec2(FLT_MAX, FLT_MAX));
+	ImGui::Begin("Asset Browser");
+
 	ImGui::Text("%s", m_CurrentPath.string().c_str());
 
 	ImVec2 window_size = ImGui::GetWindowSize();
@@ -258,6 +261,8 @@ void FileBrowser::Render()
 			ImGui::NewLine();
 		}
 	}
+
+	ImGui::End();
 }
 
 FileBrowser::~FileBrowser()
