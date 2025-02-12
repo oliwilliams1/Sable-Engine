@@ -134,7 +134,13 @@ void App::InitImGui()
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
+#ifdef UNIX
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
+#endif
+
+#ifndef UNIX
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+#endif
 
 	ImGui::StyleColorsDark();
 
