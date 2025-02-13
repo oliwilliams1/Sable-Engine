@@ -16,6 +16,7 @@ public:
 	static App& GetInstance();
 
 	void Mainloop();
+	void LoadProject(const std::string& path);
 
 private:
 	App();
@@ -29,7 +30,6 @@ private:
 	void InitWindow();
 	void InitImGui();
 	void DisplayMenuBar();
-	void LoadProject(const std::string& path);
 
 	bool assetManagerWindowOpen = true, consoleWindowOpen = true;
 

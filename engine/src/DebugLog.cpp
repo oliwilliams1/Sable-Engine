@@ -74,57 +74,56 @@ static std::string GetTime()
 	return "[" + oss.str() + "] - ";
 }
 
-void Console::Log(const char* format, ...)
+void Console::Log(const char* format, const char* file, int line, const char* func, ...)
 {
 	std::string time = GetTime();
 
 	char buffer[1024];
 	va_list args;
-	va_start(args, format);
-	vsnprintf(buffer, 1024, format, args);
+	va_start(args, func);
+	vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
 
 	std::string finalMessage = time + buffer;
 
 	std::cout << EnumToString(SB_LOG) << finalMessage << std::endl;
-	m_Logs.push_back({SB_LOG, finalMessage});
+	m_Logs.push_back({ SB_LOG, finalMessage, file, line, func });
 }
 
-void Console::Warn(const char* format, ...)
+void Console::Warn(const char* format, const char* file, int line, const char* func, ...)
 {
 	std::string time = GetTime();
 
 	char buffer[1024];
 	va_list args;
-	va_start(args, format);
-	vsnprintf(buffer, 1024, format, args);
+	va_start(args, func);
+	vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
 
 	std::string finalMessage = time + buffer;
 
 	SetConsoleColour(YELLOW);
 	std::cout << EnumToString(SB_WARNING) << finalMessage << std::endl;
-	m_Logs.push_back({ SB_WARNING, finalMessage });
+	m_Logs.push_back({ SB_WARNING, finalMessage, file, line, func });
 	ResetColour();
 }
 
-void Console::Error(const char* format, ...)
+void Console::Error(const char* format, const char* file, int line, const char* func, ...)
 {
 	std::string time = GetTime();
 
 	char buffer[1024];
 	va_list args;
-	va_start(args, format);
-	vsnprintf(buffer, 1024, format, args);
+	va_start(args, func);
+	vsnprintf(buffer, sizeof(buffer), format, args);
 	va_end(args);
 
 	std::string finalMessage = time + buffer;
 
 	SetConsoleColour(RED);
 	std::cout << EnumToString(SB_ERROR) << finalMessage << std::endl;
-	m_Logs.push_back({ SB_ERROR, finalMessage });
+	m_Logs.push_back({ SB_ERROR, finalMessage, file, line, func });
 	ResetColour();
-
 }
 
 void Console::Clear()

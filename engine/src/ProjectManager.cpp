@@ -28,11 +28,11 @@ void SB::SaveProject(const std::string& filename, const SB_Project& projectData)
 		std::filesystem::create_directory(relPath / projectData.name / "textures");
 		std::filesystem::create_directory(relPath / projectData.name / "materials");
 
-		Console::Log("Initialized project: %s", filename.c_str());
+		DEBUG_LOG("Initialized project: %s", filename.c_str());
 	}
 	else
 	{
-		Console::Error("Unable to initialize project: %s", filename.c_str());
+		DEBUG_ERROR("Unable to initialize project: %s", filename.c_str());
 	}
 }
 
@@ -44,7 +44,7 @@ void SB::LoadProject(const std::string& filename, SB_Project& projectData)
 
 	if (!std::filesystem::exists(filenamePath))
 	{
-		Console::Error("Project at: %s does not exist", filename.c_str());
+		DEBUG_WARN("Project at: %s does not exist", filename.c_str());
 		return;
 	}
 
@@ -52,11 +52,11 @@ void SB::LoadProject(const std::string& filename, SB_Project& projectData)
 
 	if (!projectNode["name"])
 	{
-		Console::Error("Project at: %s does not have a name", filename.c_str());
+		DEBUG_WARN("Project at: %s does not have a name", filename.c_str());
 	}
 	if (!projectNode["path"])
 	{
-		Console::Error("Project at: %s does not have a path", filename.c_str());
+		DEBUG_WARN("Project at: %s does not have a path", filename.c_str());
 	}
 
 	projectData.name = projectNode["name"].as<std::string>();

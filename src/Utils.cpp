@@ -105,6 +105,6 @@ void SetupImGuiStyle()
 	}
 	else 
 	{
-		SB::Console::Error("Failed to load font: OpenSans-Regular.ttf");
+		SB::DEBUG_ERROR("Failed to load font: OpenSans-Regular.ttf");
 	}
 }

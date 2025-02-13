@@ -4,6 +4,7 @@
 #include "SB/SableEngine.h"
 #include "SB/Utils.h"
 #include "SB/DebugLog.h"
+#include "App.h"
 
 FileBrowser::FileBrowser()
 {
@@ -241,7 +242,7 @@ void FileBrowser::Render()
 					break;
 
 				case SB_ASSET_CONFIG:
-					SB::Console::Log("Double clicked: %s", file.name.c_str());
+					App::GetInstance().LoadProject(file.path.string());
 					break;
 				}
 			}
@@ -271,7 +272,7 @@ void FileBrowser::SetPath(const std::filesystem::path& path)
 {
 	if (!std::filesystem::is_directory(path))
 	{
-		SB::Console::Error("Failed to set filesystem path: %s", path.string().c_str());
+		SB::DEBUG_ERROR("Failed to set filesystem path: %s", path.string().c_str());
 	}
 
 	m_CurrentPath = path;

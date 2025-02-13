@@ -55,7 +55,7 @@ void App::DisplayMenuBar()
 
 			if (ImGui::MenuItem("New Project")) 
 			{
-				SB::Console::Log("User creating new project, displaying window...");
+				SB::DEBUG_LOG("User creating new project, displaying window...");
 				newProjectWindowOpen = true;
 			}
 			ImGui::SameLine(keybindHintWidth);
@@ -124,7 +124,7 @@ void App::InitWindow()
 {
 	if (!glfwInit())
 	{
-		SB::Console::Error("Failed to initialize GLFW");
+		SB::DEBUG_ERROR("Failed to initialize GLFW");
 		exit(1);
 	}
 
@@ -132,7 +132,7 @@ void App::InitWindow()
 
 	if (!window)
 	{
-		SB::Console::Error("Failed to create GLFW window");
+		SB::DEBUG_ERROR("Failed to create GLFW window");
 		glfwTerminate();
 		exit(1);
 	}
@@ -146,10 +146,10 @@ void App::InitWindow()
 	GLenum err = glewInit();
 	if (err != GLEW_OK)
 	{
-		SB::Console::Error("Failed to initialize GLEW: %s", glewGetErrorString(err));
+		SB::DEBUG_ERROR("Failed to initialize GLEW: %s", glewGetErrorString(err));
 	}
 
-	SB::Console::Log("OpenGL version: %s", glGetString(GL_VERSION));
+	SB::DEBUG_LOG("OpenGL version: %s", glGetString(GL_VERSION));
 }
 
 void App::InitImGui()
@@ -173,17 +173,29 @@ void App::InitImGui()
 
 void App::LoadProject(const std::string& path)
 {
-	SB::SB_Project project;
-	if (!EditorProjManager::LoadProject(path, project))
+	const std::string extension = ".sbproj";
+	std::string projPathStr = path;
+
+	if (projPathStr.size() >= extension.size() &&
+		projPathStr.compare(projPathStr.size() - extension.size(), extension.size(), extension) == 0)
 	{
-		SB::Console::Error("Failed to load project: %s", path.c_str());
+		projPathStr = projPathStr.substr(0, projPathStr.size() - extension.size());
+	}
+
+	SB::SB_Project project;
+	if (!EditorProjManager::LoadProject(projPathStr, project))
+	{
+		SB::DEBUG_ERROR("Failed to load project: %s", projPathStr.c_str());
 		return;
-	};
+	}
 
 	std::filesystem::path relPath = GetRelPath("projects");
-	std::filesystem::path projPath = relPath / path;
+	std::filesystem::path projPath = relPath / projPathStr;
 
 	fileBrowser->SetPath(projPath.string());
+
+	std::string windowTitle = "Sable Engine - " + projPath.filename().string();
+	glfwSetWindowTitle(window, windowTitle.c_str());
 }
 
 void App::Mainloop()

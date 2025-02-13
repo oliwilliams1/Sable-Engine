@@ -13,7 +13,7 @@ static AssetManager* s_Instance = nullptr;
 AssetManager::AssetManager()
 {
 	ms_ResourcePath = GetRelPath("resources");
-	Console::Log("Asset manager loaded for path: %s", ms_ResourcePath.string().c_str());
+	DEBUG_LOG("Asset manager loaded for path: %s", ms_ResourcePath.string().c_str());
 }
 
 AssetManager::~AssetManager()
@@ -24,7 +24,7 @@ AssetManager::~AssetManager()
 	}
 
 	ms_TextureMap.clear();
-	Console::Log("Asset manager shutdown");
+	DEBUG_LOG("Asset manager destroyed");
 }
 
 void AssetManager::Init()
@@ -47,7 +47,7 @@ bool AssetManager::LoadTextureFromFile(const std::string& filename, SB_TEXTURE& 
 
 	if (data == nullptr)
 	{
-		Console::Error("Failed to load texture: %s", path.string().c_str());
+		DEBUG_ERROR("Failed to load texture: %s", path.string().c_str());
 		return false;
 	}
 

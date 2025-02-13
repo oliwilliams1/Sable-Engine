@@ -25,25 +25,30 @@ static ImVec4 LogTypeToColour(LogType type)
 
 void SB_EditorConsole::DisplayConsole()
 {
-    std::vector<LogData> logs = Console::GetLogs();
+	std::vector<LogData> logs = Console::GetLogs();
 
-    ImGui::SetNextWindowSizeConstraints(ImVec2(400, 200), ImVec2(FLT_MAX, FLT_MAX));
-    ImGui::Begin("Console");
+	ImGui::SetNextWindowSizeConstraints(ImVec2(400, 200), ImVec2(FLT_MAX, FLT_MAX));
+	ImGui::Begin("Console");
 
-    ImGui::BeginChild("LogChild", ImVec2(0, 0), true);
+	ImGui::BeginChild("LogChild", ImVec2(0, 0), true);
 
-    for (const LogData& log : logs)
-    {
-        ImVec4 logColour = LogTypeToColour(log.type);
-        ImGui::TextColored(logColour, "%s", log.message.c_str());
-    }
+	for (const LogData& log : logs)
+	{
+		ImVec4 logColour = LogTypeToColour(log.type);
+		ImGui::TextColored(logColour, "%s", log.message.c_str());
+		
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::SetTooltip("File: %s, line: %i, function: %s", log.file.c_str(), log.line, log.func.c_str());
+		}
+	}
 
-    if (prevLogSize < logs.size())
-    {
-        ImGui::SetScrollHereY(1.0f);
-        prevLogSize = logs.size();
-    }
+	if (prevLogSize < logs.size())
+	{
+		ImGui::SetScrollHereY(1.0f);
+		prevLogSize = logs.size();
+	}
 
-    ImGui::EndChild();
-    ImGui::End();
+	ImGui::EndChild();
+	ImGui::End();
 }
