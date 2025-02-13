@@ -27,11 +27,11 @@ file(GLOB IMGUI_SOURCE "${IMGUI_DIR}/*.cpp" "${IMGUI_DIR}/*.h")
 
 # Collect backend include files (if needed, typically not necessary for linking)
 file(GLOB IMGUI_BACKENDS_INCLUDE "${IMGUI_BACKEND_DIR}/imgui_impl_glfw.h"
-     "${IMGUI_BACKEND_DIR}/imgui_impl_opengl3.h")
+	 "${IMGUI_BACKEND_DIR}/imgui_impl_opengl3.h")
 
 # Collect backend source files
 file(GLOB IMGUI_BACKENDS_SOURCE "${IMGUI_BACKEND_DIR}/imgui_impl_glfw.cpp"
-     "${IMGUI_BACKEND_DIR}/imgui_impl_opengl3.cpp")
+	 "${IMGUI_BACKEND_DIR}/imgui_impl_opengl3.cpp")
 
 # Create the ImGui library, including both ImGui and backend source files
 add_library(imgui ${IMGUI_SOURCE} ${IMGUI_BACKENDS_SOURCE})
@@ -42,22 +42,24 @@ add_subdirectory("engine")
 # Build the editor executable
 add_executable(SableEditor ${SOURCES})
 
-# Link the SableEngine library
+# Link the engine
 target_link_libraries(SableEditor SableEngine glew glfw imgui)
 
 target_include_directories(SableEditor PUBLIC engine/include)
 
-# Copy DLLs to output directory
+# Copy dependencies to output directory (even if I dont need, its still cool)
 add_custom_command(
-  TARGET SableEditor
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:glew>
-          $<TARGET_FILE_DIR:SableEditor>
-  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:glfw>
-          $<TARGET_FILE_DIR:SableEditor>
-  COMMAND
-    ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources
-    $<TARGET_FILE_DIR:SableEditor>/resources
-  COMMAND
-    ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/projects
-    $<TARGET_FILE_DIR:SableEditor>/projects)
+	TARGET SableEditor
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:glew>
+			$<TARGET_FILE_DIR:SableEditor>
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:glfw>
+			$<TARGET_FILE_DIR:SableEditor>
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:SableEngine>
+			$<TARGET_FILE_DIR:SableEditor>
+
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources
+			$<TARGET_FILE_DIR:SableEditor>/resources
+	
+	COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/projects
+			$<TARGET_FILE_DIR:SableEditor>/projects)

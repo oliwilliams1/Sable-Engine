@@ -4,8 +4,9 @@
 #include <imgui_impl_opengl3.h>
 #include "App.h"
 #include "Utils.h"
-#include "DebugLog.h"
+#include "SB/DebugLog.h"
 #include "ConsoleDisplay.h"
+#include "ProjectManager.h"
 
 static void error_callback(int error, const char* description)
 {
@@ -20,7 +21,11 @@ void App::DisplayMenuBar()
 		{
 			const float keybindHintWidth = 120.0f;
 
-			if (ImGui::MenuItem("New Project...")) {}
+			if (ImGui::MenuItem("New Project")) 
+			{
+				SB::Console::Log("User creating new project, displaying window...");
+				newProjectWindowOpen = true;
+			}
 			ImGui::SameLine(keybindHintWidth);
 			ImGui::TextUnformatted("CTRL+N");
 
@@ -134,12 +139,11 @@ void App::InitImGui()
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
-#ifdef UNIX
-  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
-#endif
-
-#ifndef UNIX
+	// Detatched windows do not play well with experimental window managers (unix has a billion)
+#if defined(UNIX)
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+#else
+  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
 #endif
 
 	ImGui::StyleColorsDark();
@@ -177,6 +181,11 @@ void App::Mainloop()
 		if (consoleWindowOpen)
 		{
 			SB_EditorConsole::DisplayConsole();
+		}
+
+		if (newProjectWindowOpen)
+		{
+			EditorProjManager::DisplayNewProjectWindow(&newProjectWindowOpen);
 		}
 
 		ImGui::Render();

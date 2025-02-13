@@ -1,25 +1,12 @@
 #include <iostream>
 #include <imgui.h>
 #include "FileBrowser.h"
-#include "SableEngine.h"
+#include "SB/SableEngine.h"
+#include "SB/Utils.h"
 
 FileBrowser::FileBrowser()
 {
-	std::filesystem::path exec_path = std::filesystem::current_path().parent_path();
-	std::filesystem::path other_path("projects");
-
-	std::filesystem::path full_other_path = exec_path / other_path;
-
-	if (std::filesystem::exists(full_other_path))
-	{
-		// If in a build dir
-		m_CurrentPath = full_other_path;
-	}
-	else
-	{
-		// Relative to executable
-		m_CurrentPath = other_path;
-	}
+	m_CurrentPath = GetRelPath("projects");
 
 	// Load all textures
 	SBEngine& engine = SBEngine::GetInstance();

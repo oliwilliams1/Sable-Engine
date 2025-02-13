@@ -21,37 +21,39 @@ include_directories(${STB_DIR})
 
 # Assimp
 set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT
-    OFF
-    CACHE BOOL "Disable building all exporters by default")
+	OFF
+	CACHE BOOL "Disable building all exporters by default")
 set(ASSIMP_INSTALL
-    OFF
-    CACHE BOOL "Disable assimp install") # using as submodule
+	OFF
+	CACHE BOOL "Disable assimp install") # using as submodule
 add_subdirectory("vendor/assimp")
 
+include_directories("include/SB")
 # Include source files from src and headers from include
-file(GLOB_RECURSE SOURCES "src/*.cpp" "include/*.h")
+file(GLOB_RECURSE SOURCES "src/*.cpp" "include/SB/*.h")
 
 # Build SableEngine as a shared library
 add_library(${PROJECT_NAME} STATIC ${SOURCES})
 
-# Add the include directory for SableEngine
-target_include_directories(${PROJECT_NAME} PUBLIC include)
+# Yaml
+add_subdirectory("vendor/yaml")
+include_directories("vendor/yaml/include")
 
 # Link libraries
-target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} glew)
+target_link_libraries(${PROJECT_NAME} ${OPENGL_LIBRARIES} glew yaml-cpp)
 
 # Copy dependencies' .lib files to the output directory
 foreach(dep IN LISTS GLEW_LIBRARIES GLFW_LIBRARIES ASSIMP_LIBRARIES)
-  add_custom_command(
-    TARGET ${PROJECT_NAME}
-    POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${dep}>
-            $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+add_custom_command(
+	TARGET ${PROJECT_NAME}
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${dep}>
+			$<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endforeach()
 
 # Copy GLEW DLL to output directory
 add_custom_command(
-  TARGET ${PROJECT_NAME}
-  POST_BUILD
-  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:glew>
-          $<TARGET_FILE_DIR:${PROJECT_NAME}>)
+	TARGET ${PROJECT_NAME}
+	POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:glew>
+			$<TARGET_FILE_DIR:${PROJECT_NAME}>)

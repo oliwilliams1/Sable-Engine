@@ -1,7 +1,8 @@
-#include <filesystem>
 #include <iostream>
 #include <imgui.h>
 #include "Utils.h"
+#include "SB/Utils.h"
+#include "SB/DebugLog.h"
 
 void SetupImGuiStyle()
 {
@@ -93,20 +94,17 @@ void SetupImGuiStyle()
 	style.Colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.800000011920929f, 0.800000011920929f, 0.800000011920929f, 0.2000000029802322f);
 	style.Colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.800000011920929f, 0.800000011920929f, 0.800000011920929f, 0.3499999940395355f);
 
-	std::filesystem::path exec_path = std::filesystem::current_path().parent_path();
-	std::filesystem::path font_path("resources/fonts/OpenSans-Regular.ttf");
+	std::filesystem::path relPath = GetRelPath("resources");
 
-	std::filesystem::path full_font_path = exec_path / font_path;
-
+	std::filesystem::path full_font_path = relPath / "fonts" / "OpenSans-Regular.ttf";
+	
 	ImGuiIO& io = ImGui::GetIO();
 	if (std::filesystem::exists(full_font_path)) 
 	{
-		// If in a build dir
 		io.Fonts->AddFontFromFileTTF(full_font_path.string().c_str(), 16.0f);
 	}
 	else 
 	{
-		// Relative to executable
-		io.Fonts->AddFontFromFileTTF(font_path.string().c_str(), 16.0f);
+		SB::Console::Error("Failed to load font: OpenSans-Regular.ttf");
 	}
 }

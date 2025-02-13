@@ -1,6 +1,7 @@
 #include "DebugLog.h"
 #include "AssetManager.h"
 #include <iostream>
+#include "Utils.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -11,21 +12,7 @@ static AssetManager* s_Instance = nullptr;
 
 AssetManager::AssetManager()
 {
-	std::filesystem::path exec_path = std::filesystem::current_path().parent_path();
-	std::filesystem::path other_path("resources");
-
-	std::filesystem::path full_other_path = exec_path / other_path;
-
-	if (std::filesystem::exists(full_other_path))
-	{
-		// If in a build dir
-		ms_ResourcePath = full_other_path;
-	}
-	else
-	{
-		// Relative to executable
-		ms_ResourcePath = other_path;
-	}
+	ms_ResourcePath = GetRelPath("resources");
 	Console::Log("Asset manager loaded for path: %s", ms_ResourcePath.string().c_str());
 }
 
