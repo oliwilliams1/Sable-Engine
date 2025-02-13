@@ -26,6 +26,8 @@ FileBrowser::FileBrowser()
 	engine.LoadTextureFromFile("icons/sb-icon-mtl.png", m_MTL_FileTexture);
 	
 	UpdateCacheDirectoryFiles(m_CurrentPath);
+
+	m_ProjectRelativePath = GetRelPath("projects");
 }
 
 GLuint FileBrowser::GetFileTexture(SB_FILE_TYPE type) const
@@ -165,7 +167,8 @@ void FileBrowser::UpdateCacheDirectoryFiles(const std::filesystem::path& path)
 
 	// Update files vector
 	m_Files.clear();
-	m_Files.push_back({ "..", m_CurrentPath.parent_path(), SB_ASSET_FOLDER, GetFileTexture(SB_ASSET_FOLDER)}); // Add parent dir button at start of vector
+
+	m_Files.push_back({ "..", m_CurrentPath.parent_path(), SB_ASSET_FOLDER, GetFileTexture(SB_ASSET_FOLDER) }); // Add parent dir button at start of vector
 	m_Files.insert(m_Files.end(), p_Directories.begin(), p_Directories.end());
 	m_Files.insert(m_Files.end(), p_Files.begin(), p_Files.end());
 }
@@ -193,7 +196,16 @@ void FileBrowser::Render()
 
 	float pady = ImGui::GetStyle().ItemSpacing.y;
 
-	for (int i = 0; i < m_Files.size(); i++)
+	std::filesystem::path projectPath = App::GetInstance().GetCurrentProject().path;
+
+	// Skip first item (back folder)
+	int startY = 0;
+	if (m_CurrentPath == m_CurrentProjectPath || m_CurrentPath == m_ProjectRelativePath)
+	{
+		startY = 1;
+	}
+
+	for (int i = startY; i < m_Files.size(); i++)
 	{
 		const File& file = m_Files[i];
 
@@ -277,6 +289,11 @@ void FileBrowser::SetPath(const std::filesystem::path& path)
 
 	m_CurrentPath = path;
 	UpdateCache();
+}
+
+void FileBrowser::SetCurrentProjectPath(const std::filesystem::path& path)
+{
+	m_CurrentProjectPath = path;
 }
 
 FileBrowser::~FileBrowser()

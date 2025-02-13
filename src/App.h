@@ -3,6 +3,7 @@
 #include <GLFW/glfw3.h>
 #include "FileBrowser.h"
 #include "SB/SableEngine.h"
+#include "SB/ProjectManager.h"
 
 class App 
 {
@@ -17,6 +18,8 @@ public:
 
 	void Mainloop();
 	void LoadProject(const std::string& path);
+	SB::SB_Project GetCurrentProject();
+	bool GetCurrentProjectLoaded();
 
 private:
 	App();
@@ -24,7 +27,10 @@ private:
 
 	GLFWwindow* window;
 
-	FileBrowser* fileBrowser;
+	FileBrowser* fileBrowser = nullptr;
+
+	SB::SB_Project currentProject;
+	bool projectLoaded = false;
 
 	int width, height;
 	void InitWindow();

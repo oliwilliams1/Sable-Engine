@@ -42,6 +42,8 @@ App::App()
 
 	SBEngine::Init();
 
+	currentProject = SB::SB_Project();
+
 	fileBrowser = new FileBrowser();
 }
 
@@ -193,9 +195,21 @@ void App::LoadProject(const std::string& path)
 	std::filesystem::path projPath = relPath / projPathStr;
 
 	fileBrowser->SetPath(projPath.string());
+	fileBrowser->SetCurrentProjectPath(projPath);
+	currentProject = project;
 
 	std::string windowTitle = "Sable Engine - " + projPath.filename().string();
 	glfwSetWindowTitle(window, windowTitle.c_str());
+}
+
+SB::SB_Project App::GetCurrentProject()
+{
+	return currentProject;
+}
+
+bool App::GetCurrentProjectLoaded()
+{
+	return projectLoaded;
 }
 
 void App::Mainloop()

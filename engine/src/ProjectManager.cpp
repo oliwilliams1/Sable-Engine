@@ -24,7 +24,7 @@ void SB::SaveProject(const std::string& filename, const SB_Project& projectData)
 
 		std::filesystem::create_directory(relPath / projectData.name);
 
-		std::filesystem::create_directory(relPath / projectData.name / "assets");
+		std::filesystem::create_directory(relPath / projectData.name / "meshes");
 		std::filesystem::create_directory(relPath / projectData.name / "textures");
 		std::filesystem::create_directory(relPath / projectData.name / "materials");
 

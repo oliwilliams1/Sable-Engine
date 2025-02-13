@@ -15,6 +15,7 @@ public:
 
 	void Render();
     void SetPath(const std::filesystem::path& path);
+    void SetCurrentProjectPath(const std::filesystem::path& path);
     void UpdateCache();
 
 private:
@@ -51,6 +52,8 @@ private:
     SB_FILE_TYPE GetFileType(const std::filesystem::path& path);
     void UpdateCacheDirectoryFiles(const std::filesystem::path& path);
 	std::filesystem::path m_CurrentPath;
+    std::filesystem::path m_CurrentProjectPath;
+    std::filesystem::path m_ProjectRelativePath;
 	std::vector<File> m_Files;
 
     GLuint m_FolderTexture, m_ImageFileTexture, m_UnknownFileTexture, m_FolderCompressedTexture,
