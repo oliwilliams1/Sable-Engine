@@ -3,6 +3,7 @@
 #include "FileBrowser.h"
 #include "SB/SableEngine.h"
 #include "SB/Utils.h"
+#include "SB/DebugLog.h"
 
 FileBrowser::FileBrowser()
 {
@@ -105,7 +106,7 @@ FileBrowser::SB_FILE_TYPE FileBrowser::GetFileType(const std::filesystem::path& 
 	{
 		return SB_ASSET_SHADER;
 	}
-	else if (extension == ".json" || extension == ".yaml" || extension == ".conf" || extension == ".ini")
+	else if (extension == ".json" || extension == ".yaml" || extension == ".conf" || extension == ".ini" || extension == ".sbproj")
 	{
 		return SB_ASSET_CONFIG;
 	}
@@ -231,9 +232,18 @@ void FileBrowser::Render()
 			drawList->AddRectFilled(pos, size, IM_COL32(255, 255, 255, 20));
 
 			// Basically see if the user clicked a button, but image is button
-			if (ImGui::IsMouseClicked(0))
+			if (ImGui::IsMouseDoubleClicked(0))
 			{
-				UpdateCacheDirectoryFiles(file.path);
+				switch (file.type)
+				{
+				case SB_ASSET_FOLDER:
+					UpdateCacheDirectoryFiles(file.path);
+					break;
+
+				case SB_ASSET_CONFIG:
+					SB::Console::Log("Double clicked: %s", file.name.c_str());
+					break;
+				}
 			}
 		}
 
@@ -250,6 +260,22 @@ void FileBrowser::Render()
 	}
 
 	ImGui::End();
+}
+
+void FileBrowser::UpdateCache()
+{
+	UpdateCacheDirectoryFiles(m_CurrentPath);
+}
+
+void FileBrowser::SetPath(const std::filesystem::path& path)
+{
+	if (!std::filesystem::is_directory(path))
+	{
+		SB::Console::Error("Failed to set filesystem path: %s", path.string().c_str());
+	}
+
+	m_CurrentPath = path;
+	UpdateCache();
 }
 
 FileBrowser::~FileBrowser()

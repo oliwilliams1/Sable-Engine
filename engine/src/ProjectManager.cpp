@@ -1,5 +1,6 @@
 #include <fstream>
 #include <yaml-cpp/yaml.h>
+
 #include "ProjectManager.h"
 #include "DebugLog.h"
 #include "Utils.h"
@@ -21,6 +22,12 @@ void SB::SaveProject(const std::string& filename, const SB_Project& projectData)
 		file << projectNode;
 		file.close();
 
+		std::filesystem::create_directory(relPath / projectData.name);
+
+		std::filesystem::create_directory(relPath / projectData.name / "assets");
+		std::filesystem::create_directory(relPath / projectData.name / "textures");
+		std::filesystem::create_directory(relPath / projectData.name / "materials");
+
 		Console::Log("Initialized project: %s", filename.c_str());
 	}
 	else
@@ -34,6 +41,12 @@ void SB::LoadProject(const std::string& filename, SB_Project& projectData)
 	std::filesystem::path relPath = GetRelPath("projects");
 
 	std::filesystem::path filenamePath = relPath / std::filesystem::path(filename);
+
+	if (!std::filesystem::exists(filenamePath))
+	{
+		Console::Error("Project at: %s does not exist", filename.c_str());
+		return;
+	}
 
 	YAML::Node projectNode = YAML::LoadFile(filenamePath.string());
 

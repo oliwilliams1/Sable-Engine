@@ -3,7 +3,9 @@
 
 namespace EditorProjManager
 {
-	void DisplayNewProjectWindow(bool* open);
+	bool DisplayNewProjectWindow(bool* open, SB::SB_Project& project);
 	void DisplayOpenProjectWindow(bool* open);
 	void DisplaySaveProjectWindow(bool* open);
+
+	bool LoadProject(const std::string& path, SB::SB_Project& project);
 }

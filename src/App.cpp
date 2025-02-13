@@ -5,12 +5,44 @@
 #include "App.h"
 #include "Utils.h"
 #include "SB/DebugLog.h"
+#include "SB/Utils.h"
 #include "ConsoleDisplay.h"
 #include "ProjectManager.h"
+
+static App* s_AppInstance = nullptr;
 
 static void error_callback(int error, const char* description)
 {
 	std::cout << "GLFW::ERROR_CALLBACK: " << error << ": " << description << std::endl;
+}
+
+void App::Init()
+{
+	s_AppInstance = new App();
+}
+
+void App::Shutdown()
+{
+	delete s_AppInstance;
+	s_AppInstance = nullptr;
+}
+
+App& App::GetInstance()
+{
+	return *s_AppInstance;
+}
+
+App::App()
+{
+	width = 1600;
+	height = 900;
+	InitWindow();
+	InitImGui();
+	SetupImGuiStyle();
+
+	SBEngine::Init();
+
+	fileBrowser = new FileBrowser();
 }
 
 void App::DisplayMenuBar()
@@ -88,19 +120,6 @@ void App::DisplayMenuBar()
 	}
 }
 
-App::App()
-{
-	width = 1600;
-	height = 900;
-	InitWindow();
-	InitImGui();
-	SetupImGuiStyle();
-
-	SBEngine::Init();
-
-	fileBrowser = new FileBrowser();
-}
-
 void App::InitWindow()
 {
 	if (!glfwInit())
@@ -150,7 +169,21 @@ void App::InitImGui()
 
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
+}
 
+void App::LoadProject(const std::string& path)
+{
+	SB::SB_Project project;
+	if (!EditorProjManager::LoadProject(path, project))
+	{
+		SB::Console::Error("Failed to load project: %s", path.c_str());
+		return;
+	};
+
+	std::filesystem::path relPath = GetRelPath("projects");
+	std::filesystem::path projPath = relPath / path;
+
+	fileBrowser->SetPath(projPath.string());
 }
 
 void App::Mainloop()
@@ -173,19 +206,23 @@ void App::Mainloop()
 		ImGui::Text("Hello!");
 		ImGui::End();
 
-		if (assetManagerWindowOpen)
-		{
-			fileBrowser->Render();
-		}
-
 		if (consoleWindowOpen)
 		{
 			SB_EditorConsole::DisplayConsole();
 		}
 
+		if (assetManagerWindowOpen)
+		{
+			fileBrowser->Render();
+		}
+
 		if (newProjectWindowOpen)
 		{
-			EditorProjManager::DisplayNewProjectWindow(&newProjectWindowOpen);
+			SB::SB_Project project;
+			if (EditorProjManager::DisplayNewProjectWindow(&newProjectWindowOpen, project))
+			{
+				LoadProject(project.name);
+			}
 		}
 
 		ImGui::Render();

@@ -14,6 +14,8 @@ public:
 	~FileBrowser();
 
 	void Render();
+    void SetPath(const std::filesystem::path& path);
+    void UpdateCache();
 
 private:
 

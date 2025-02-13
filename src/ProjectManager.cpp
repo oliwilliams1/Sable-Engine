@@ -4,7 +4,7 @@
 
 using namespace SB;
 
-void EditorProjManager::DisplayNewProjectWindow(bool* open)
+bool EditorProjManager::DisplayNewProjectWindow(bool* open, SB::SB_Project& inputProject)
 {
     ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking |
         ImGuiWindowFlags_NoCollapse |
@@ -31,21 +31,32 @@ void EditorProjManager::DisplayNewProjectWindow(bool* open)
     if (ImGui::Button("Create"))
     {
         if (projectName[0] == '\0')
-		{
+        {
             Console::Log("Project name cannot be empty");
             ImGui::End();
-			return;
-		}
+            return false;
+        }
         SB_Project projectData;
         std::string projectNameString = projectName;
         projectData.name = projectNameString;
         projectData.path = projectNameString;
 
         SaveProject(projectNameString + ".sbproj", projectData);
-        ImGui::End();
+
         *open = false;
-        return;
+
+        inputProject = SB_Project(projectData);
+
+        ImGui::End();
+        return true;
     }
 
     ImGui::End();
+    return false;
+}
+
+bool EditorProjManager::LoadProject(const std::string& path, SB::SB_Project& project)
+{
+    SB::LoadProject(path + ".sbproj", project);
+    return true;
 }

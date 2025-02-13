@@ -6,12 +6,21 @@
 
 class App 
 {
-	public:
-	App();
+public:
+	App(const App&) = delete;
+	App& operator=(const App&) = delete;
+
+	static void Init();
+	static void Shutdown();
+
+	static App& GetInstance();
+
 	void Mainloop();
+
+private:
+	App();
 	~App();
 
-	private:
 	GLFWwindow* window;
 
 	FileBrowser* fileBrowser;
@@ -20,6 +29,7 @@ class App
 	void InitWindow();
 	void InitImGui();
 	void DisplayMenuBar();
+	void LoadProject(const std::string& path);
 
 	bool assetManagerWindowOpen = true, consoleWindowOpen = true;
 

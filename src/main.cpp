@@ -3,7 +3,8 @@
 
 int main()
 {
-	App app = App();
-	app.Mainloop();
+	App::Init();
+	App::GetInstance().Mainloop();
+	App::Shutdown();
 	return 0;
 }
