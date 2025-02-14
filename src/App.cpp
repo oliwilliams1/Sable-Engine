@@ -1,4 +1,3 @@
-#include <iostream>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -13,6 +12,11 @@ static App* s_AppInstance = nullptr;
 
 static void error_callback(int error, const char* description)
 {
+    if (error == 65548)
+    {
+        // Error is a dumb wayland error, which i do not care about, already fixed with macros
+        return;
+    }
 	SB::DEBUG_WARN("GLFW::ERROR_CALLBACK: %i: %s", error, description);
 }
 
@@ -177,7 +181,7 @@ void App::InitImGui()
 	ImGuiIO& io = ImGui::GetIO(); (void)io;
 
 	// Detatched windows do not play well with experimental window managers (unix has a billion)
-#if defined(UNIX)
+#if defined(__linux__)
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
 #else
   io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
