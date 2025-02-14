@@ -61,4 +61,6 @@ void SB::LoadProject(const std::string& filename, SB_Project& projectData)
 
 	projectData.name = projectNode["name"].as<std::string>();
 	projectData.path = projectNode["path"].as<std::string>();
+
+	DEBUG_LOG("Loaded project: %s located at: %s", projectData.name.c_str(), filenamePath.string().c_str());
 }

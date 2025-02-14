@@ -13,7 +13,7 @@ static App* s_AppInstance = nullptr;
 
 static void error_callback(int error, const char* description)
 {
-	std::cout << "GLFW::ERROR_CALLBACK: " << error << ": " << description << std::endl;
+	SB::DEBUG_WARN("GLFW::ERROR_CALLBACK: %i: %s", error, description);
 }
 
 void App::Init()
@@ -200,21 +200,11 @@ void App::LoadProject(const std::string& path)
 
 	std::string windowTitle = "Sable Engine - " + projPath.filename().string();
 	glfwSetWindowTitle(window, windowTitle.c_str());
-
-	SB::DEBUG_LOG("Editor loaded project %s", projPathStr.c_str());
-	SB::SB_LOG
-	std::cout << "Editor loaded project " << projPathStr << std::endl;
-	projectLoaded = true;
 }
 
 SB::SB_Project App::GetCurrentProject()
 {
 	return currentProject;
-}
-
-bool App::GetCurrentProjectLoaded()
-{
-	return projectLoaded;
 }
 
 void App::Mainloop()
@@ -249,7 +239,6 @@ void App::Mainloop()
 
 		if (newProjectWindowOpen)
 		{
-			SB::SB_LOG("Editor new project window open");
 			SB::SB_Project project;
 			if (EditorProjManager::DisplayNewProjectWindow(&newProjectWindowOpen, project))
 			{

@@ -3,15 +3,15 @@
 #include <vector>
 #include <string>
 
+enum class LogType
+{
+	SB_LOG = 0,
+	SB_WARNING = 1,
+	SB_ERROR = 2
+};
+
 namespace SB
 {
-	enum class LogType
-	{
-		SB_LOG = 0,
-		SB_WARNING = 1,
-		SB_ERROR = 2
-	};
-
 	struct LogData
 	{
 		LogType type;

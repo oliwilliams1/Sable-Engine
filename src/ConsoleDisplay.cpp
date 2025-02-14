@@ -9,13 +9,13 @@ static ImVec4 LogTypeToColour(LogType type)
 {
 	switch (type)
 	{
-	case SB_LOG:
+	case LogType::SB_LOG:
 		return ImVec4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	case SB_WARNING:
+	case LogType::SB_WARNING:
 		return ImVec4(1.0f, 1.0f, 0.0f, 1.0f);
 
-	case SB_ERROR:
+	case LogType::SB_ERROR:
 		return ImVec4(1.0f, 0.0f, 0.0f, 1.0f);
 
 	default:

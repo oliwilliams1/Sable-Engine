@@ -19,7 +19,6 @@ public:
 	void Mainloop();
 	void LoadProject(const std::string& path);
 	SB::SB_Project GetCurrentProject();
-	bool GetCurrentProjectLoaded();
 
 private:
 	App();
@@ -30,7 +29,6 @@ private:
 	FileBrowser* fileBrowser = nullptr;
 
 	SB::SB_Project currentProject;
-	bool projectLoaded = false;
 
 	int width, height;
 	void InitWindow();
