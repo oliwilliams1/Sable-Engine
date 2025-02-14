@@ -1,6 +1,5 @@
 #pragma once
-
-#include "SB/Scene.h"
+#include <imgui.h>
 
 class SceneViewer
 {
@@ -8,5 +7,6 @@ public:
 	void Draw();
 
 private:
-	SB::Scene* m_Scene;
+	ImVec2 contextMenuPos = ImVec2(0, 0);
+	bool contextMenuOpen = false;
 };

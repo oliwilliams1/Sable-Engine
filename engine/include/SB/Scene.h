@@ -6,37 +6,42 @@
 
 namespace SB
 {
-    // class Entity;
-
-    class SceneNode 
+    class SceneNode
     {
     public:
-        SceneNode(const std::string& name);
-        ~SceneNode() = default; // Should be fine for now
+        explicit SceneNode(const std::string& name);
+        ~SceneNode() = default;
 
-        void AddChild(std::unique_ptr<SceneNode> child);
-        // void SetEntity(std::shared_ptr<Entity> entity);
+        void AddChild(std::shared_ptr<SceneNode> child);
         std::string m_Name;
 
+        std::vector<std::shared_ptr<SceneNode>> m_Children;
+
     private:
-        std::vector<std::unique_ptr<SceneNode>> m_Children;
-        // std::shared_ptr<Entity> m_Entity;
+        // std::shared_ptr<Entity> m_Entity; // Uncomment if needed
     };
 
-    class Scene 
+    class Scene
     {
     public:
-        Scene();
-        ~Scene();
+        Scene(const Scene&) = delete;
+        Scene& operator=(const Scene&) = delete;
 
-        void AddNode(std::unique_ptr<SceneNode> node);
-        void RemoveNode(SceneNode* node);
+        static void Init();
+        static void Shutdown();
 
-        std::vector<SceneNode*> GetNodes();
-        const SceneNode* GetRoot() const;
+        static Scene& GetInstance();
+
+        void AddNode(const std::string& name, const std::shared_ptr<SceneNode>& parentNode);
+        void AddNodeToVec(const std::shared_ptr<SceneNode>& node);
+
+        std::vector<std::shared_ptr<SceneNode>> GetNodes();
+        const std::shared_ptr<SceneNode> GetRoot() const;
 
     private:
-        std::vector<std::unique_ptr<SceneNode>> m_Nodes;
-        std::unique_ptr<SceneNode> m_Root;
+        Scene();
+        ~Scene();
+        std::vector<std::shared_ptr<SceneNode>> m_Nodes;
+        std::shared_ptr<SceneNode> m_Root = std::make_shared<SceneNode>("root");
     };
 }

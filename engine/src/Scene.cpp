@@ -1,47 +1,65 @@
 #include "Scene.h"
+#include "DebugLog.h"
 
 using namespace SB;
 
-Scene::Scene() 
+static Scene* s_Instance = nullptr;
+
+Scene::Scene()
 {
-    m_Root = std::make_unique<SceneNode>("Root");
+    m_Nodes.push_back(m_Root);
 }
 
-Scene::~Scene()
-{
+Scene::~Scene() {}
 
+void Scene::Init()
+{
+    s_Instance = new Scene();
 }
 
-void Scene::AddNode(std::unique_ptr<SceneNode> node) 
+void Scene::Shutdown()
 {
-	m_Nodes.push_back(std::move(node));
+    delete s_Instance;
+    s_Instance = nullptr;
 }
 
-void Scene::RemoveNode(SceneNode* node) 
+Scene& Scene::GetInstance()
 {
-    auto it = std::remove_if(m_Nodes.begin(), m_Nodes.end(),
-        [node](const std::unique_ptr<SceneNode>& n) { return n.get() == node; });
-    m_Nodes.erase(it, m_Nodes.end());
+    return *s_Instance;
 }
 
-const SceneNode* Scene::GetRoot() const
+void Scene::AddNodeToVec(const std::shared_ptr<SceneNode>& node)
 {
-    return m_Root.get();
+    m_Nodes.push_back(node);
+    DEBUG_LOG("Node added: %s", node->m_Name.c_str());
 }
 
-// Raw pointers may not be best implementation
-std::vector<SceneNode*> Scene::GetNodes() 
+void Scene::AddNode(const std::string& name, const std::shared_ptr<SceneNode>& parentNode)
 {
-    std::vector<SceneNode*> rawPointers;
-    for (const auto& node : m_Nodes) {
-        rawPointers.push_back(node.get());
+    for (const auto& node : m_Nodes)
+    {
+        if (node->m_Name == parentNode->m_Name)
+        {
+            node->AddChild(std::make_shared<SceneNode>(name));
+            return;
+        }
     }
-    return rawPointers;
 }
 
-void SceneNode::AddChild(std::unique_ptr<SceneNode> child)
+const std::shared_ptr<SceneNode> Scene::GetRoot() const
 {
-	m_Children.push_back(std::move(child));
+    return m_Root;
+}
+
+std::vector<std::shared_ptr<SceneNode>> Scene::GetNodes()
+{
+    return m_Nodes;
+}
+
+void SceneNode::AddChild(std::shared_ptr<SceneNode> child)
+{
+    m_Children.push_back(child);
+    Scene::GetInstance().AddNodeToVec(child);
 }
 
 SceneNode::SceneNode(const std::string& name)
