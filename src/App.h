@@ -2,6 +2,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "FileBrowser.h"
+#include "SceneViewer.h"
 #include "SB/SableEngine.h"
 #include "SB/ProjectManager.h"
 
@@ -27,6 +28,7 @@ private:
 	GLFWwindow* window;
 
 	FileBrowser* fileBrowser = nullptr;
+	SceneViewer* sceneViewer = nullptr;
 
 	SB::SB_Project currentProject;
 
@@ -35,7 +37,7 @@ private:
 	void InitImGui();
 	void DisplayMenuBar();
 
-	bool assetManagerWindowOpen = true, consoleWindowOpen = true;
+	bool assetManagerWindowOpen = true, consoleWindowOpen = true, sceneHeirachyWindowOpen = true;
 
 	bool newProjectWindowOpen = false;
 };

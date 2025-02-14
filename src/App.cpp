@@ -45,6 +45,7 @@ App::App()
 	currentProject = SB::SB_Project();
 
 	fileBrowser = new FileBrowser();
+	sceneViewer = new SceneViewer();
 }
 
 void App::DisplayMenuBar()
@@ -116,6 +117,13 @@ void App::DisplayMenuBar()
 			}
 			ImGui::SameLine(checkboxWidth);
 			ImGui::TextUnformatted((consoleWindowOpen ? "[x]" : "[ ]"));
+
+			if (ImGui::MenuItem("Scene Hierarchy"))
+			{
+				sceneHeirachyWindowOpen = !sceneHeirachyWindowOpen;
+			}
+			ImGui::SameLine(checkboxWidth);
+			ImGui::TextUnformatted((sceneHeirachyWindowOpen ? "[x]" : "[ ]"));
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();
@@ -235,6 +243,11 @@ void App::Mainloop()
 		if (assetManagerWindowOpen)
 		{
 			fileBrowser->Render();
+		}
+
+		if (sceneHeirachyWindowOpen)
+		{
+			sceneViewer->Draw();
 		}
 
 		if (newProjectWindowOpen)
