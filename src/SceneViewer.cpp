@@ -3,7 +3,7 @@
 #include "SB/Scene.h"
 #include "SB/DebugLog.h"
 
-void SceneViewer::Draw() 
+void SceneViewer::Draw()
 {
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 200), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::Begin("Scene Hierarchy");
@@ -13,14 +13,14 @@ void SceneViewer::Draw()
 
     bool hovered = ImGui::IsMouseHoveringRect(windowPos, ImVec2(windowPos.x + windowSize.x, windowPos.y + windowSize.y));
 
-    bool queueContextMenuClose = false;
+    static ImVec2 popupPrevPos = ImVec2(0.0, 0.0);
 
-    if (hovered) 
+    if (hovered)
     {
         if (ImGui::IsMouseClicked(1) && !contextMenuOpen)
         {
-            contextMenuPos = ImGui::GetMousePos();
-			contextMenuOpen = true;
+            contextMenuOpen = true;
+            popupPrevPos = ImGui::GetMousePos();
         }
     }
 
@@ -33,23 +33,35 @@ void SceneViewer::Draw()
 
     ImGui::End();
 
-    if (contextMenuOpen) 
+
+    if (contextMenuOpen)
     {
         ImGui::OpenPopup("ContextMenu");
 
-        if (ImGui::BeginPopup("ContextMenu")) 
+        if (ImGui::BeginPopup("ContextMenu"))
         {
-            if (ImGui::BeginMenu("Add mesh...")) 
+            ImVec2 newPos = ImGui::GetWindowPos();
+
+            if (popupPrevPos.x != newPos.x && popupPrevPos.y != newPos.y)
             {
-                if (ImGui::MenuItem("Plane")) 
+                contextMenuOpen = false;
+            }
+
+            popupPrevPos = newPos;
+
+            bool menuItemClicked = false;
+
+            if (ImGui::BeginMenu("Add mesh..."))
+            {
+                if (ImGui::MenuItem("Plane"))
                 {
                     SB::Scene::GetInstance().AddNode("Plane", rootNode);
-                    contextMenuOpen = false;
+                    menuItemClicked = true;
                 }
-                if (ImGui::MenuItem("Cube")) 
+                if (ImGui::MenuItem("Cube"))
                 {
                     SB::Scene::GetInstance().AddNode("Cube", rootNode);
-                    contextMenuOpen = false;
+                    menuItemClicked = true;
                 }
                 if (ImGui::MenuItem("Cone")) {}
                 if (ImGui::MenuItem("Cylinder")) {}
@@ -59,14 +71,19 @@ void SceneViewer::Draw()
                 ImGui::EndMenu();
             }
 
-            if (ImGui::BeginMenu("Add light...")) 
+            if (ImGui::BeginMenu("Add light..."))
             {
-                ImGui::MenuItem("Point light");
-                ImGui::MenuItem("Sun light");
+                if (ImGui::MenuItem("Point light")) {}
+                if (ImGui::MenuItem("Sun light")) {}
                 ImGui::EndMenu();
             }
 
             ImGui::MenuItem("Add camera");
+
+            if (menuItemClicked)
+            {
+                contextMenuOpen = false;
+            }
 
             ImGui::EndPopup();
         }
