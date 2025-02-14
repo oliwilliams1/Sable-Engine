@@ -5,6 +5,15 @@
 
 void SceneViewer::DrawNode(const std::shared_ptr<SB::SceneNode>& node, std::shared_ptr<SB::SceneNode>& selectedNode, bool isRoot)
 {
+    // Cant be bothered backtracking, this will remove root node, i will probably revert later
+    if (isRoot) {
+        for (const auto& childNode : node->m_Children)
+        {
+            DrawNode(childNode, selectedNode, false);
+        }
+        return;
+    }
+
     bool isSelected = (selectedNode == node);
 
     // Always expand the root node
@@ -115,6 +124,15 @@ void SceneViewer::Draw()
             bool menuItemClicked = false;
             std::shared_ptr<SB::SceneNode> p_SelectedNode = (selectedNode == nullptr) ? rootNode : selectedNode;
 
+            if (selectedNode != nullptr)
+            {
+                if (ImGui::MenuItem("Move to root"))
+                {
+                    SB::Scene::GetInstance().MoveNodeToParent(p_SelectedNode, SB::Scene::GetInstance().GetRoot());
+                }
+                ImGui::Separator();
+            }
+
             if (ImGui::BeginMenu("Add mesh..."))
             {
                 if (ImGui::MenuItem("Plane"))
@@ -149,4 +167,23 @@ void SceneViewer::Draw()
             ImGui::EndPopup();
         }
     }
+
+    RenderPropertyWindow(selectedNode);
+}
+
+void SceneViewer::RenderPropertyWindow(const std::shared_ptr<SB::SceneNode>& node)
+{
+    ImGui::SetNextWindowSizeConstraints(ImVec2(400, 200), ImVec2(FLT_MAX, FLT_MAX));
+    ImGui::Begin("Entity Properties");
+
+    if (node == nullptr)
+    {
+        ImGui::Text("No node selected");
+        ImGui::End();
+        return;
+    }
+
+    ImGui::Text("%s", node->m_Name.c_str());
+
+    ImGui::End();
 }

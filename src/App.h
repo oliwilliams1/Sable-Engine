@@ -38,6 +38,6 @@ private:
 	void DisplayMenuBar();
 
 	bool assetManagerWindowOpen = true, consoleWindowOpen = true, sceneHeirachyWindowOpen = true;
-
+	bool imguiDemoWindowOpen = false;
 	bool newProjectWindowOpen = false;
 };

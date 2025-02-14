@@ -124,6 +124,14 @@ void App::DisplayMenuBar()
 			}
 			ImGui::SameLine(checkboxWidth);
 			ImGui::TextUnformatted((sceneHeirachyWindowOpen ? "[x]" : "[ ]"));
+
+			if (ImGui::MenuItem("ImGui Demo Window"))
+			{
+				imguiDemoWindowOpen = !imguiDemoWindowOpen;
+			}
+			ImGui::SameLine(checkboxWidth);
+			ImGui::TextUnformatted((imguiDemoWindowOpen ? "[x]" : "[ ]"));
+
 			ImGui::EndMenu();
 		}
 		ImGui::EndMainMenuBar();
@@ -234,6 +242,11 @@ void App::Mainloop()
 		ImGui::Begin("Docking");
 		ImGui::Text("Hello!");
 		ImGui::End();
+
+		if (imguiDemoWindowOpen)
+		{
+			ImGui::ShowDemoWindow();
+		}
 
 		if (consoleWindowOpen)
 		{
