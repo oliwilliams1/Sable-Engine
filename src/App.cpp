@@ -200,6 +200,11 @@ void App::LoadProject(const std::string& path)
 
 	std::string windowTitle = "Sable Engine - " + projPath.filename().string();
 	glfwSetWindowTitle(window, windowTitle.c_str());
+
+	SB::DEBUG_LOG("Editor loaded project %s", projPathStr.c_str());
+	SB::SB_LOG
+	std::cout << "Editor loaded project " << projPathStr << std::endl;
+	projectLoaded = true;
 }
 
 SB::SB_Project App::GetCurrentProject()
@@ -244,6 +249,7 @@ void App::Mainloop()
 
 		if (newProjectWindowOpen)
 		{
+			SB::SB_LOG("Editor new project window open");
 			SB::SB_Project project;
 			if (EditorProjManager::DisplayNewProjectWindow(&newProjectWindowOpen, project))
 			{

@@ -43,13 +43,13 @@ std::string Console::EnumToString(LogType type)
 {
 	switch (type) 
 	{
-	case SB_LOG:
+	case LogType::SB_LOG:
 		return "[LOG]\t";
 
-	case SB_WARNING:
+	case LogType::SB_WARNING:
 		return "[WARN]\t";
 
-	case SB_ERROR:
+	case LogType::SB_ERROR:
 		return "[ERROR]\t";
 	}
 }
@@ -86,8 +86,8 @@ void Console::Log(const char* format, const char* file, int line, const char* fu
 
 	std::string finalMessage = time + buffer;
 
-	std::cout << EnumToString(SB_LOG) << finalMessage << std::endl;
-	m_Logs.push_back({ SB_LOG, finalMessage, file, line, func });
+	std::cout << EnumToString(LogType::SB_LOG) << finalMessage << std::endl;
+	m_Logs.push_back({ LogType::SB_LOG, finalMessage, file, line, func });
 }
 
 void Console::Warn(const char* format, const char* file, int line, const char* func, ...)
@@ -103,8 +103,8 @@ void Console::Warn(const char* format, const char* file, int line, const char* f
 	std::string finalMessage = time + buffer;
 
 	SetConsoleColour(YELLOW);
-	std::cout << EnumToString(SB_WARNING) << finalMessage << std::endl;
-	m_Logs.push_back({ SB_WARNING, finalMessage, file, line, func });
+	std::cout << EnumToString(LogType::SB_WARNING) << finalMessage << std::endl;
+	m_Logs.push_back({ LogType::SB_WARNING, finalMessage, file, line, func });
 	ResetColour();
 }
 
@@ -121,8 +121,8 @@ void Console::Error(const char* format, const char* file, int line, const char* 
 	std::string finalMessage = time + buffer;
 
 	SetConsoleColour(RED);
-	std::cout << EnumToString(SB_ERROR) << finalMessage << std::endl;
-	m_Logs.push_back({ SB_ERROR, finalMessage, file, line, func });
+	std::cout << EnumToString(LogType::SB_ERROR) << finalMessage << std::endl;
+	m_Logs.push_back({ LogType::SB_ERROR, finalMessage, file, line, func });
 	ResetColour();
 }
 

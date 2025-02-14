@@ -5,7 +5,7 @@
 
 namespace SB
 {
-	enum LogType
+	enum class LogType
 	{
 		SB_LOG = 0,
 		SB_WARNING = 1,

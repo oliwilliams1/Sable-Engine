@@ -3,10 +3,11 @@
 std::filesystem::path GetRelPath(std::string otherPath)
 {
 	std::filesystem::path relPath;
-	std::filesystem::path exec_path = std::filesystem::current_path().parent_path();
+	std::filesystem::path currentPath = std::filesystem::current_path();
+	std::filesystem::path parentPath = currentPath.parent_path();
 	std::filesystem::path other_path(otherPath);
 
-	std::filesystem::path full_other_path = exec_path / other_path;
+	std::filesystem::path full_other_path = parentPath / other_path;
 
 	if (std::filesystem::exists(full_other_path))
 	{
@@ -16,6 +17,6 @@ std::filesystem::path GetRelPath(std::string otherPath)
 	else
 	{
 		// Relative to executable
-		return other_path;
+		return currentPath / other_path;
 	}
 }
