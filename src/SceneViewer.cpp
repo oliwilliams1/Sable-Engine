@@ -3,7 +3,7 @@
 #include "SB/Scene.h"
 #include "SB/DebugLog.h"
 
-void SceneViewer::DrawNode(const std::shared_ptr<SB::SceneNode>& node, std::shared_ptr<SB::SceneNode>& selectedNode, bool isRoot)
+void SceneViewer::DrawNode(SB::SceneNode* node, SB::SceneNode* selectedNode, bool isRoot)
 {
     // Cant be bothered backtracking, this will remove root node, i will probably revert later
     if (isRoot) {
@@ -23,7 +23,7 @@ void SceneViewer::DrawNode(const std::shared_ptr<SB::SceneNode>& node, std::shar
         flags |= ImGuiTreeNodeFlags_DefaultOpen;
     }
 
-    if (ImGui::TreeNodeEx(node->m_Name.c_str(), flags))
+    if (ImGui::TreeNodeEx(node->GetName().c_str(), flags))
     {
         // Selection
         if (ImGui::IsItemClicked(0))
@@ -39,7 +39,7 @@ void SceneViewer::DrawNode(const std::shared_ptr<SB::SceneNode>& node, std::shar
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
         {
             ImGui::SetDragDropPayload("NODE_PAYLOAD", &node, sizeof(node));
-            ImGui::Text("%s", node->m_Name.c_str());
+            ImGui::Text("%s", node->GetName().c_str());
             ImGui::EndDragDropSource();
         }
 
@@ -57,12 +57,12 @@ void SceneViewer::DrawNode(const std::shared_ptr<SB::SceneNode>& node, std::shar
     {
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("NODE_PAYLOAD"))
         {
-            auto& droppedNode = *(std::shared_ptr<SB::SceneNode>*)(payload->Data);
+            //auto& droppedNode = *(std::shared_ptr<SB::SceneNode>*)(payload->Data);
             // Allow dropping onto root or other nodes, but not onto itself
-            if (droppedNode != node || node == SB::Scene::GetInstance().GetRoot())
-            {
-                SB::Scene::GetInstance().MoveNodeToParent(droppedNode, node);
-            }
+            // if (droppedNode != node || node == SB::Scene::GetInstance().GetRoot())
+            // {
+            //     SB::Scene::GetInstance().MoveNodeToParent(droppedNode, node);
+            // }
         }
         ImGui::EndDragDropTarget();
     }
@@ -79,8 +79,8 @@ void SceneViewer::Draw()
     bool hovered = ImGui::IsMouseHoveringRect(windowPos, ImVec2(windowPos.x + windowSize.x, windowPos.y + windowSize.y));
 
     static ImVec2 popupPrevPos = ImVec2(0.0, 0.0);
-    const std::shared_ptr<SB::SceneNode> rootNode = SB::Scene::GetInstance().GetRoot();
-    static std::shared_ptr<SB::SceneNode> selectedNode = nullptr;
+    SB::SceneNode* rootNode = SB::Scene::GetInstance().GetRootNode();
+    static SB::SceneNode* selectedNode = nullptr;
 
     if (hovered && ImGui::IsMouseDoubleClicked(0))
     {
@@ -99,7 +99,7 @@ void SceneViewer::Draw()
 
             if (selectedNode != nullptr)
             {
-                SB::DEBUG_LOG("Selected node: %s", selectedNode->m_Name.c_str());
+                SB::DEBUG_LOG("Selected node: %s", selectedNode->GetName().c_str());
             }
         }
     }
@@ -122,13 +122,13 @@ void SceneViewer::Draw()
             popupPrevPos = newPos;
 
             bool menuItemClicked = false;
-            std::shared_ptr<SB::SceneNode> p_SelectedNode = (selectedNode == nullptr) ? rootNode : selectedNode;
+            SB::SceneNode* p_SelectedNode = (selectedNode == nullptr) ? rootNode : selectedNode;
 
             if (selectedNode != nullptr)
             {
                 if (ImGui::MenuItem("Move to root"))
                 {
-                    SB::Scene::GetInstance().MoveNodeToParent(p_SelectedNode, SB::Scene::GetInstance().GetRoot());
+                    //SB::Scene::GetInstance().MoveNodeToParent(p_SelectedNode, SB::Scene::GetInstance().GetRoot());
                 }
                 ImGui::Separator();
             }
@@ -137,7 +137,6 @@ void SceneViewer::Draw()
             {
                 if (ImGui::MenuItem("Plane"))
                 {
-                    SB::DEBUG_LOG("Parent node %s", p_SelectedNode->m_Name.c_str());
                     SB::Scene::GetInstance().AddNode("Plane", p_SelectedNode);
                     menuItemClicked = true;
                 }
@@ -171,7 +170,7 @@ void SceneViewer::Draw()
     RenderPropertyWindow(selectedNode);
 }
 
-void SceneViewer::RenderPropertyWindow(const std::shared_ptr<SB::SceneNode>& node)
+void SceneViewer::RenderPropertyWindow(const SB::SceneNode* node)
 {
     ImGui::SetNextWindowSizeConstraints(ImVec2(400, 200), ImVec2(FLT_MAX, FLT_MAX));
     ImGui::Begin("Entity Properties");
@@ -183,7 +182,7 @@ void SceneViewer::RenderPropertyWindow(const std::shared_ptr<SB::SceneNode>& nod
         return;
     }
 
-    ImGui::Text("%s", node->m_Name.c_str());
+    ImGui::Text("%s", node->GetName().c_str());
 
     ImGui::End();
 }
