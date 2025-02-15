@@ -3,13 +3,13 @@
 #include "SB/Scene.h"
 #include "SB/DebugLog.h"
 
-void SceneViewer::DrawNode(SB::SceneNode* node, SB::SceneNode* selectedNode, bool isRoot)
+void SceneViewer::DrawNode(SB::SceneNode* node, bool isRoot)
 {
     // Cant be bothered backtracking, this will remove root node, i will probably revert later
     if (isRoot) {
         for (const auto& childNode : node->m_Children)
         {
-            DrawNode(childNode, selectedNode, false);
+            DrawNode(childNode, false);
         }
         return;
     }
@@ -38,7 +38,7 @@ void SceneViewer::DrawNode(SB::SceneNode* node, SB::SceneNode* selectedNode, boo
         // Begin dragging this node
         if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
         {
-            ImGui::SetDragDropPayload("NODE_PAYLOAD", &node, sizeof(node));
+            ImGui::SetDragDropPayload("NODE_PAYLOAD", &node, sizeof(SB::SceneNode));
             ImGui::Text("%s", node->GetName().c_str());
             ImGui::EndDragDropSource();
         }
@@ -46,26 +46,28 @@ void SceneViewer::DrawNode(SB::SceneNode* node, SB::SceneNode* selectedNode, boo
         // Recursion :(
         for (const auto& childNode : node->m_Children)
         {
-            DrawNode(childNode, selectedNode);
+            DrawNode(childNode, false);
         }
 
         ImGui::TreePop();
     }
 
-    // Check if this node is a drop target
     if (ImGui::BeginDragDropTarget())
+{
+    if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("NODE_PAYLOAD"))
     {
-        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("NODE_PAYLOAD"))
+        // Cast the payload data to a raw pointer of SceneNode
+        SB::SceneNode* droppedNode = *(SB::SceneNode**)(payload->Data);
+        
+        // Allow dropping onto root or other nodes, but not onto itself
+        if (droppedNode != node && droppedNode != SB::Scene::GetInstance().GetRootNode())
         {
-            //auto& droppedNode = *(std::shared_ptr<SB::SceneNode>*)(payload->Data);
-            // Allow dropping onto root or other nodes, but not onto itself
-            // if (droppedNode != node || node == SB::Scene::GetInstance().GetRoot())
-            // {
-            //     SB::Scene::GetInstance().MoveNodeToParent(droppedNode, node);
-            // }
+            SB::Scene::GetInstance().MoveNodeToParent(droppedNode, node);
         }
-        ImGui::EndDragDropTarget();
     }
+    ImGui::EndDragDropTarget();
+}
+
 }
 
 void SceneViewer::Draw()
@@ -80,7 +82,6 @@ void SceneViewer::Draw()
 
     static ImVec2 popupPrevPos = ImVec2(0.0, 0.0);
     SB::SceneNode* rootNode = SB::Scene::GetInstance().GetRootNode();
-    static SB::SceneNode* selectedNode = nullptr;
 
     if (hovered && ImGui::IsMouseDoubleClicked(0))
     {
@@ -88,7 +89,7 @@ void SceneViewer::Draw()
     }
 
     // Draw the root node (always expanded)
-    DrawNode(rootNode, selectedNode, true);
+    DrawNode(rootNode, true);
 
     if (hovered)
     {
@@ -128,7 +129,7 @@ void SceneViewer::Draw()
             {
                 if (ImGui::MenuItem("Move to root"))
                 {
-                    //SB::Scene::GetInstance().MoveNodeToParent(p_SelectedNode, SB::Scene::GetInstance().GetRoot());
+                    SB::Scene::GetInstance().MoveNodeToParent(p_SelectedNode, SB::Scene::GetInstance().GetRootNode());
                 }
                 ImGui::Separator();
             }

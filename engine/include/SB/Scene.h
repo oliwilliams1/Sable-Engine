@@ -34,6 +34,8 @@ namespace SB
 		SceneNode* AddNode(const std::string& name, SceneNode* parent);
 		SceneNode* GetRootNode();
 
+        void MoveNodeToParent(SceneNode* node, SceneNode* parent);
+
 	private:
 		Scene();
 		~Scene();

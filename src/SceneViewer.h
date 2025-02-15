@@ -8,9 +8,9 @@ public:
 	void Draw();
 
 private:
-	void DrawNode(SB::SceneNode* node, SB::SceneNode* selectedNode, bool isRoot = false);
+	void DrawNode(SB::SceneNode* node, bool isRoot = false);
 
-
+    SB::SceneNode* selectedNode = nullptr;
 	void RenderPropertyWindow(const SB::SceneNode* node);
 	ImVec2 contextMenuPos = ImVec2(0, 0);
 	bool contextMenuOpen = false;

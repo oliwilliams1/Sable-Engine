@@ -1,8 +1,8 @@
 #include "Scene.h"
 #include "DebugLog.h"
-#include <algorithm>
 #include <iomanip>
 #include <sstream>
+#include <algorithm>
 
 using namespace SB;
 
@@ -87,6 +87,24 @@ SceneNode* Scene::AddNode(const std::string& name, SceneNode* parent)
     return newNode;
 }
 
+void Scene::MoveNodeToParent(SceneNode* node, SceneNode* parent)
+{
+    for (SceneNode* oldParent : m_Nodes)
+    {
+        auto& children = oldParent->m_Children;
+        auto it = std::find(children.begin(), children.end(), node);
+
+        if (it != children.end())
+        {
+            children.erase(it);
+            DEBUG_LOG("Node: %s removed from parent: %s", node->GetName().c_str(), oldParent->GetName().c_str());
+            break;
+        }
+    }
+
+    parent->AddChild(node);
+}
+
 SceneNode* SB::Scene::GetRootNode()
 {
     return m_RootNode;
@@ -95,6 +113,7 @@ SceneNode* SB::Scene::GetRootNode()
 void SceneNode::AddChild(SceneNode* child)
 {
     if (child) {
+        DEBUG_LOG("Child: %s, added to node: %s", child->GetName().c_str(), m_Name.c_str());
         m_Children.push_back(child);
     }
 }
