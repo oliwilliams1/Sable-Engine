@@ -8,10 +8,20 @@ public:
 	void Draw();
 
 private:
-	void DrawNode(SB::SceneNode* node, bool isRoot = false);
-
     SB::SceneNode* selectedNode = nullptr;
-	void RenderPropertyWindow(const SB::SceneNode* node);
-	ImVec2 contextMenuPos = ImVec2(0, 0);
-	bool contextMenuOpen = false;
+
+	void DrawNode(SB::SceneNode* node, bool isRoot = false);
+	void DrawAlternatingRows() const;
+
+	bool IsDescendant(SB::SceneNode* potentialAncestor, SB::SceneNode* node);
+
+	int m_VerticalNodesAmnt = 0;
+	ImVec2 m_NodeFirstPos = ImVec2(0.0f, 0.0f);
+	float m_NodeVertSize = 20.0f;
+
+	ImVec2 selectedNodePos = ImVec2(0.0f, 0.0f);
+	void DrawSelectedNodeHighlight();
+
+	void RenderPropertyWindow(SB::SceneNode* node);
+	bool m_MontextMenuOpen = false;
 };
