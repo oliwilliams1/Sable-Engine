@@ -13,7 +13,7 @@ void SceneViewer::DrawNode(SB::SceneNode* node, bool isRoot)
 		return;
 	}
 
-	m_VisibleNodes++;
+	m_VerticalNodesAmnt++;
 
 	bool isSelected = (selectedNode == node);
 
@@ -94,7 +94,10 @@ void SceneViewer::Draw()
 	ImGui::SetNextWindowSizeConstraints(ImVec2(400, 200), ImVec2(FLT_MAX, FLT_MAX));
 	ImGui::Begin("Scene Hierarchy");
 
-	m_VisibleNodes = 0;
+	m_VerticalNodesAmnt = 0;
+
+	m_NodeFirstPos = ImGui::GetCursorScreenPos();
+	m_NodeVertSize = ImGui::GetTreeNodeToLabelSpacing() - 2.0f * ImGui::GetStyle().FramePadding.y;
 
 	ImVec2 windowSize = ImGui::GetWindowSize();
 	ImVec2 windowPos = ImGui::GetWindowPos();
@@ -114,9 +117,9 @@ void SceneViewer::Draw()
 
 	if (hovered)
 	{
-		if (ImGui::IsMouseClicked(1) && !contextMenuOpen)
+		if (ImGui::IsMouseClicked(1) && !m_MontextMenuOpen)
 		{
-			contextMenuOpen = true;
+			m_MontextMenuOpen = true;
 			popupPrevPos = ImGui::GetMousePos();
 
 			if (selectedNode != nullptr)
@@ -126,9 +129,11 @@ void SceneViewer::Draw()
 		}
 	}
 
+	DrawAlternatingRows();
+
 	ImGui::End();
 
-	if (contextMenuOpen)
+	if (m_MontextMenuOpen)
 	{
 		ImGui::OpenPopup("ContextMenu");
 
@@ -138,7 +143,7 @@ void SceneViewer::Draw()
 
 			if (popupPrevPos.x != newPos.x && popupPrevPos.y != newPos.y)
 			{
-				contextMenuOpen = false;
+				m_MontextMenuOpen = false;
 			}
 
 			popupPrevPos = newPos;
@@ -181,7 +186,7 @@ void SceneViewer::Draw()
 
 			if (menuItemClicked)
 			{
-				contextMenuOpen = false;
+				m_MontextMenuOpen = false;
 				selectedNode = nullptr;
 			}
 
@@ -190,6 +195,29 @@ void SceneViewer::Draw()
 	}
 
 	RenderPropertyWindow(selectedNode);
+}
+
+void SceneViewer::DrawAlternatingRows() const
+{
+	ImDrawList* drawList = ImGui::GetForegroundDrawList();
+	ImVec2 currentPos = m_NodeFirstPos;
+	float verticalPadding = ImGui::GetStyle().ItemSpacing.y;
+
+	float paddingX = ImGui::GetStyle().FramePadding.x;
+	float windowSizeX = ImGui::GetWindowSize().x - 2.0f * paddingX;
+
+
+	for (int i = 0; i < m_VerticalNodesAmnt; i++)
+	{
+		bool draw = (i % 2 != 0);
+
+		if (draw)
+		{
+			drawList->AddRectFilled(currentPos, ImVec2(currentPos.x + windowSizeX, currentPos.y + m_NodeVertSize), ImColor(1.0f, 1.0f, 1.0f, 0.1f));
+		}
+
+		currentPos.y += m_NodeVertSize + verticalPadding / 2.0f;
+	}
 }
 
 void SceneViewer::RenderPropertyWindow(const SB::SceneNode* node)
