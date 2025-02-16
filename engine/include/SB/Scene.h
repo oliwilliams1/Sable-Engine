@@ -13,11 +13,14 @@ namespace SB
 
 		void AddChild(SceneNode* child);
 		const std::string& GetName() const;
+		const SceneNode* GetParent() const;
+		void SetParent(SceneNode* parent);
 
 		std::vector<SceneNode*> m_Children;
 
 	private:
 		std::string m_Name;
+		SceneNode* m_Parent = nullptr;
 	};
 
 	class Scene
@@ -34,7 +37,7 @@ namespace SB
 		SceneNode* AddNode(const std::string& name, SceneNode* parent);
 		SceneNode* GetRootNode();
 
-        void MoveNodeToParent(SceneNode* node, SceneNode* parent);
+		void MoveNodeToParent(SceneNode* node, SceneNode* parent);
 
 	private:
 		Scene();

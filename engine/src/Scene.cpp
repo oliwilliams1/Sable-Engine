@@ -98,6 +98,7 @@ void Scene::MoveNodeToParent(SceneNode* node, SceneNode* parent)
         {
             children.erase(it);
             DEBUG_LOG("Node: %s removed from parent: %s", node->GetName().c_str(), oldParent->GetName().c_str());
+            node->SetParent(nullptr);
             break;
         }
     }
@@ -115,6 +116,7 @@ void SceneNode::AddChild(SceneNode* child)
     if (child) {
         DEBUG_LOG("Child: %s, added to node: %s", child->GetName().c_str(), m_Name.c_str());
         m_Children.push_back(child);
+        child->SetParent(this);
     }
 }
 
@@ -123,4 +125,14 @@ SceneNode::SceneNode(const std::string& name) : m_Name(name) {}
 const std::string& SceneNode::GetName() const
 {
     return m_Name;
+}
+
+const SceneNode* SceneNode::GetParent() const
+{
+    return m_Parent;
+}
+
+void SceneNode::SetParent(SceneNode* parent)
+{
+    m_Parent = parent;
 }
