@@ -19,9 +19,9 @@ namespace SB
 		void SetParent(SceneNode* parent);
 
 		std::vector<SceneNode*> m_Children;
-
+        
 	private:
-		std::string m_Name;
+        std::string m_Name;
 		SceneNode* m_Parent = nullptr;
 	};
 

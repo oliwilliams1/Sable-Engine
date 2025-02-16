@@ -1,5 +1,6 @@
 #include "Object.h"
 #include "DebugLog.h"
+#include <type_traits>
 
 using namespace SB;
 
@@ -8,6 +9,9 @@ Object::Object() {}
 template<typename T>
 void Object::SetObjectData(T data, SB_OBJECT_DATA_TYPE dataType)
 {
+    static_assert(std::is_same<T, glm::vec3>::value || std::is_same<T, glm::vec2>::value || std::is_same<T, unsigned int>::value,
+                "SetObjectData only accepts glm::vec3 glm::vec2, unsigned int");
+
     switch (dataType)
     {
     case SB_OBJECT_DATA_VERTICES:

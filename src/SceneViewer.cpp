@@ -254,6 +254,7 @@ void SceneViewer::RenderPropertyWindow(SB::SceneNode* node)
 	strncpy(nameBuffer, node->GetName().c_str(), sizeof(nameBuffer) - 1);
 	nameBuffer[sizeof(nameBuffer) - 1] = '\0';
 
+    ImGui::SetNextItemWidth(-FLT_MIN);
 	if (ImGui::InputText("Node name: ", nameBuffer, sizeof(nameBuffer), ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		node->SetName(nameBuffer);
