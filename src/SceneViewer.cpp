@@ -13,37 +13,40 @@ void SceneViewer::DrawNode(SB::SceneNode* node, bool isRoot)
 		return;
 	}
 
+	if (selectedNode == node)
+	{
+		selectedNodePos = ImGui::GetCursorScreenPos();
+	}
+
 	m_VerticalNodesAmnt++;
 
 	bool isSelected = (selectedNode == node);
 
-	// Always expand the root node
-	ImGuiTreeNodeFlags flags = isSelected ? ImGuiTreeNodeFlags_Selected : 0;
-	if (isRoot)
+	if (isRoot) return;
+
+	ImGuiTreeNodeFlags flags = ImGuiTreeNodeFlags_OpenOnArrow;
+	bool expanded = ImGui::TreeNodeEx(node->GetName().c_str(), flags);
+
+	// Selection
+	if (ImGui::IsItemClicked(0))
 	{
-		flags |= ImGuiTreeNodeFlags_DefaultOpen;
+		selectedNode = node;
+	}
+	else if (ImGui::IsItemClicked(1))
+	{
+		selectedNode = node;
 	}
 
-	if (ImGui::TreeNodeEx(node->GetName().c_str(), flags))
+	// Begin dragging this node
+	if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
 	{
-		// Selection
-		if (ImGui::IsItemClicked(0))
-		{
-			selectedNode = node;
-		}
-		else if (ImGui::IsItemClicked(1))
-		{
-			selectedNode = node;
-		}
+		ImGui::SetDragDropPayload("NODE_PAYLOAD", &node, sizeof(SB::SceneNode*));
+		ImGui::Text("%s", node->GetName().c_str());
+		ImGui::EndDragDropSource();
+	}
 
-		// Begin dragging this node
-		if (ImGui::BeginDragDropSource(ImGuiDragDropFlags_SourceAllowNullID))
-		{
-			ImGui::SetDragDropPayload("NODE_PAYLOAD", &node, sizeof(SB::SceneNode*));
-			ImGui::Text("%s", node->GetName().c_str());
-			ImGui::EndDragDropSource();
-		}
-
+	if (expanded)
+	{
 		// Recursion >:(
 		for (const auto& childNode : node->m_Children)
 		{
@@ -52,7 +55,7 @@ void SceneViewer::DrawNode(SB::SceneNode* node, bool isRoot)
 
 		ImGui::TreePop();
 	}
-
+	
 	const ImGuiPayload* payload = ImGui::GetDragDropPayload();
 	if (payload == nullptr)	return;
 
@@ -112,7 +115,6 @@ void SceneViewer::Draw()
 		selectedNode = nullptr;
 	}
 
-	// Draw the root node, recursively draws everything
 	DrawNode(rootNode, true);
 
 	if (hovered)
@@ -130,6 +132,8 @@ void SceneViewer::Draw()
 	}
 
 	DrawAlternatingRows();
+
+	DrawSelectedNodeHighlight();
 
 	ImGui::End();
 
@@ -199,7 +203,7 @@ void SceneViewer::Draw()
 
 void SceneViewer::DrawAlternatingRows() const
 {
-	ImDrawList* drawList = ImGui::GetForegroundDrawList();
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
 	ImVec2 currentPos = m_NodeFirstPos;
 	float verticalPadding = ImGui::GetStyle().ItemSpacing.y;
 
@@ -213,14 +217,28 @@ void SceneViewer::DrawAlternatingRows() const
 
 		if (draw)
 		{
-			drawList->AddRectFilled(currentPos, ImVec2(currentPos.x + windowSizeX, currentPos.y + m_NodeVertSize), ImColor(1.0f, 1.0f, 1.0f, 0.1f));
+			drawList->AddRectFilled(currentPos, ImVec2(currentPos.x + windowSizeX, currentPos.y + m_NodeVertSize), ImColor(1.0f, 1.0f, 1.0f, 0.05f));
 		}
 
 		currentPos.y += m_NodeVertSize + verticalPadding / 2.0f;
 	}
 }
 
-void SceneViewer::RenderPropertyWindow(const SB::SceneNode* node)
+void SceneViewer::DrawSelectedNodeHighlight()
+{
+	if (selectedNode == nullptr) return;
+
+	ImDrawList* drawList = ImGui::GetWindowDrawList();
+
+	selectedNodePos.x = m_NodeFirstPos.x;
+
+	float paddingX = ImGui::GetStyle().FramePadding.x;
+	float windowSizeX = ImGui::GetWindowSize().x - 2.0f * paddingX;
+
+	drawList->AddRectFilled(selectedNodePos, ImVec2(selectedNodePos.x + windowSizeX, selectedNodePos.y + m_NodeVertSize), ImColor(1.0f, 1.0f, 1.0f, 0.2f));
+}
+
+void SceneViewer::RenderPropertyWindow(SB::SceneNode* node)
 {
 	ImGui::SetNextWindowSizeConstraints(ImVec2(400, 200), ImVec2(FLT_MAX, FLT_MAX));
 	ImGui::Begin("Entity Properties");
@@ -232,7 +250,14 @@ void SceneViewer::RenderPropertyWindow(const SB::SceneNode* node)
 		return;
 	}
 
-	ImGui::Text("%s", node->GetName().c_str());
+	static char nameBuffer[256];
+	strncpy(nameBuffer, node->GetName().c_str(), sizeof(nameBuffer) - 1);
+	nameBuffer[sizeof(nameBuffer) - 1] = '\0';
+
+	if (ImGui::InputText("Node name: ", nameBuffer, sizeof(nameBuffer), ImGuiInputTextFlags_EnterReturnsTrue))
+	{
+		node->SetName(nameBuffer);
+	}
 
 	ImGui::End();
 }

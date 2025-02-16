@@ -13,6 +13,8 @@ namespace SB
 
 		void AddChild(SceneNode* child);
 		const std::string& GetName() const;
+		void SetName(const std::string& name);
+
 		const SceneNode* GetParent() const;
 		void SetParent(SceneNode* parent);
 
@@ -39,11 +41,10 @@ namespace SB
 
 		void MoveNodeToParent(SceneNode* node, SceneNode* parent);
 
+		std::string GenerateUniqueName(const std::string& name);
 	private:
 		Scene();
 		~Scene();
-
-		std::string GenerateUniqueName(const std::string& name);
 
 		std::vector<SceneNode*> m_Nodes;
 		SceneNode* m_RootNode;

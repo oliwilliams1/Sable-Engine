@@ -19,6 +19,9 @@ private:
 	ImVec2 m_NodeFirstPos = ImVec2(0.0f, 0.0f);
 	float m_NodeVertSize = 20.0f;
 
-	void RenderPropertyWindow(const SB::SceneNode* node);
+	ImVec2 selectedNodePos = ImVec2(0.0f, 0.0f);
+	void DrawSelectedNodeHighlight();
+
+	void RenderPropertyWindow(SB::SceneNode* node);
 	bool m_MontextMenuOpen = false;
 };
