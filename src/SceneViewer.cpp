@@ -240,7 +240,7 @@ void SceneViewer::DrawSelectedNodeHighlight()
 
 void SceneViewer::RenderPropertyWindow(SB::SceneNode* node)
 {
-	ImGui::SetNextWindowSizeConstraints(ImVec2(400, 200), ImVec2(FLT_MAX, FLT_MAX));
+	ImGui::SetNextWindowSizeConstraints(ImVec2(400, 400), ImVec2(FLT_MAX, FLT_MAX));
 	ImGui::Begin("Entity Properties");
 
 	if (node == nullptr)
@@ -254,11 +254,14 @@ void SceneViewer::RenderPropertyWindow(SB::SceneNode* node)
 	strncpy(nameBuffer, node->GetName().c_str(), sizeof(nameBuffer) - 1);
 	nameBuffer[sizeof(nameBuffer) - 1] = '\0';
 
-    ImGui::SetNextItemWidth(-FLT_MIN);
-	if (ImGui::InputText("Node name: ", nameBuffer, sizeof(nameBuffer), ImGuiInputTextFlags_EnterReturnsTrue))
+    ImGui::SetNextItemWidth(ImGui::GetWindowWidth() - ImGui::GetStyle().WindowPadding.x * 3 - 100);
+	if (ImGui::InputText("##Node name: ", nameBuffer, sizeof(nameBuffer), ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		node->SetName(nameBuffer);
 	}
+
+	ImGui::SameLine();
+	ImGui::Button("Add component", ImVec2(100, 0));
 
 	ImGui::End();
 }
