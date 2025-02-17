@@ -254,14 +254,38 @@ void SceneViewer::RenderPropertyWindow(SB::SceneNode* node)
 	strncpy(nameBuffer, node->GetName().c_str(), sizeof(nameBuffer) - 1);
 	nameBuffer[sizeof(nameBuffer) - 1] = '\0';
 
-    ImGui::SetNextItemWidth(ImGui::GetWindowWidth() - ImGui::GetStyle().WindowPadding.x * 3 - 100);
-	if (ImGui::InputText("##Node name: ", nameBuffer, sizeof(nameBuffer), ImGuiInputTextFlags_EnterReturnsTrue))
+	ImGui::SetNextItemWidth(ImGui::GetWindowWidth() - 122 - ImGui::GetStyle().ItemSpacing.x * 4);
+	if (ImGui::InputText("##NodeName", nameBuffer, sizeof(nameBuffer), ImGuiInputTextFlags_EnterReturnsTrue))
 	{
 		node->SetName(nameBuffer);
 	}
 
+	const char* componentOptions[] = { "Mesh", "Script", "Int Variable", "Shader", "Rigid Body" };
+	static int selectedComponent = 0;
+
 	ImGui::SameLine();
-	ImGui::Button("Add component", ImVec2(100, 0));
+	ImGui::SetNextItemWidth(100);
+	ImGui::Combo("##ComponentType", &selectedComponent, componentOptions, IM_ARRAYSIZE(componentOptions));
+
+	ImGui::SameLine();
+	if (ImGui::Button("+", ImVec2(22, 0)))
+	{
+		switch (selectedComponent)
+		{
+		case 0:
+			node->AddMeshComponent();
+			break;
+		default:
+			SB::DEBUG_LOG("Not implemented");
+			break;
+		}
+	}
+
+	if (node->GetMeshComponent() != nullptr)
+	{
+		ImGui::SeparatorText("Mesh");
+
+	}
 
 	ImGui::End();
 }

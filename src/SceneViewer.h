@@ -22,6 +22,7 @@ private:
 	ImVec2 selectedNodePos = ImVec2(0.0f, 0.0f);
 	void DrawSelectedNodeHighlight();
 
-	void RenderPropertyWindow(SB::SceneNode* node);
+	bool addComponentModal = false;
 	bool m_MontextMenuOpen = false;
+	void RenderPropertyWindow(SB::SceneNode* node);
 };

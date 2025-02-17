@@ -141,3 +141,13 @@ void SceneNode::SetParent(SceneNode* parent)
 {
     m_Parent = parent;
 }
+
+void SceneNode::AddMeshComponent()
+{
+    m_Mesh = MeshArena::GetInstance().AddMesh(m_Name);
+}
+
+const Mesh* SceneNode::GetMeshComponent() const
+{
+	return m_Mesh;
+}

@@ -2,6 +2,7 @@
 #include "AssetManager.h"
 #include "Scene.h"
 #include "DebugLog.h"
+#include "Mesh.h"
 
 using namespace SB;
 
@@ -12,6 +13,7 @@ SBEngine::SBEngine()
     Console::Init();
     AssetManager::Init();
     Scene::Init();
+    MeshArena::Init();
 }
 
 SBEngine::~SBEngine()
@@ -19,6 +21,7 @@ SBEngine::~SBEngine()
     Console::Shutdown();
     AssetManager::Shutdown();
     Scene::Shutdown();
+    MeshArena::Shutdown();
 }
 
 bool SBEngine::LoadTextureFromFile(const std::string& filename, GLuint& id)

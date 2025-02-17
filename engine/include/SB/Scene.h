@@ -19,11 +19,14 @@ namespace SB
         const SceneNode* GetParent() const;
         void SetParent(SceneNode* parent);
 
+        void AddMeshComponent();
+        const Mesh* GetMeshComponent() const;
+
         std::vector<SceneNode*> m_Children;
         
     private:
         std::string m_Name;
-        Mesh* m_Object = nullptr;
+        Mesh* m_Mesh = nullptr;
         SceneNode* m_Parent = nullptr;
     };
 

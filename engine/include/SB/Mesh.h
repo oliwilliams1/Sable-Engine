@@ -28,7 +28,7 @@ namespace SB
     class Mesh
     {
     public:
-        Mesh(std::string* parentNodeName);
+        Mesh(const std::string& parentNodeName);
         ~Mesh();
         
         template<typename T>
@@ -36,6 +36,25 @@ namespace SB
 
     private:
         ObjectData m_ObjData;
-        std::string* m_ParentNodeName;
+        std::string m_ParentNodeName;
+    };
+
+    class MeshArena
+    {
+    public:
+        MeshArena(const MeshArena&) = delete;
+        MeshArena& operator=(const MeshArena&) = delete;
+
+        static void Init();
+        static void Shutdown();
+
+        static MeshArena& GetInstance();
+
+        Mesh* AddMesh(const std::string& parentNodeName);
+
+    private:
+        MeshArena();
+        ~MeshArena();
+        std::vector<Mesh> m_Meshes;
     };
 }
