@@ -13,7 +13,7 @@ static AssetManager* s_Instance = nullptr;
 AssetManager::AssetManager()
 {
 	ms_ResourcePath = GetRelPath("resources");
-	DEBUG_LOG("Asset manager loaded for path: %s", ms_ResourcePath.string().c_str());
+	SABLE_LOG("Asset manager loaded for path: %s", ms_ResourcePath.string().c_str());
 }
 
 AssetManager::~AssetManager()
@@ -24,7 +24,7 @@ AssetManager::~AssetManager()
 	}
 
 	ms_TextureMap.clear();
-	DEBUG_LOG("Asset manager destroyed");
+	SABLE_LOG("Asset manager destroyed");
 }
 
 void AssetManager::Init()

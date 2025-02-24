@@ -32,7 +32,7 @@ bool EditorProjManager::DisplayNewProjectWindow(bool* open, SB::SB_Project& inpu
     {
         if (projectName[0] == '\0')
         {
-            DEBUG_LOG("Project name cannot be empty");
+            SABLE_LOG("Project name cannot be empty");
             ImGui::End();
             return false;
         }

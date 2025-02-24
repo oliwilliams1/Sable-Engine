@@ -284,7 +284,7 @@ void FileBrowser::SetPath(const std::filesystem::path& path)
 {
 	if (!std::filesystem::is_directory(path))
 	{
-		SB::DEBUG_ERROR("Failed to set filesystem path: %s", path.string().c_str());
+		SB::SABLE_ERROR("Failed to set filesystem path: %s", path.string().c_str());
 	}
 
 	m_CurrentPath = path;

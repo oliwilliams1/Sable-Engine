@@ -126,7 +126,7 @@ void SceneViewer::Draw()
 
 			if (selectedNode != nullptr)
 			{
-				SB::DEBUG_LOG("Selected node: %s", selectedNode->GetName().c_str());
+				SB::SABLE_LOG("Selected node: %s", selectedNode->GetName().c_str());
 			}
 		}
 	}
@@ -276,7 +276,7 @@ void SceneViewer::RenderPropertyWindow(SB::SceneNode* node)
 			node->AddMeshComponent();
 			break;
 		default:
-			SB::DEBUG_LOG("Not implemented");
+			SB::SABLE_LOG("Not implemented");
 			break;
 		}
 	}

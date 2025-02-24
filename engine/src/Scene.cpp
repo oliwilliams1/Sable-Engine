@@ -97,7 +97,7 @@ void Scene::MoveNodeToParent(SceneNode* node, SceneNode* parent)
         if (it != children.end())
         {
             children.erase(it);
-            DEBUG_LOG("[SCENE]\tNode: %s removed from parent: %s", node->GetName().c_str(), oldParent->GetName().c_str());
+            SABLE_LOG("[SCENE]\tNode: %s removed from parent: %s", node->GetName().c_str(), oldParent->GetName().c_str());
             node->SetParent(nullptr);
             break;
         }
@@ -114,7 +114,7 @@ SceneNode* SB::Scene::GetRootNode()
 void SceneNode::AddChild(SceneNode* child)
 {
     if (child) {
-        DEBUG_LOG("[SCENE]\tChild: %s, added to node: %s", child->GetName().c_str(), m_Name.c_str());
+        SABLE_LOG("[SCENE]\tChild: %s, added to node: %s", child->GetName().c_str(), m_Name.c_str());
         m_Children.push_back(child);
         child->SetParent(this);
     }

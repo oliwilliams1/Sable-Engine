@@ -46,6 +46,6 @@ namespace SB
 	};
 }
 
-#define DEBUG_LOG(format, ...) Console::Log(format, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
-#define DEBUG_WARN(format, ...) Console::Warn(format, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
-#define DEBUG_ERROR(format, ...) Console::Error(format, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define SABLE_LOG(format, ...) Console::Log(format, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define SABLE_WARN(format, ...) Console::Warn(format, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define SABLE_ERROR(format, ...) Console::Error(format, __FILE__, __LINE__, __func__, ##__VA_ARGS__)

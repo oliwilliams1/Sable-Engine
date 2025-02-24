@@ -20,7 +20,7 @@ static void error_callback(int error, const char* description)
         // Error is a dumb wayland error, which i do not care about, already fixed with macros
         return;
     }
-	SB::DEBUG_WARN("GLFW::ERROR_CALLBACK: %i: %s", error, description);
+	SB::SABLE_WARN("GLFW::ERROR_CALLBACK: %i: %s", error, description);
 }
 
 void App::Init()
@@ -63,7 +63,7 @@ void App::DisplayMenuBar()
 
 			if (ImGui::MenuItem("New Project")) 
 			{
-				SB::DEBUG_LOG("User creating new project, displaying window...");
+				SB::SABLE_LOG("User creating new project, displaying window...");
 				newProjectWindowOpen = true;
 			}
 			ImGui::SameLine(keybindHintWidth);
@@ -147,7 +147,7 @@ void App::InitWindow()
 {
 	if (!glfwInit())
 	{
-		SB::DEBUG_ERROR("Failed to initialize GLFW");
+		SB::SABLE_ERROR("Failed to initialize GLFW");
 		exit(1);
 	}
 
@@ -158,7 +158,7 @@ void App::InitWindow()
 
 	if (!window)
 	{
-		SB::DEBUG_ERROR("Failed to create GLFW window");
+		SB::SABLE_ERROR("Failed to create GLFW window");
 		glfwTerminate();
 		exit(1);
 	}
@@ -169,9 +169,9 @@ void App::InitWindow()
 	const char** glfwExtensions;
 	glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
-	vkCore.InitVulkan(glfwExtensionCount, glfwExtensions);
+	vkCore.InitVk(glfwExtensionCount, glfwExtensions);
 
-	SB::DEBUG_LOG("GLFW window created for Vulkan");
+	SB::SABLE_LOG("GLFW window created for Vulkan");
 }
 
 void App::LoadProject(const std::string& path)
@@ -188,7 +188,7 @@ void App::LoadProject(const std::string& path)
 	SB::SB_Project project;
 	if (!EditorProjManager::LoadProject(projPathStr, project))
 	{
-		SB::DEBUG_ERROR("Failed to load project: %s", projPathStr.c_str());
+		SB::SABLE_ERROR("Failed to load project: %s", projPathStr.c_str());
 		return;
 	}
 
@@ -218,7 +218,7 @@ void App::Mainloop()
 
 App::~App()
 {
-	vkCore.ShutdownVulkan();
+	vkCore.ShutdownVk();
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

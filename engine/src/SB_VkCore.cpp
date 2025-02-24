@@ -14,7 +14,7 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 
 	if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
 	{
-		SB::DEBUG_WARN("[VK debug callback] validation layer: %s", pCallbackData->pMessage);
+		SB::SABLE_WARN("[VK debug callback] validation layer: %s", pCallbackData->pMessage);
 	}
 
 	return VK_FALSE;
@@ -98,23 +98,66 @@ static bool isDeviceSuitable(VkPhysicalDevice device)
 
 using namespace SB;
 
-void VkCore::InitVulkan(uint32_t glfwExtensionCount, const char** glfwExtensions)
+void VkCore::InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions)
 {
 	createInstance(glfwExtensionCount, glfwExtensions);
 	setupDebugMessenger();
 	pickPhysicalDevice();
+	createLogicalDevice();
 }
 
-void VkCore::pickPhysicalDevice() const
+void VkCore::createLogicalDevice()
 {
-	VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+	QueueFamilyIndices indices = findQueueFamilies(m_PhysicalDevice);
+
+	VkDeviceQueueCreateInfo queueCreateInfo{};
+	queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+	queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+	queueCreateInfo.queueCount = 1;
+
+	float queuePriority = 1.0f;
+	queueCreateInfo.pQueuePriorities = &queuePriority;
+
+	VkPhysicalDeviceFeatures deviceFeatures{};
+
+	VkDeviceCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+	createInfo.pQueueCreateInfos = &queueCreateInfo;
+	createInfo.queueCreateInfoCount = 1;
+
+	createInfo.pEnabledFeatures = &deviceFeatures;
+	createInfo.enabledExtensionCount = 0;
+
+	if (enableValidationLayers)
+	{
+		createInfo.enabledLayerCount = static_cast<uint32_t>(m_ValidationLayers.size());
+		createInfo.ppEnabledLayerNames = m_ValidationLayers.data();
+	}
+	else
+	{
+		createInfo.enabledLayerCount = 0;
+	}
+
+	if (vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_Device) != VK_SUCCESS)
+	{
+		SABLE_ERROR("Failed to create logical device!");
+		throw std::runtime_error("Failed to create logical device!");
+	}
+
+	vkGetDeviceQueue(m_Device, indices.graphicsFamily.value(), 0, &m_GraphicsQueue);
+}
+
+void VkCore::pickPhysicalDevice()
+{
+	m_PhysicalDevice = VK_NULL_HANDLE;
 
 	uint32_t deviceCount = 0;
 	vkEnumeratePhysicalDevices(m_VkInstance, &deviceCount, nullptr);
 
 	if (deviceCount == 0)
 	{
-		DEBUG_ERROR("Nah, youve got no GPUs with vulkan support?!");
+		SABLE_ERROR("Nah, youve got no GPUs with vulkan support?!");
 		throw std::runtime_error("Nah, youve got no GPUs with vulkan support?!");
 	}
 
@@ -125,22 +168,22 @@ void VkCore::pickPhysicalDevice() const
 	{
 		if (isDeviceSuitable(device))
 		{
-			physicalDevice = device;
+			m_PhysicalDevice = device;
 			break;
 		}
 	}
 
-	if (physicalDevice == VK_NULL_HANDLE)
+	if (m_PhysicalDevice == VK_NULL_HANDLE)
 	{
-		DEBUG_ERROR("Failed to find a suitable GPU!");
+		SABLE_ERROR("Failed to find a suitable GPU!");
 		throw std::runtime_error("Failed to find a suitable GPU!");
 	}
 	else
 	{
 		VkPhysicalDeviceProperties deviceProperties;
-		vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);
+		vkGetPhysicalDeviceProperties(m_PhysicalDevice, &deviceProperties);
 
-		DEBUG_LOG("Selected GPU: %s", deviceProperties.deviceName);
+		SABLE_LOG("Selected GPU: %s", deviceProperties.deviceName);
 	}
 }
 
@@ -148,7 +191,7 @@ void VkCore::createInstance(uint32_t glfwExtensionCount, const char** glfwExtens
 {
     if (enableValidationLayers && !checkValidationLayerSupport())
     {
-        DEBUG_ERROR("Validation layers requested, but not available!");
+        SABLE_ERROR("Validation layers requested, but not available!");
         exit(1);
     }
 
@@ -198,7 +241,7 @@ void VkCore::createInstance(uint32_t glfwExtensionCount, const char** glfwExtens
     }
 
     if (vkCreateInstance(&createInfo, nullptr, &m_VkInstance) != VK_SUCCESS) {
-		DEBUG_ERROR("failed to create vulkan instance! :cry:");
+		SABLE_ERROR("failed to create vulkan instance! :cry:");
         throw std::runtime_error("failed to create vulkan instance!");
     }
 
@@ -210,10 +253,10 @@ void VkCore::createInstance(uint32_t glfwExtensionCount, const char** glfwExtens
     std::vector<VkExtensionProperties> availableExtensions(extensionCount);
     vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, availableExtensions.data());
 
-    DEBUG_LOG("Available extensions: ");
+    SABLE_LOG("Available extensions: ");
     for (const auto& extension : availableExtensions)
     {
-        DEBUG_LOG("\t%s", extension.extensionName);
+        SABLE_LOG("\t%s", extension.extensionName);
     }
 }
 
@@ -249,12 +292,13 @@ void VkCore::setupDebugMessenger()
 	populateDebugMessengerCreateInfo(createInfo);
 
 	if (CreateDebugUtilsMessengerEXT(m_VkInstance, &createInfo, nullptr, &m_DebugMessenger) != VK_SUCCESS) {
-		DEBUG_ERROR("Failed to set up debug messenger!");
+		SABLE_ERROR("Failed to set up debug messenger!");
 	}
 }
 
-void VkCore::ShutdownVulkan()
+void VkCore::ShutdownVk()
 {
+	vkDestroyDevice(m_Device, nullptr);
 	if (enableValidationLayers)
 	{
 		DestroyDebugUtilsMessengerEXT(m_VkInstance, m_DebugMessenger, nullptr);
