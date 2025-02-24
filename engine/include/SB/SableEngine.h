@@ -1,5 +1,4 @@
 #pragma once
-#include <GL/glew.h>
 #include <string>
 
 class SBEngine
@@ -13,7 +12,7 @@ public:
 
     static SBEngine& GetInstance();
 
-    bool LoadTextureFromFile(const std::string& filename, GLuint& id);
+    // bool LoadTextureFromFile(const std::string& filename, GLuint& id);
 
 private:
     SBEngine();

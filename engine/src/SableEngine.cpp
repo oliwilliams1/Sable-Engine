@@ -24,7 +24,7 @@ SBEngine::~SBEngine()
     MeshArena::Shutdown();
 }
 
-bool SBEngine::LoadTextureFromFile(const std::string& filename, GLuint& id)
+/*bool SBEngine::LoadTextureFromFile(const std::string& filename, GLuint& id)
 {
     SB_TEXTURE tempTexture;
 
@@ -32,7 +32,7 @@ bool SBEngine::LoadTextureFromFile(const std::string& filename, GLuint& id)
 
     id = tempTexture.id;
     return res;
-}
+}*/
 
 void SBEngine::Init()
 {

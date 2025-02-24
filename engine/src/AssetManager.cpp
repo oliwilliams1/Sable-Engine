@@ -20,7 +20,7 @@ AssetManager::~AssetManager()
 {
 	for (const auto& pair : ms_TextureMap)
 	{
-		glDeleteTextures(1, &pair.second.id);
+		// glDeleteTextures(1, &pair.second.id);
 	}
 
 	ms_TextureMap.clear();
@@ -38,7 +38,7 @@ void AssetManager::Shutdown()
 	s_Instance = nullptr;
 }
 
-bool AssetManager::LoadTextureFromFile(const std::string& filename, SB_TEXTURE& texture)
+/*bool AssetManager::LoadTextureFromFile(const std::string& filename, SB_TEXTURE& texture)
 {
 	std::filesystem::path path = ms_ResourcePath / filename;
 
@@ -79,7 +79,7 @@ bool AssetManager::LoadTextureFromFile(const std::string& filename, SB_TEXTURE& 
 	ms_TextureMap[filename] = texture;
 
 	return true;
-}
+}*/
 
 bool AssetManager::LoadMeshFromFile(const std::string& filename, SB_MESH& mesh)
 {

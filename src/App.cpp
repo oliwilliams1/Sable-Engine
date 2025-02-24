@@ -1,6 +1,7 @@
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
+#include <vulkan/vulkan.h>
+//#include <imgui.h>
+//#include <imgui_impl_glfw.h>
+//#include <imgui_impl_vulkan.h>
 #include "App.h"
 #include "Utils.h"
 #include "SB/DebugLog.h"
@@ -41,8 +42,8 @@ App::App()
 	width = 1600;
 	height = 900;
 	InitWindow();
-	InitImGui();
-	SetupImGuiStyle();
+	//InitImGui();
+	//SetupImGuiStyle();
 
 	SBEngine::Init();
 
@@ -142,6 +143,29 @@ void App::DisplayMenuBar()
 	}
 }
 
+void App::InitVulkan()
+{
+	VkInstance instance;
+	VkApplicationInfo appInfo{};
+	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+	appInfo.pApplicationName = "Sable Editor";
+	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
+	appInfo.pEngineName = "No Engine";
+	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
+	appInfo.apiVersion = VK_API_VERSION_1_0;
+
+	VkInstanceCreateInfo createInfo{};
+	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+	createInfo.pApplicationInfo = &appInfo;
+
+	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
+		SB::DEBUG_ERROR("Failed to create Vulkan instance!");
+		exit(1);
+	}
+
+	SB::DEBUG_LOG("Vulkan instance created successfully!");
+}
+
 void App::InitWindow()
 {
 	if (!glfwInit())
@@ -149,6 +173,8 @@ void App::InitWindow()
 		SB::DEBUG_ERROR("Failed to initialize GLFW");
 		exit(1);
 	}
+
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // disable opengl context
 
 	window = glfwCreateWindow(width, height, "Sable Editor", nullptr, nullptr);
 
@@ -159,22 +185,14 @@ void App::InitWindow()
 		exit(1);
 	}
 
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, true);
-
-	glfwMakeContextCurrent(window);
-
 	glfwSetErrorCallback(error_callback);
 
-	GLenum err = glewInit();
-	if (err != GLEW_OK)
-	{
-		SB::DEBUG_ERROR("Failed to initialize GLEW: %s", glewGetErrorString(err));
-	}
+	InitVulkan(); // You will need to implement this function
 
-	SB::DEBUG_LOG("OpenGL version: %s", glGetString(GL_VERSION));
+	SB::DEBUG_LOG("GLFW window created for Vulkan");
 }
 
-void App::InitImGui()
+/*void App::InitImGui()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -191,7 +209,7 @@ void App::InitImGui()
 
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
-}
+}*/
 
 void App::LoadProject(const std::string& path)
 {
@@ -229,13 +247,13 @@ SB::SB_Project App::GetCurrentProject()
 
 void App::Mainloop()
 {
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	//ImGuiIO& io = ImGui::GetIO(); (void)io;
 
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
 
-		ImGui_ImplOpenGL3_NewFrame();
+		/*ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
@@ -287,8 +305,7 @@ void App::Mainloop()
 			ImGui::RenderPlatformWindowsDefault();
 			glfwMakeContextCurrent(backup_current_window);
 		}
-
-		glfwSwapBuffers(window);
+		*/
 	}
 }
 

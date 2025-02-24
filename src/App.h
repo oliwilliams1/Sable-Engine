@@ -1,5 +1,4 @@
 #pragma once
-#include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include "FileBrowser.h"
 #include "SceneViewer.h"
@@ -34,8 +33,9 @@ private:
 
 	int width, height;
 	void InitWindow();
-	void InitImGui();
+	// void InitImGui();
 	void DisplayMenuBar();
+	void InitVulkan();
 
 	bool assetManagerWindowOpen = true, consoleWindowOpen = true, sceneHeirachyWindowOpen = true;
 	bool imguiDemoWindowOpen = false;

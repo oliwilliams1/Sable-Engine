@@ -11,7 +11,7 @@ FileBrowser::FileBrowser()
 	m_CurrentPath = GetRelPath("projects");
 
 	// Load all textures
-	SBEngine& engine = SBEngine::GetInstance();
+	/*SBEngine& engine = SBEngine::GetInstance();
 	engine.LoadTextureFromFile("icons/sb-icon-folder.png", m_FolderTexture);
 	engine.LoadTextureFromFile("icons/sb-icon-image.png", m_ImageFileTexture);
 	engine.LoadTextureFromFile("icons/sb-icon-unknown.png", m_UnknownFileTexture);
@@ -23,14 +23,14 @@ FileBrowser::FileBrowser()
 	engine.LoadTextureFromFile("icons/sb-icon-fbx.png", m_FBX_FileTexture);
 	engine.LoadTextureFromFile("icons/sb-icon-gltf.png", m_GLTF_FileTexture);
 	engine.LoadTextureFromFile("icons/sb-icon-obj.png", m_OBJ_FileTexture);
-	engine.LoadTextureFromFile("icons/sb-icon-mtl.png", m_MTL_FileTexture);
+	engine.LoadTextureFromFile("icons/sb-icon-mtl.png", m_MTL_FileTexture);*/
 	
 	UpdateCacheDirectoryFiles(m_CurrentPath);
 
 	m_ProjectRelativePath = GetRelPath("projects");
 }
 
-GLuint FileBrowser::GetFileTexture(SB_FILE_TYPE type) const
+/*GLuint FileBrowser::GetFileTexture(SB_FILE_TYPE type) const
 {
 	switch (type)
 	{
@@ -70,7 +70,7 @@ GLuint FileBrowser::GetFileTexture(SB_FILE_TYPE type) const
 	default:
 		return m_UnknownFileTexture;
 	}
-}
+}*/
 
 FileBrowser::SB_FILE_TYPE FileBrowser::GetFileType(const std::filesystem::path& path)
 {
@@ -129,7 +129,7 @@ void FileBrowser::UpdateCacheDirectoryFiles(const std::filesystem::path& path)
 			file.name = entry.path().filename().string();
 			file.path = entry.path();
 			file.type = GetFileType(entry.path());
-			file.icon = GetFileTexture(file.type);
+			// file.icon = GetFileTexture(file.type);
 
 			p_Files.emplace_back(file);
 		}
@@ -168,9 +168,9 @@ void FileBrowser::UpdateCacheDirectoryFiles(const std::filesystem::path& path)
 	// Update files vector
 	m_Files.clear();
 
-	m_Files.push_back({ "..", m_CurrentPath.parent_path(), SB_ASSET_FOLDER, GetFileTexture(SB_ASSET_FOLDER) }); // Add parent dir button at start of vector
-	m_Files.insert(m_Files.end(), p_Directories.begin(), p_Directories.end());
-	m_Files.insert(m_Files.end(), p_Files.begin(), p_Files.end());
+	// m_Files.push_back({ "..", m_CurrentPath.parent_path(), SB_ASSET_FOLDER, GetFileTexture(SB_ASSET_FOLDER) }); // Add parent dir button at start of vector
+	// m_Files.insert(m_Files.end(), p_Directories.begin(), p_Directories.end());
+	// m_Files.insert(m_Files.end(), p_Files.begin(), p_Files.end());
 }
 
 void FileBrowser::Render()
@@ -211,7 +211,7 @@ void FileBrowser::Render()
 
 		ImGui::BeginGroup();
 
-		ImGui::Image((ImTextureID)(intptr_t)file.icon, ImVec2(fileWidth, fileWidth));
+		// ImGui::Image((ImTextureID)(intptr_t)file.icon, ImVec2(fileWidth, fileWidth));
 
 		ImVec2 pos = ImGui::GetItemRectMin();
 		ImVec2 sizeImage = ImGui::GetItemRectSize();

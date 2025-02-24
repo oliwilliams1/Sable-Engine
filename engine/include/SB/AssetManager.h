@@ -1,5 +1,4 @@
 #pragma once
-#include <GL/glew.h>
 
 #include <filesystem>
 #include <map>
@@ -18,7 +17,7 @@ namespace SB
 	struct SB_TEXTURE
 	{
 		int width, height, channels;
-		GLuint id = -1;
+		// GLuint id = -1;
 	};
 
 	struct SB_MESH
