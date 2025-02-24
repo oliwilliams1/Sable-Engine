@@ -1,9 +1,13 @@
 #pragma once
+#define GLFW_INCLUDE_VULKAN
+#define GLM_FORCE_RADIANS
+#define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <GLFW/glfw3.h>
 #include "FileBrowser.h"
 #include "SceneViewer.h"
 #include "SB/SableEngine.h"
 #include "SB/ProjectManager.h"
+#include "SB/SB_VkCore.h"
 
 class App 
 {
@@ -30,12 +34,12 @@ private:
 	SceneViewer* sceneViewer = nullptr;
 
 	SB::SB_Project currentProject;
+	SB::VkCore vkCore;
 
 	int width, height;
 	void InitWindow();
 	// void InitImGui();
 	void DisplayMenuBar();
-	void InitVulkan();
 
 	bool assetManagerWindowOpen = true, consoleWindowOpen = true, sceneHeirachyWindowOpen = true;
 	bool imguiDemoWindowOpen = false;

@@ -6,8 +6,10 @@
 #include "Utils.h"
 #include "SB/DebugLog.h"
 #include "SB/Utils.h"
+
 #include "ConsoleDisplay.h"
 #include "ProjectManager.h"
+
 
 static App* s_AppInstance = nullptr;
 
@@ -42,8 +44,6 @@ App::App()
 	width = 1600;
 	height = 900;
 	InitWindow();
-	//InitImGui();
-	//SetupImGuiStyle();
 
 	SBEngine::Init();
 
@@ -143,29 +143,6 @@ void App::DisplayMenuBar()
 	}
 }
 
-void App::InitVulkan()
-{
-	VkInstance instance;
-	VkApplicationInfo appInfo{};
-	appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-	appInfo.pApplicationName = "Sable Editor";
-	appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.pEngineName = "No Engine";
-	appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-	appInfo.apiVersion = VK_API_VERSION_1_0;
-
-	VkInstanceCreateInfo createInfo{};
-	createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-	createInfo.pApplicationInfo = &appInfo;
-
-	if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
-		SB::DEBUG_ERROR("Failed to create Vulkan instance!");
-		exit(1);
-	}
-
-	SB::DEBUG_LOG("Vulkan instance created successfully!");
-}
-
 void App::InitWindow()
 {
 	if (!glfwInit())
@@ -175,6 +152,7 @@ void App::InitWindow()
 	}
 
 	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // disable opengl context
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	window = glfwCreateWindow(width, height, "Sable Editor", nullptr, nullptr);
 
@@ -187,29 +165,14 @@ void App::InitWindow()
 
 	glfwSetErrorCallback(error_callback);
 
-	InitVulkan(); // You will need to implement this function
+	uint32_t glfwExtensionCount = 0;
+	const char** glfwExtensions;
+	glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
+
+	vkCore.InitVulkan(glfwExtensionCount, glfwExtensions);
 
 	SB::DEBUG_LOG("GLFW window created for Vulkan");
 }
-
-/*void App::InitImGui()
-{
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-	// Detatched windows do not play well with experimental window managers (unix has a billion)
-#if defined(__linux__)
-  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
-#else
-  io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
-#endif
-
-	ImGui::StyleColorsDark();
-
-	ImGui_ImplGlfw_InitForOpenGL(window, true);
-	ImGui_ImplOpenGL3_Init("#version 330");
-}*/
 
 void App::LoadProject(const std::string& path)
 {
@@ -247,70 +210,16 @@ SB::SB_Project App::GetCurrentProject()
 
 void App::Mainloop()
 {
-	//ImGuiIO& io = ImGui::GetIO(); (void)io;
-
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
-
-		/*ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
-
-		DisplayMenuBar();
-
-		ImGui::DockSpaceOverViewport();
-
-		ImGui::Begin("Docking");
-		ImGui::Text("Hello!");
-		ImGui::End();
-
-		if (imguiDemoWindowOpen)
-		{
-			ImGui::ShowDemoWindow();
-		}
-
-		if (consoleWindowOpen)
-		{
-			SB_EditorConsole::DisplayConsole();
-		}
-
-		if (assetManagerWindowOpen)
-		{
-			fileBrowser->Render();
-		}
-
-		if (sceneHeirachyWindowOpen)
-		{
-			sceneViewer->Draw();
-		}
-
-		if (newProjectWindowOpen)
-		{
-			SB::SB_Project project;
-			if (EditorProjManager::DisplayNewProjectWindow(&newProjectWindowOpen, project))
-			{
-				LoadProject(project.name);
-			}
-		}
-
-		ImGui::Render();
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-		{
-			GLFWwindow* backup_current_window = glfwGetCurrentContext();
-			ImGui::UpdatePlatformWindows();
-			ImGui::RenderPlatformWindowsDefault();
-			glfwMakeContextCurrent(backup_current_window);
-		}
-		*/
 	}
 }
 
 App::~App()
 {
+	vkCore.ShutdownVulkan();
+
 	glfwDestroyWindow(window);
 	glfwTerminate();
 
