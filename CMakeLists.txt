@@ -16,7 +16,6 @@ include_directories("vendor/glfw/include")
 # Include source files from src
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.h")
 
-
 # GLFW
 add_subdirectory("vendor/glfw")
 

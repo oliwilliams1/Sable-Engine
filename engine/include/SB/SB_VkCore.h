@@ -33,6 +33,7 @@ namespace SB
 
 		void createInstance(uint32_t glfwExtensionCount, const char** glfwExtensions, bool displayExtensions = false);
 		bool checkValidationLayerSupport();
+		bool checkPortabilityEnumerationSupport();
 		void setupDebugMessenger();
 		void pickPhysicalDevice();
 		void createLogicalDevice();

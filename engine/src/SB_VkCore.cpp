@@ -195,14 +195,22 @@ void VkCore::createInstance(uint32_t glfwExtensionCount, const char** glfwExtens
         exit(1);
     }
 
-    // Collect GLFW extensions
     m_Extensions = std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-    // Always include the debug utils extension if validation layers are enabled
-    if (enableValidationLayers)
-    {
-        m_Extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME); // Correct extension name
-    }
+    if (enableValidationLayers) {
+		m_Extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+	}
+
+	bool portabillityEnumerationSupport = checkPortabilityEnumerationSupport();
+
+	if (portabillityEnumerationSupport)
+	{
+		m_Extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
+	} 
+	else
+	{
+		SABLE_WARN("Vk Portability enumeration extension unavailable, vulkan instance may have problems initializing");
+	}
 
     VkApplicationInfo appInfo{};
     appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -215,6 +223,11 @@ void VkCore::createInstance(uint32_t glfwExtensionCount, const char** glfwExtens
     VkInstanceCreateInfo createInfo{};
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
+
+	if (portabillityEnumerationSupport)
+	{
+		createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+	}
 
     createInfo.enabledExtensionCount = static_cast<uint32_t>(m_Extensions.size());
     createInfo.ppEnabledExtensionNames = m_Extensions.data();
@@ -260,28 +273,67 @@ void VkCore::createInstance(uint32_t glfwExtensionCount, const char** glfwExtens
     }
 }
 
+bool VkCore::checkPortabilityEnumerationSupport()
+{
+    uint32_t extensionCount = 0;
+    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+
+    std::vector<VkExtensionProperties> extensions(extensionCount);
+    vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
+
+    bool portabilityExtSupported = false;
+
+    for (const auto& extension : extensions)
+    {
+        if (strcmp(extension.extensionName, VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME) == 0)
+        {
+            portabilityExtSupported = true;
+            break;
+        }
+    }
+
+    return portabilityExtSupported;
+}
+
 bool VkCore::checkValidationLayerSupport()
 {
-	uint32_t layerCount;
-	vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+    uint32_t layerCount;
+    VkResult result = vkEnumerateInstanceLayerProperties(&layerCount, nullptr);
+    if (result != VK_SUCCESS)
+	{
+        std::cerr << "Failed to enumerate instance layer properties." << std::endl;
+        return false;
+    }
 
-	std::vector<VkLayerProperties> availableLayers(layerCount);
-	vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+    std::vector<VkLayerProperties> availableLayers(layerCount);
+    result = vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
+    if (result != VK_SUCCESS)
+	{
+        std::cerr << "Failed to enumerate instance layer properties." << std::endl;
+        return false;
+    }
 
-	for (const char* layerName : m_ValidationLayers) {
-		bool layerFound = false;
+    for (const char* layerName : m_ValidationLayers)
+	{
+        bool layerFound = false;
 
-		for (const auto& layerProperties : availableLayers) {
-			if (strcmp(layerName, layerProperties.layerName) == 0) {
-				layerFound = true;
-				break;
-			}
-		}
+        for (const auto& layerProperties : availableLayers)
+		{
+            if (strcmp(layerName, layerProperties.layerName) == 0)
+			{
+                layerFound = true;
+                break;
+            }
+        }
 
-		if (!layerFound) {
-			return false;
-		}
-	}
+        if (!layerFound)
+		{
+            std::cerr << "Validation layer not found: " << layerName << std::endl;
+            return false;
+        }
+    }
+
+    return true;
 }
 
 void VkCore::setupDebugMessenger()
