@@ -2,6 +2,7 @@
 #include <stdexcept>
 #include <cstring>
 #include <optional>
+#include <set>
 
 #include "SB_VkCore.h"
 #include "DebugLog.h"
@@ -51,15 +52,9 @@ static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMesse
 	}
 }
 
-struct QueueFamilyIndices {
-	std::optional<uint32_t> graphicsFamily;
+using namespace SB;
 
-	bool isComplete() {
-		return graphicsFamily.has_value();
-	}
-};
-
-static QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
+QueueFamilyIndices VkCore::findQueueFamilies(VkPhysicalDevice device) const
 {
 	QueueFamilyIndices indices{};
 
@@ -74,6 +69,14 @@ static QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
 	int i = 0;
 	for (const auto& queueFamily : queueFamilies)
 	{
+		VkBool32 presentSupport = false;
+		vkGetPhysicalDeviceSurfaceSupportKHR(device, i, m_Surface, &presentSupport);
+
+		if (presentSupport)
+		{
+			indices.presentFamily = i;
+		}
+
 		if (indices.isComplete())
 		{
 			break;
@@ -89,19 +92,27 @@ static QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device)
 	return indices;
 }
 
-static bool isDeviceSuitable(VkPhysicalDevice device)
+bool VkCore::isDeviceSuitable(VkPhysicalDevice device)
 {
 	QueueFamilyIndices indices = findQueueFamilies(device);
 
 	return indices.graphicsFamily.has_value();
 }
 
-using namespace SB;
-
 void VkCore::InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions)
 {
 	createInstance(glfwExtensionCount, glfwExtensions);
 	setupDebugMessenger();
+
+	if (m_CreateSurfaceFuncPtr == nullptr)
+	{
+		SABLE_ERROR("No create surface function set!");
+	}
+	else
+	{
+		m_CreateSurfaceFuncPtr(m_VkInstance, &m_Surface);
+	}
+
 	pickPhysicalDevice();
 	createLogicalDevice();
 }
@@ -110,23 +121,30 @@ void VkCore::createLogicalDevice()
 {
 	QueueFamilyIndices indices = findQueueFamilies(m_PhysicalDevice);
 
-	VkDeviceQueueCreateInfo queueCreateInfo{};
-	queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-	queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
-	queueCreateInfo.queueCount = 1;
+	std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+	std::set<uint32_t> uniqueQueueFamilies = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
 	float queuePriority = 1.0f;
-	queueCreateInfo.pQueuePriorities = &queuePriority;
+	for (uint32_t queueFamily : uniqueQueueFamilies)
+	{
+		VkDeviceQueueCreateInfo queueCreateInfo{};
+		queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+		queueCreateInfo.queueFamilyIndex = queueFamily;
+		queueCreateInfo.queueCount = 1;
+		queueCreateInfo.pQueuePriorities = &queuePriority;
+		queueCreateInfos.push_back(queueCreateInfo);
+	}
 
 	VkPhysicalDeviceFeatures deviceFeatures{};
 
 	VkDeviceCreateInfo createInfo{};
 	createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
-	createInfo.pQueueCreateInfos = &queueCreateInfo;
-	createInfo.queueCreateInfoCount = 1;
+	createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+	createInfo.pQueueCreateInfos = queueCreateInfos.data();
 
 	createInfo.pEnabledFeatures = &deviceFeatures;
+
 	createInfo.enabledExtensionCount = 0;
 
 	if (enableValidationLayers)
@@ -146,6 +164,7 @@ void VkCore::createLogicalDevice()
 	}
 
 	vkGetDeviceQueue(m_Device, indices.graphicsFamily.value(), 0, &m_GraphicsQueue);
+	vkGetDeviceQueue(m_Device, indices.presentFamily.value(), 0, &m_PresentQueue);
 }
 
 void VkCore::pickPhysicalDevice()
@@ -350,6 +369,7 @@ void VkCore::setupDebugMessenger()
 
 void VkCore::ShutdownVk()
 {
+	vkDestroySurfaceKHR(m_VkInstance, m_Surface, nullptr);
 	vkDestroyDevice(m_Device, nullptr);
 	if (enableValidationLayers)
 	{
@@ -357,4 +377,9 @@ void VkCore::ShutdownVk()
 	}
 
 	vkDestroyInstance(m_VkInstance, nullptr);
+}
+
+void SB::VkCore::AttachCreateSurfaceFunction(FuncPtr func)
+{
+	m_CreateSurfaceFuncPtr = func;
 }

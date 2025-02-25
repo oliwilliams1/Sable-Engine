@@ -24,11 +24,12 @@ public:
 	void LoadProject(const std::string& path);
 	SB::SB_Project GetCurrentProject();
 
+	
 private:
 	App();
 	~App();
 
-	GLFWwindow* window;
+	inline static GLFWwindow* window = nullptr;
 
 	FileBrowser* fileBrowser = nullptr;
 	SceneViewer* sceneViewer = nullptr;
@@ -38,8 +39,10 @@ private:
 
 	int width, height;
 	void InitWindow();
-	// void InitImGui();
+	//void InitImGui();
 	void DisplayMenuBar();
+	
+	static void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
 
 	bool assetManagerWindowOpen = true, consoleWindowOpen = true, sceneHeirachyWindowOpen = true;
 	bool imguiDemoWindowOpen = false;

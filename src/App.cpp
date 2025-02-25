@@ -23,6 +23,16 @@ static void error_callback(int error, const char* description)
 	SB::SABLE_WARN("GLFW::ERROR_CALLBACK: %i: %s", error, description);
 }
 
+void App::CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface)
+{
+	if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS)
+	{
+		SB::SABLE_ERROR("Failed to create window surface!");
+		throw std::runtime_error("Failed to create window surface!");
+	}
+	SB::SABLE_LOG("Window surface created suceesfully");
+}
+
 void App::Init()
 {
 	s_AppInstance = new App();
@@ -169,6 +179,7 @@ void App::InitWindow()
 	const char** glfwExtensions;
 	glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
+	vkCore.AttachCreateSurfaceFunction(CreateWindowSurface);
 	vkCore.InitVk(glfwExtensionCount, glfwExtensions);
 
 	SB::SABLE_LOG("GLFW window created for Vulkan");
