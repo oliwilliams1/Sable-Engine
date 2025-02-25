@@ -179,7 +179,11 @@ void App::InitWindow()
 	const char** glfwExtensions;
 	glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
+	int fbW, fbH;
+	glfwGetFramebufferSize(window, &fbW, &fbH);
+
 	vkCore.AttachCreateSurfaceFunction(CreateWindowSurface);
+	vkCore.SetFramebufferSize(fbW, fbH);
 	vkCore.InitVk(glfwExtensionCount, glfwExtensions);
 
 	SB::SABLE_LOG("GLFW window created for Vulkan");
