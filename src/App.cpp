@@ -228,6 +228,7 @@ void App::Mainloop()
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
+		vkCore.Draw();
 	}
 }
 

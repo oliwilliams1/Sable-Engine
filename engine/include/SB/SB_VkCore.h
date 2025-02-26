@@ -33,6 +33,8 @@ namespace SB
 
 		void SetFramebufferSize(int width, int height);
 
+		void Draw();
+
 		using FuncPtr = void(*)(VkInstance, VkSurfaceKHR*);
 		void AttachCreateSurfaceFunction(FuncPtr func);
 
@@ -64,6 +66,14 @@ namespace SB
 		VkRenderPass m_RenderPass;
 		VkPipelineLayout m_PipelineLayout;
 		VkPipeline m_GraphicsPipeline;
+
+		std::vector<VkFramebuffer> m_SwapChainFramebuffers;
+		VkCommandPool m_CommandPool;
+		VkCommandBuffer m_CommandBuffer;
+
+		VkSemaphore m_ImageAvailableSemaphore;
+		VkSemaphore m_RenderFinishedSemaphore;
+		VkFence m_InFlightFence;
 
 		std::vector<const char*> m_Extensions;
 		const std::vector<const char*> m_ValidationLayers = {
@@ -98,5 +108,12 @@ namespace SB
 		
 		void createGraphicsPipeline();
 		VkShaderModule createShaderModule(const std::vector<char>& code);
+
+		void createFramebuffers();
+		void createCommandPool();
+		void createCommandBuffer();
+		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+
+		void createSyncObjects();
 	};
 }
