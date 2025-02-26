@@ -50,12 +50,16 @@ namespace SB
 		VkPhysicalDevice m_PhysicalDevice;
 		VkDevice m_Device;
 		VkSurfaceKHR m_Surface;
+
 		VkQueue m_GraphicsQueue;
 		VkQueue m_PresentQueue;
+
 		VkSwapchainKHR m_Swapchain;
 		std::vector<VkImage> m_SwapChainImages;
 		VkFormat m_SwapChainImageFormat;
 		VkExtent2D m_SwapChainExtent;
+
+		std::vector<VkImageView> m_SwapChainImageViews;
 
 		std::vector<const char*> m_Extensions;
 		const std::vector<const char*> m_ValidationLayers = {
@@ -72,8 +76,10 @@ namespace SB
 		bool checkValidationLayerSupport();
 		bool checkPortabilityEnumerationSupport();
 		void setupDebugMessenger();
+
 		void pickPhysicalDevice();
 		void createLogicalDevice();
+
 		QueueFamilyIndices findQueueFamilies(VkPhysicalDevice device) const;
 		bool isDeviceSuitable(VkPhysicalDevice device);
 		bool checkDeviceExtensionSupport(VkPhysicalDevice device);
@@ -81,6 +87,10 @@ namespace SB
 		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 		VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
+		
 		void createSwapChain();
+		void createImageViews();
+		
+		void createGraphicsPipeline();
 	};
 }

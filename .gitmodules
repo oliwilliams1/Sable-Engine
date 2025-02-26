@@ -1,9 +1,6 @@
 [submodule "engine/vendor/glm"]
 	path = engine/vendor/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "engine/vendor/glew"]
-	path = engine/vendor/glew
-	url = https://github.com/Perlmint/glew-cmake.git
 [submodule "engine/vendor/stb"]
 	path = engine/vendor/stb
 	url = https://github.com/nothings/stb.git
@@ -23,12 +20,12 @@
 	path = vendor/imgui
 	url = https://github.com/ocornut/imgui.git
 	branch = docking
-[submodule "vendor/glew"]
-	path = vendor/glew
-	url = https://github.com/Perlmint/glew-cmake.git
 [submodule "vendor/yaml"]
 	path = vendor/yaml
 	url = https://github.com/jbeder/yaml-cpp
 [submodule "engine/vendor/yaml"]
 	path = engine/vendor/yaml
 	url = https://github.com/jbeder/yaml-cpp
+[submodule "engine/vendor/shaderc"]
+	path = engine/vendor/shaderc
+	url = https://github.com/google/shaderc
