@@ -61,6 +61,10 @@ namespace SB
 
 		std::vector<VkImageView> m_SwapChainImageViews;
 
+		VkRenderPass m_RenderPass;
+		VkPipelineLayout m_PipelineLayout;
+		VkPipeline m_GraphicsPipeline;
+
 		std::vector<const char*> m_Extensions;
 		const std::vector<const char*> m_ValidationLayers = {
 			"VK_LAYER_KHRONOS_validation"
@@ -90,7 +94,9 @@ namespace SB
 		
 		void createSwapChain();
 		void createImageViews();
+		void createRenderPass();
 		
 		void createGraphicsPipeline();
+		VkShaderModule createShaderModule(const std::vector<char>& code);
 	};
 }
