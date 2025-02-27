@@ -24,6 +24,8 @@ public:
 	void LoadProject(const std::string& path);
 	SB::SB_Project GetCurrentProject();
 
+	void ReiszePublicCallback();
+
 	
 private:
 	App();

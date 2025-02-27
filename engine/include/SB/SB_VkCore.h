@@ -38,6 +38,8 @@ namespace SB
 		using FuncPtr = void(*)(VkInstance, VkSurfaceKHR*);
 		void AttachCreateSurfaceFunction(FuncPtr func);
 
+		void RecreateSwapchain();
+
 	private:
 		int m_FramebufferWidth, m_FramebufferHeight = 0;
 
@@ -75,6 +77,8 @@ namespace SB
 		std::vector<VkSemaphore> renderFinishedSemaphores;
 		std::vector<VkFence> inFlightFences;
 
+		bool framebufferResized = false;
+
 		uint32_t currentFrame = 0;
 
 		const int MAX_FRAMES_IN_FLIGHT = 2;
@@ -106,7 +110,7 @@ namespace SB
 		VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
 		
-		void createSwapChain();
+		void createSwapchain();
 		void createImageViews();
 		void createRenderPass();
 		
@@ -119,5 +123,7 @@ namespace SB
 		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
 		void createSyncObjects();
+
+		void cleanupSwapchain();
 	};
 }

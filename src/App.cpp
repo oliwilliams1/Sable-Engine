@@ -23,6 +23,12 @@ static void error_callback(int error, const char* description)
 	SB::SABLE_WARN("GLFW::ERROR_CALLBACK: %i: %s", error, description);
 }
 
+static void framebufferResizeCallback(GLFWwindow* window, int width, int height)
+{
+	auto app = reinterpret_cast<App*>(glfwGetWindowUserPointer(window));
+	app->ReiszePublicCallback();
+}
+
 void App::CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface)
 {
 	if (glfwCreateWindowSurface(instance, window, nullptr, surface) != VK_SUCCESS)
@@ -161,8 +167,7 @@ void App::InitWindow()
 		exit(1);
 	}
 
-	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API); // disable opengl context
-	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
+	glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 
 	window = glfwCreateWindow(width, height, "Sable Editor", nullptr, nullptr);
 
@@ -174,6 +179,10 @@ void App::InitWindow()
 	}
 
 	glfwSetErrorCallback(error_callback);
+
+	glfwSetWindowUserPointer(window, this);
+	glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
+	glfwSetWindowSizeLimits(window, 800, 600, GLFW_DONT_CARE, GLFW_DONT_CARE);
 
 	uint32_t glfwExtensionCount = 0;
 	const char** glfwExtensions;
@@ -221,6 +230,21 @@ void App::LoadProject(const std::string& path)
 SB::SB_Project App::GetCurrentProject()
 {
 	return currentProject;
+}
+
+void App::ReiszePublicCallback()
+{
+	int width = 0, height = 0;
+	glfwGetFramebufferSize(window, &width, &height);
+
+	while (width == 0 || height == 0)
+	{
+		glfwGetFramebufferSize(window, &width, &height);
+		glfwWaitEvents();
+	}
+
+	vkCore.SetFramebufferSize(width, height);
+	vkCore.RecreateSwapchain();
 }
 
 void App::Mainloop()
