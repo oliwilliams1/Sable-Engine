@@ -1,7 +1,7 @@
 #include <vulkan/vulkan.h>
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_vulkan.h>
+//#include <imgui.h>
+//#include <imgui_impl_glfw.h>
+//#include <imgui_impl_vulkan.h>
 #include "App.h"
 #include "Utils.h"
 #include "SB/DebugLog.h"
@@ -60,7 +60,6 @@ App::App()
 	width = 1600;
 	height = 900;
 	InitWindow();
-	InitImGui();
 
 	SBEngine::Init();
 
@@ -199,60 +198,6 @@ void App::InitWindow()
 	SB::SABLE_LOG("GLFW window created for Vulkan");
 }
 
-void App::InitImGui()
-{
-	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
-	ImGui_ImplGlfw_InitForVulkan(window, true);
-
-	VkDescriptorPool vkImGuiDescPool = vkCore.CreateDiscriptorPool(10);
-
-	ImGui_ImplVulkan_InitInfo initInfo = {};
-	initInfo.Instance = vkCore.vkInstance;
-	initInfo.PhysicalDevice = vkCore.physicalDevice;
-	initInfo.Device = vkCore.device;
-	initInfo.QueueFamily = vkCore.graphicsQueueFamilyIndex;
-	initInfo.Queue = vkCore.graphicsQueue;
-	initInfo.DescriptorPool = vkImGuiDescPool;
-	initInfo.MinImageCount = 2;
-	initInfo.ImageCount = vkCore.swapChainImages.size();
-	initInfo.RenderPass = vkCore.renderPass;
-
-	ImGui_ImplVulkan_Init(&initInfo);
-
-	VkCommandBufferAllocateInfo allocInfo = {};
-	allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-	allocInfo.commandPool = vkCore.commandPool;
-	allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-	allocInfo.commandBufferCount = 1;
-
-	VkCommandBuffer imguiCommandBuffer;
-	if (vkAllocateCommandBuffers(vkCore.device, &allocInfo, &imguiCommandBuffer) != VK_SUCCESS) {
-		throw std::runtime_error("Failed to allocate command buffer!");
-	}
-
-	VkCommandBufferBeginInfo beginInfo = {};
-	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-	beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-	vkBeginCommandBuffer(imguiCommandBuffer, &beginInfo);
-	ImGui_ImplVulkan_CreateFontsTexture();
-	vkEndCommandBuffer(imguiCommandBuffer);
-
-	VkSubmitInfo submitInfo = {};
-	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &imguiCommandBuffer;
-
-	if (vkQueueSubmit(vkCore.graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE) != VK_SUCCESS) {
-		throw std::runtime_error("Failed to submit command buffer!");
-	}
-
-	vkQueueWaitIdle(vkCore.graphicsQueue);
-
-	ImGui_ImplVulkan_DestroyFontsTexture();
-}
-
 void App::LoadProject(const std::string& path)
 {
 	const std::string extension = ".sbproj";
@@ -316,9 +261,9 @@ App::~App()
 {
 	vkDeviceWaitIdle(vkCore.device);
 
-	ImGui_ImplVulkan_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
+	//ImGui_ImplVulkan_Shutdown();
+	//ImGui_ImplGlfw_Shutdown();
+	//ImGui::DestroyContext();
 
 	vkCore.ShutdownVk();
 

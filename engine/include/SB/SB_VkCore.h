@@ -2,10 +2,48 @@
 
 #include <vulkan/vulkan.h>
 #include <vector>
+#include <array>
+#include <glm/glm.hpp>
 
 // Huge thanks to https://vulkan-tutorial.com/
 namespace SB
 {
+	struct Vertex
+	{
+		glm::vec2 pos;
+		glm::vec3 colour;
+
+		static VkVertexInputBindingDescription getBindingDescription() {
+			VkVertexInputBindingDescription bindingDescription{};
+			bindingDescription.binding = 0;
+			bindingDescription.stride = sizeof(Vertex);
+			bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+
+			return bindingDescription;
+		}
+
+		static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
+			std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
+			attributeDescriptions[0].binding = 0;
+			attributeDescriptions[0].location = 0;
+			attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+			attributeDescriptions[0].offset = offsetof(Vertex, pos);
+
+			/*float: VK_FORMAT_R32_SFLOAT
+			  vec2: VK_FORMAT_R32G32_SFLOAT
+			  vec3 : VK_FORMAT_R32G32B32_SFLOAT
+			  vec4 : VK_FORMAT_R32G32B32A32_SFLOAT*/
+
+
+			attributeDescriptions[1].binding = 0;
+			attributeDescriptions[1].location = 1;
+			attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+			attributeDescriptions[1].offset = offsetof(Vertex, colour);
+
+			return attributeDescriptions;
+		}
+	};
+
 	struct QueueFamilyIndices
 	{
 		std::optional<uint32_t> graphicsFamily;
@@ -40,8 +78,6 @@ namespace SB
 
 		void RecreateSwapchain();
 
-		VkDescriptorPool CreateDiscriptorPool(uint32_t maxSets);
-
 		VkInstance vkInstance;
 		VkDevice device;
 		VkPhysicalDevice physicalDevice;
@@ -52,7 +88,11 @@ namespace SB
 		VkCommandPool commandPool;
 
 	private:
-		std::vector<VkDescriptorPool> m_DescriptorPools;
+		const std::vector<Vertex> vertices = {
+			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
+			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+		};
 
 		int m_FramebufferWidth, m_FramebufferHeight = 0;
 
@@ -82,6 +122,9 @@ namespace SB
 		std::vector<VkSemaphore> imageAvailableSemaphores;
 		std::vector<VkSemaphore> renderFinishedSemaphores;
 		std::vector<VkFence> inFlightFences;
+
+		VkBuffer vertexBuffer;
+		VkDeviceMemory vertexBufferMemory;
 
 		bool framebufferResized = false;
 
@@ -131,5 +174,8 @@ namespace SB
 		void createSyncObjects();
 
 		void cleanupSwapchain();
+
+		void createVertexBuffer();
+		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	};
 }

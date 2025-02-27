@@ -43,7 +43,7 @@ private:
 
 	int width, height;
 	void InitWindow();
-	void InitImGui();
+	//void InitImGui();
 	void DisplayMenuBar();
 	
 	static void CreateWindowSurface(VkInstance instance, VkSurfaceKHR* surface);
