@@ -40,7 +40,20 @@ namespace SB
 
 		void RecreateSwapchain();
 
+		VkDescriptorPool CreateDiscriptorPool(uint32_t maxSets);
+
+		VkInstance vkInstance;
+		VkDevice device;
+		VkPhysicalDevice physicalDevice;
+		VkRenderPass renderPass;
+		VkQueue graphicsQueue;
+		uint32_t graphicsQueueFamilyIndex;
+		std::vector<VkImage> swapChainImages;
+		VkCommandPool commandPool;
+
 	private:
+		std::vector<VkDescriptorPool> m_DescriptorPools;
+
 		int m_FramebufferWidth, m_FramebufferHeight = 0;
 
 #ifdef NDEBUG
@@ -49,28 +62,21 @@ namespace SB
 		const bool enableValidationLayers = true;
 #endif
 
-		VkInstance vkInstance;
 		VkDebugUtilsMessengerEXT debugMessenger;
-		VkPhysicalDevice physicalDevice;
-		VkDevice device;
 		VkSurfaceKHR surface;
 
-		VkQueue graphicsQueue;
 		VkQueue presentQueue;
 
 		VkSwapchainKHR swapchain;
-		std::vector<VkImage> swapChainImages;
 		VkFormat swapChainImageFormat;
 		VkExtent2D m_SwapChainExtent;
 
 		std::vector<VkImageView> swapChainImageViews;
 
-		VkRenderPass renderPass;
 		VkPipelineLayout pipelineLayout;
 		VkPipeline graphicsPipeline;
 
 		std::vector<VkFramebuffer> swapChainFramebuffers;
-		VkCommandPool commandPool;
 		std::vector<VkCommandBuffer> commandBuffers;
 
 		std::vector<VkSemaphore> imageAvailableSemaphores;

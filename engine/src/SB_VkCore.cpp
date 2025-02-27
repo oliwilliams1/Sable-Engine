@@ -647,6 +647,33 @@ void VkCore::RecreateSwapchain()
 	createFramebuffers();
 }
 
+VkDescriptorPool VkCore::CreateDiscriptorPool(uint32_t maxSets)
+{
+	std::vector<VkDescriptorPoolSize> poolSizes = {
+		{ VK_DESCRIPTOR_TYPE_SAMPLER, 10 },
+		{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 10 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 10 },
+		{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, 10 },
+	};
+
+	VkDescriptorPoolCreateInfo poolInfo = {};
+	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+	poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+	poolInfo.pPoolSizes = poolSizes.data();
+	poolInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+	poolInfo.maxSets = maxSets;
+
+	VkDescriptorPool descriptorPool;
+	if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
+		SABLE_ERROR("Failed to create descriptor pool!");
+		throw std::runtime_error("Failed to create descriptor pool!");
+	}
+
+	m_DescriptorPools.push_back(descriptorPool);
+
+	return descriptorPool;
+}
+
 void VkCore::cleanupSwapchain()
 {
 	for (size_t i = 0; i < swapChainFramebuffers.size(); i++)
@@ -736,6 +763,8 @@ void VkCore::createLogicalDevice()
 	}
 
 	vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
+	graphicsQueueFamilyIndex = indices.graphicsFamily.value();
+
 	vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
 }
 
@@ -1021,6 +1050,11 @@ void VkCore::AttachCreateSurfaceFunction(FuncPtr func)
 void VkCore::ShutdownVk()
 {
 	cleanupSwapchain();
+
+	for (size_t i = 0; i < m_DescriptorPools.size(); i++)
+	{
+		vkDestroyDescriptorPool(device, m_DescriptorPools[i], nullptr);
+	}
 
 	vkDestroyPipeline(device, graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
