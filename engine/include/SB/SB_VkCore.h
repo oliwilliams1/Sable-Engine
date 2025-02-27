@@ -47,33 +47,37 @@ namespace SB
 		const bool enableValidationLayers = true;
 #endif
 
-		VkInstance m_VkInstance;
-		VkDebugUtilsMessengerEXT m_DebugMessenger;
-		VkPhysicalDevice m_PhysicalDevice;
-		VkDevice m_Device;
-		VkSurfaceKHR m_Surface;
+		VkInstance vkInstance;
+		VkDebugUtilsMessengerEXT debugMessenger;
+		VkPhysicalDevice physicalDevice;
+		VkDevice device;
+		VkSurfaceKHR surface;
 
-		VkQueue m_GraphicsQueue;
-		VkQueue m_PresentQueue;
+		VkQueue graphicsQueue;
+		VkQueue presentQueue;
 
-		VkSwapchainKHR m_Swapchain;
-		std::vector<VkImage> m_SwapChainImages;
-		VkFormat m_SwapChainImageFormat;
+		VkSwapchainKHR swapchain;
+		std::vector<VkImage> swapChainImages;
+		VkFormat swapChainImageFormat;
 		VkExtent2D m_SwapChainExtent;
 
-		std::vector<VkImageView> m_SwapChainImageViews;
+		std::vector<VkImageView> swapChainImageViews;
 
-		VkRenderPass m_RenderPass;
-		VkPipelineLayout m_PipelineLayout;
-		VkPipeline m_GraphicsPipeline;
+		VkRenderPass renderPass;
+		VkPipelineLayout pipelineLayout;
+		VkPipeline graphicsPipeline;
 
-		std::vector<VkFramebuffer> m_SwapChainFramebuffers;
-		VkCommandPool m_CommandPool;
-		VkCommandBuffer m_CommandBuffer;
+		std::vector<VkFramebuffer> swapChainFramebuffers;
+		VkCommandPool commandPool;
+		std::vector<VkCommandBuffer> commandBuffers;
 
-		VkSemaphore m_ImageAvailableSemaphore;
-		VkSemaphore m_RenderFinishedSemaphore;
-		VkFence m_InFlightFence;
+		std::vector<VkSemaphore> imageAvailableSemaphores;
+		std::vector<VkSemaphore> renderFinishedSemaphores;
+		std::vector<VkFence> inFlightFences;
+
+		uint32_t currentFrame = 0;
+
+		const int MAX_FRAMES_IN_FLIGHT = 2;
 
 		std::vector<const char*> m_Extensions;
 		const std::vector<const char*> m_ValidationLayers = {
@@ -111,7 +115,7 @@ namespace SB
 
 		void createFramebuffers();
 		void createCommandPool();
-		void createCommandBuffer();
+		void createCommandBuffers();
 		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
 		void createSyncObjects();

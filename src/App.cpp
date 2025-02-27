@@ -230,12 +230,12 @@ void App::Mainloop()
 		glfwPollEvents();
 		vkCore.Draw();
 	}
+
+	vkCore.ShutdownVk();
 }
 
 App::~App()
 {
-	vkCore.ShutdownVk();
-
 	glfwDestroyWindow(window);
 	glfwTerminate();
 
