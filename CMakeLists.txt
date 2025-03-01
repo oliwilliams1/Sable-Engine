@@ -42,6 +42,11 @@ add_subdirectory("engine")
 # Build the editor executable
 add_executable(SableEditor ${SOURCES})
 
+# Set the working directory to the output directory of the executable
+set_target_properties(SableEditor PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}"
+)
+
 # Link the engine
 target_link_libraries(SableEditor SableEngine glfw Vulkan::Vulkan imgui)
 
@@ -59,3 +64,13 @@ add_custom_command(
             $<TARGET_FILE_DIR:SableEditor>/resources
     COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/projects
             $<TARGET_FILE_DIR:SableEditor>/projects)
+
+# Copy engine's shaders to output directory
+add_custom_command(
+    TARGET SableEditor
+    POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_FILE_DIR:SableEngine>/../shaders
+            $<TARGET_FILE_DIR:SableEditor>/shaders)
+
+add_custom_target(copy_shaders_editor ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/shaders)
+add_dependencies(SableEditor copy_shaders_editor)

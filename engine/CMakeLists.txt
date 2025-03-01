@@ -47,3 +47,26 @@ add_custom_command(
 	COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${dep}>
 			$<TARGET_FILE_DIR:${PROJECT_NAME}>)
 endforeach()
+
+# Gather shaders for copying
+set(SHADER_DIR "${CMAKE_CURRENT_SOURCE_DIR}/shaders")
+file(GLOB SHADERS "${SHADER_DIR}/*.spv")
+
+# Custom command to copy shaders to the build output and editor source directory for development
+add_custom_command(
+    OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/shaders
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/shaders
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${SHADERS}
+        ${CMAKE_CURRENT_BINARY_DIR}/shaders/
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_SOURCE_DIR}/../shaders
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        ${SHADERS}
+        ${CMAKE_CURRENT_SOURCE_DIR}/../shaders/
+    DEPENDS ${SHADERS}
+    COMMENT "Copying shaders to build output and parent directory"
+)
+
+# Ensure shaders are copied
+add_custom_target(copy_shaders_engine ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/shaders)
+add_dependencies(SableEngine copy_shaders_engine)

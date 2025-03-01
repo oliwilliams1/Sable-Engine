@@ -8,14 +8,17 @@
 
 #include "SB_VkCore.h"
 #include "DebugLog.h"
+#include "Utils.h"
 
 static std::vector<char> readFile(const std::string& filename)
 {
-	std::ifstream file(filename, std::ios::ate | std::ios::binary);
+	std::filesystem::path filepath = GetRelPath("shaders") / filename;
+
+	std::ifstream file(filepath.string(), std::ios::ate | std::ios::binary);
 
 	if (!file.is_open())
 	{
-		SB::SABLE_ERROR("Failed to open file: %s", filename.c_str());
+		SB::SABLE_ERROR("Failed to open file: %s", filepath.string().c_str());
 		throw std::runtime_error("Failed to open file!");
 	}
 
@@ -372,8 +375,8 @@ void VkCore::createRenderPass()
 
 void VkCore::createGraphicsPipeline()
 {
-	std::vector<char> vertShaderCode = readFile("shaders/vert.spv");
-	std::vector<char> fragShaderCode = readFile("shaders/frag.spv");
+	std::vector<char> vertShaderCode = readFile("vert.spv");
+	std::vector<char> fragShaderCode = readFile("frag.spv");
 
 	VkShaderModule vertShaderModule = createShaderModule(vertShaderCode);
 	VkShaderModule fragShaderModule = createShaderModule(fragShaderCode);
@@ -759,6 +762,7 @@ void VkCore::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize siz
 void VkCore::createVertexBuffer()
 {
 	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
+	bufferSize = (bufferSize + 4095) & ~static_cast<VkDeviceSize>(4095);
 
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
@@ -783,6 +787,7 @@ void VkCore::createVertexBuffer()
 void VkCore::createIndexBuffer()
 {
 	VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
+	bufferSize = (bufferSize + 4095) & ~static_cast<VkDeviceSize>(4095);
 
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
