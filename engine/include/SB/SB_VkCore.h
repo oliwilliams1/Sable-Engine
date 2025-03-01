@@ -89,9 +89,14 @@ namespace SB
 
 	private:
 		const std::vector<Vertex> vertices = {
-			{{0.0f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, 0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{-0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}}
+			{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
+			{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
+			{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
+			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+		};
+
+		const std::vector<uint16_t> indices = {
+			0, 1, 2, 2, 3, 0
 		};
 
 		int m_FramebufferWidth, m_FramebufferHeight = 0;
@@ -109,7 +114,7 @@ namespace SB
 
 		VkSwapchainKHR swapchain;
 		VkFormat swapChainImageFormat;
-		VkExtent2D m_SwapChainExtent;
+		VkExtent2D swapChainExtent;
 
 		std::vector<VkImageView> swapChainImageViews;
 
@@ -125,6 +130,8 @@ namespace SB
 
 		VkBuffer vertexBuffer;
 		VkDeviceMemory vertexBufferMemory;
+		VkBuffer indexBuffer;
+		VkDeviceMemory indexBufferMemory;
 
 		bool framebufferResized = false;
 
@@ -176,6 +183,10 @@ namespace SB
 		void cleanupSwapchain();
 
 		void createVertexBuffer();
+		void createIndexBuffer();
 		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+
+		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
 	};
 }
