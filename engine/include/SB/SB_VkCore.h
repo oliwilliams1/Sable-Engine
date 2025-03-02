@@ -3,7 +3,11 @@
 #include <vulkan/vulkan.h>
 #include <vector>
 #include <array>
+#include <chrono>
+
+#define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 // Huge thanks to https://vulkan-tutorial.com/
 namespace SB
@@ -99,6 +103,12 @@ namespace SB
 			0, 1, 2, 2, 3, 0
 		};
 
+		struct UniformBufferObject {
+			glm::mat4 model;
+			glm::mat4 view;
+			glm::mat4 proj;
+		};
+
 		int m_FramebufferWidth, m_FramebufferHeight = 0;
 
 #ifdef NDEBUG
@@ -118,6 +128,7 @@ namespace SB
 
 		std::vector<VkImageView> swapChainImageViews;
 
+		VkDescriptorSetLayout descriptorSetLayout;
 		VkPipelineLayout pipelineLayout;
 		VkPipeline graphicsPipeline;
 
@@ -132,6 +143,13 @@ namespace SB
 		VkDeviceMemory vertexBufferMemory;
 		VkBuffer indexBuffer;
 		VkDeviceMemory indexBufferMemory;
+
+		std::vector<VkBuffer> uniformBuffers;
+		std::vector<VkDeviceMemory> uniformBuffersMemory;
+		std::vector<void*> uniformBuffersMapped;
+
+		VkDescriptorPool descriptorPool;
+		std::vector<VkDescriptorSet> descriptorSets;
 
 		bool framebufferResized = false;
 
@@ -188,5 +206,12 @@ namespace SB
 
 		void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
 		void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+
+		void createDescriptorSetLayout();
+		void createUniformBuffers();
+		void updateUniformBuffer(uint32_t currentImage);
+
+		void createDescriptorPool();
+		void createDescriptorSets();
 	};
 }
