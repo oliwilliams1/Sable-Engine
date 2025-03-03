@@ -10,6 +10,7 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 // Huge thanks to https://vulkan-tutorial.com/
+// And for vulkan imgui setup, https://frguthmann.github.io/posts/vulkan_imgui/
 namespace SB
 {
 	struct Vertex
@@ -66,6 +67,16 @@ namespace SB
 		std::vector<VkPresentModeKHR> presentModes;
 	};
 
+	struct ImGuiInitInfo
+	{
+		VkInstance instance;
+		VkPhysicalDevice physicalDevice;
+		VkDevice device;
+		VkQueue graphicsQueue;
+		VkDescriptorPool descriptorPool;
+		uint32_t imageCount;
+	};
+
 	class VkCore
 	{
 	public:
@@ -73,26 +84,26 @@ namespace SB
 		void InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions);
 		void ShutdownVk();
 
+		void GetImGuiInitInfo(ImGuiInitInfo& info);
+		VkDescriptorPool MakeDescriptorPool(VkDescriptorPoolSize* poolSizes, uint32_t poolSizeCount);
+
 		void SetFramebufferSize(int width, int height);
 
-		void Draw();
-
 		void BeginFrame();
+		void Draw();
 		void EndFrame();
+
+		VkCommandBuffer BeginSingleTimeCommands();
+		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
+
+		VkRenderPass MakeImGuiRenderPass();
+
+		VkDevice GetDevice() const { return device; }
 
 		using FuncPtr = void(*)(VkInstance, VkSurfaceKHR*);
 		void AttachCreateSurfaceFunction(FuncPtr func);
 
 		void RecreateSwapchain();
-
-		VkInstance vkInstance;
-		VkDevice device;
-		VkPhysicalDevice physicalDevice;
-		VkRenderPass renderPass;
-		VkQueue graphicsQueue;
-		uint32_t graphicsQueueFamilyIndex;
-		std::vector<VkImage> swapChainImages;
-		VkCommandPool commandPool;
 
 	private:
 		uint32_t imageIndex;
@@ -121,6 +132,15 @@ namespace SB
 #else 
 		const bool enableValidationLayers = true;
 #endif
+
+		VkInstance vkInstance;
+		VkDevice device;
+		VkPhysicalDevice physicalDevice;
+		VkRenderPass renderPass;
+		VkQueue graphicsQueue;
+		uint32_t graphicsQueueFamilyIndex;
+		std::vector<VkImage> swapChainImages;
+		VkCommandPool commandPool;
 
 		VkDebugUtilsMessengerEXT debugMessenger;
 		VkSurfaceKHR surface;
@@ -199,7 +219,6 @@ namespace SB
 		void createFramebuffers();
 		void createCommandPool();
 		void createCommandBuffers();
-		void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 
 		void createSyncObjects();
 

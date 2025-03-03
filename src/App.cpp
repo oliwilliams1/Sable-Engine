@@ -1,7 +1,7 @@
 #include <vulkan/vulkan.h>
-//#include <imgui.h>
-//#include <imgui_impl_glfw.h>
-//#include <imgui_impl_vulkan.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_vulkan.h>
 #include "App.h"
 #include "Utils.h"
 #include "SB/DebugLog.h"
@@ -60,6 +60,7 @@ App::App()
 	width = 1600;
 	height = 900;
 	InitWindow();
+	InitImGui();
 
 	SBEngine::Init();
 
@@ -198,6 +199,40 @@ void App::InitWindow()
 	SB::SABLE_LOG("GLFW window created for Vulkan");
 }
 
+void App::InitImGui()
+{
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+	(void)io;
+	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplGlfw_InitForVulkan(window, true);
+	SB::ImGuiInitInfo SbInitInfo{};
+	ImGui_ImplVulkan_InitInfo ImGuiInitInfo{};
+
+	vkCore.GetImGuiInitInfo(SbInitInfo);
+	VkRenderPass imguiRenderPass = vkCore.MakeImGuiRenderPass();
+
+	// Copy my cool info over
+	ImGuiInitInfo.Instance       = SbInitInfo.instance;
+	ImGuiInitInfo.PhysicalDevice = SbInitInfo.physicalDevice;
+	ImGuiInitInfo.Device         = SbInitInfo.device;
+	ImGuiInitInfo.Queue          = SbInitInfo.graphicsQueue;
+	ImGuiInitInfo.DescriptorPool = SbInitInfo.descriptorPool;
+	ImGuiInitInfo.ImageCount     = SbInitInfo.imageCount;
+	ImGuiInitInfo.MinImageCount  = SbInitInfo.imageCount;
+	ImGuiInitInfo.RenderPass     = imguiRenderPass;
+
+	ImGui_ImplVulkan_Init(&ImGuiInitInfo);
+
+	VkCommandBuffer commandBuffer = vkCore.BeginSingleTimeCommands();
+	ImGui_ImplVulkan_CreateFontsTexture();
+	vkCore.EndSingleTimeCommands(commandBuffer);
+}
+
 void App::LoadProject(const std::string& path)
 {
 	const std::string extension = ".sbproj";
@@ -255,17 +290,24 @@ void App::Mainloop()
 
 		vkCore.BeginFrame();
 		vkCore.Draw();
+
+		ImGui_ImplVulkan_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+		ImGui::ShowDemoWindow();
+		ImGui::Render();
+
 		vkCore.EndFrame();
 	}
 }
 
 App::~App()
 {
-	vkDeviceWaitIdle(vkCore.device);
+	vkDeviceWaitIdle(vkCore.GetDevice());
 
-	//ImGui_ImplVulkan_Shutdown();
-	//ImGui_ImplGlfw_Shutdown();
-	//ImGui::DestroyContext();
+	ImGui_ImplVulkan_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	vkCore.ShutdownVk();
 
