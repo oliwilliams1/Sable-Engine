@@ -253,7 +253,9 @@ void App::Mainloop()
 	{
 		glfwPollEvents();
 
+		vkCore.BeginFrame();
 		vkCore.Draw();
+		vkCore.EndFrame();
 	}
 }
 

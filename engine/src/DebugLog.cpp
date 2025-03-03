@@ -126,6 +126,26 @@ void Console::Error(const char* format, const char* file, int line, const char* 
 	ResetColour();
 }
 
+void Console::RuntimeError(const char* format, const char* file, int line, const char* func, ...)
+{
+	std::string time = GetTime();
+
+	char buffer[1024];
+	va_list args;
+	va_start(args, func);
+	vsnprintf(buffer, sizeof(buffer), format, args);
+	va_end(args);
+
+	std::string finalMessage = time + buffer;
+
+	SetConsoleColour(RED);
+	std::cout << EnumToString(LogType::SB_ERROR) << finalMessage << std::endl;
+	m_Logs.push_back({ LogType::SB_ERROR, finalMessage, file, line, func });
+	ResetColour();
+
+	throw std::runtime_error(finalMessage.c_str());
+}
+
 void Console::Clear()
 {
 	m_Logs.clear();

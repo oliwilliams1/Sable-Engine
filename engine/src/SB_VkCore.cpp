@@ -18,8 +18,7 @@ static std::vector<char> readFile(const std::string& filename)
 
 	if (!file.is_open())
 	{
-		SB::SABLE_ERROR("Failed to open file: %s", filepath.string().c_str());
-		throw std::runtime_error("Failed to open file!");
+		SB::SABLE_RUNTIME_ERROR("Failed to open file: %s", filepath.string().c_str());
 	}
 
 	size_t fileSize = (size_t)file.tellg();
@@ -206,8 +205,7 @@ VkExtent2D VkCore::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities
 {
 	if (m_FramebufferWidth == 0 || m_FramebufferHeight == 0)
 	{
-		SABLE_ERROR("Cannot choose swapchain extent, framebuffer width or height is 0");
-		throw std::runtime_error("Cannot choose swapchain extent, framebuffer width or height is 0");
+		SABLE_RUNTIME_ERROR("Cannot choose swapchain extent, framebuffer width or height is 0");
 	}
 	if (capabilities.currentExtent.width != std::numeric_limits<uint32_t>::max())
 	{
@@ -278,8 +276,7 @@ void VkCore::createSwapchain()
 
 	if (vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapchain) != VK_SUCCESS)
 	{
-		SABLE_ERROR("failed to create swap chain!");
-		throw std::runtime_error("failed to create swap chain!");
+		SABLE_RUNTIME_ERROR("failed to create swap chain!");
 	}
 
 	vkGetSwapchainImagesKHR(device, swapchain, &imageCount, nullptr);
@@ -316,8 +313,7 @@ void VkCore::createImageViews()
 
 		if (vkCreateImageView(device, &createInfo, nullptr, &swapChainImageViews[i]) != VK_SUCCESS)
 		{
-			SABLE_ERROR("Failed to create image views!");
-			throw std::runtime_error("Failed to create image views!");
+			SABLE_RUNTIME_ERROR("Failed to create image views!");
 		}
 	}
 }
@@ -368,8 +364,7 @@ void VkCore::createRenderPass()
 
 	if (vkCreateRenderPass(device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS)
 	{
-		SABLE_ERROR("Failed to create render pass!");
-		throw std::runtime_error("Failed to create render pass!");
+		SABLE_RUNTIME_ERROR("Failed to create render pass!");
 	}
 }
 
@@ -462,8 +457,7 @@ void VkCore::createGraphicsPipeline()
 
 	if (vkCreatePipelineLayout(device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS)
 	{
-		SABLE_ERROR("Failed to create pipeline layout!");
-		throw std::runtime_error("Failed to create pipeline layout!");
+		SABLE_RUNTIME_ERROR("Failed to create pipeline layout!");
 	}
 
 	VkGraphicsPipelineCreateInfo pipelineInfo{};
@@ -484,8 +478,7 @@ void VkCore::createGraphicsPipeline()
 
 	if (vkCreateGraphicsPipelines(device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS)
 	{
-		SABLE_ERROR("Failed to create graphics pipeline!");
-		throw std::runtime_error("Failed to create graphics pipeline!");
+		SABLE_RUNTIME_ERROR("Failed to create graphics pipeline!");
 	}
 
 	vkDestroyShaderModule(device, fragShaderModule, nullptr);
@@ -502,8 +495,7 @@ VkShaderModule VkCore::createShaderModule(const std::vector<char>& code)
 	VkShaderModule shaderModule;
 	if (vkCreateShaderModule(device, &createInfo, nullptr, &shaderModule) != VK_SUCCESS)
 	{
-		SABLE_ERROR("Failed to create shader module!");
-		throw std::runtime_error("Failed to create shader module!");
+		SABLE_RUNTIME_ERROR("Failed to create shader module!");
 	}
 
 	return shaderModule;
@@ -530,8 +522,7 @@ void VkCore::createFramebuffers()
 
 		if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS)
 		{
-			SABLE_ERROR("Failed to create framebuffer!");
-			throw std::runtime_error("Failed to create framebuffer!");
+			SABLE_RUNTIME_ERROR("Failed to create framebuffer!");
 		}
 	}
 }
@@ -547,8 +538,7 @@ void VkCore::createCommandPool()
 
 	if (vkCreateCommandPool(device, &poolInfo, nullptr, &commandPool) != VK_SUCCESS)
 	{
-		SABLE_ERROR("Failed to create command pool!");
-		throw std::runtime_error("Failed to create command pool!");
+		SABLE_RUNTIME_ERROR("Failed to create command pool!");
 	}
 }
 
@@ -564,68 +554,7 @@ void VkCore::createCommandBuffers()
 
 	if (vkAllocateCommandBuffers(device, &allocInfo, commandBuffers.data()) != VK_SUCCESS)
 	{
-		SABLE_ERROR("Failed to allocate command buffers!");
-		throw std::runtime_error("Failed to allocate command buffers!");
-	}
-}
-
-void VkCore::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex)
-{
-	VkCommandBufferBeginInfo beginInfo{};
-	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-	if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
-	{
-		SABLE_ERROR("Failed to begin recording command buffer!");
-		throw std::runtime_error("Failed to begin recording command buffer!");
-	}
-
-	VkRenderPassBeginInfo renderPassInfo{};
-	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	renderPassInfo.renderPass = renderPass;
-	renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
-	renderPassInfo.renderArea.offset = { 0, 0 };
-	renderPassInfo.renderArea.extent = swapChainExtent;
-
-	VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
-	renderPassInfo.clearValueCount = 1;
-	renderPassInfo.pClearValues = &clearColor;
-
-	vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
-
-	vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
-
-	VkViewport viewport{};
-	viewport.x = 0.0f;
-	viewport.y = 0.0f;
-	viewport.width = (float)swapChainExtent.width;
-	viewport.height = (float)swapChainExtent.height;
-	viewport.minDepth = 0.0f;
-	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
-
-	VkRect2D scissor{};
-	scissor.offset = { 0, 0 };
-	scissor.extent = swapChainExtent;
-	vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
-
-	VkBuffer vertexBuffers[] = { vertexBuffer };
-	VkDeviceSize offsets[] = { 0 };
-
-	vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-
-	vkCmdBindIndexBuffer(commandBuffer, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
-
-	vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
-
-	vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
-
-	vkCmdEndRenderPass(commandBuffer);
-
-	if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
-	{
-		SABLE_ERROR("Failed to record command buffer!");
-		throw std::runtime_error("Failed to record command buffer!");
+		SABLE_RUNTIME_ERROR("Failed to allocate command buffers!");
 	}
 }
 
@@ -647,8 +576,7 @@ void VkCore::createSyncObjects()
 			vkCreateSemaphore(device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
 			vkCreateFence(device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS)
 		{
-			SABLE_ERROR("Failed to create synchronization objects for a frame!");
-			throw std::runtime_error("Failed to create synchronization objects for a frame!");
+			SABLE_RUNTIME_ERROR("Failed to create synchronization objects for a frame!");
 		}
 	}
 }
@@ -692,8 +620,7 @@ uint32_t VkCore::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags prope
 		}
 	}
 
-	SABLE_ERROR("Failed to find suitable memory type!");
-	throw std::runtime_error("Failed to find suitable memory type!");
+	SABLE_RUNTIME_ERROR("Failed to find suitable memory type!");
 }
 
 void VkCore::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)
@@ -706,8 +633,7 @@ void VkCore::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryP
 
 	if (vkCreateBuffer(device, &bufferInfo, nullptr, &buffer) != VK_SUCCESS)
 	{
-		SABLE_ERROR("Failed to create buffer!");
-		throw std::runtime_error("Failed to create buffer!");
+		SABLE_RUNTIME_ERROR("Failed to create buffer!");
 	}
 
 	VkMemoryRequirements memRequirements;
@@ -720,8 +646,7 @@ void VkCore::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryP
 
 	if (vkAllocateMemory(device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS)
 	{
-		SABLE_ERROR("Failed to allocate buffer memory!");
-		throw std::runtime_error("Failed to allocate buffer memory!");
+		SABLE_RUNTIME_ERROR("Failed to allocate buffer memory!");
 	}
 
 	vkBindBufferMemory(device, buffer, bufferMemory, 0);
@@ -777,8 +702,7 @@ void VkCore::createDescriptorSetLayout()
 
 	if (vkCreateDescriptorSetLayout(device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS)
 	{
-		SABLE_ERROR("Failed to create descriptor set layout!");
-		throw std::runtime_error("Failed to create descriptor set layout!");
+		SABLE_RUNTIME_ERROR("Failed to create descriptor set layout!");
 	}
 }
 
@@ -830,8 +754,7 @@ void VkCore::createDescriptorPool()
 
 	if (vkCreateDescriptorPool(device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS)
 	{
-		SABLE_ERROR("Failed to create descriptor pool!");
-		throw std::runtime_error("Failed to create descriptor pool!");
+		SABLE_RUNTIME_ERROR("Failed to create descriptor pool!");
 	}
 }
 
@@ -847,8 +770,7 @@ void VkCore::createDescriptorSets()
 	descriptorSets.resize(MAX_FRAMES_IN_FLIGHT);
 	if (vkAllocateDescriptorSets(device, &allocInfo, descriptorSets.data()) != VK_SUCCESS)
 	{
-		SABLE_ERROR("Failed to allocate descriptor sets!");
-		throw std::runtime_error("Failed to allocate descriptor sets!");
+		SABLE_RUNTIME_ERROR("Failed to allocate descriptor sets!");
 	}
 
 	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
@@ -928,7 +850,7 @@ void VkCore::InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions)
 
 	if (m_CreateSurfaceFuncPtr == nullptr)
 	{
-		SABLE_ERROR("No create surface function set!");
+		SABLE_RUNTIME_ERROR("No create surface function set!");
 	}
 	else
 	{
@@ -996,8 +918,7 @@ void VkCore::createLogicalDevice()
 
 	if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS)
 	{
-		SABLE_ERROR("Failed to create logical device!");
-		throw std::runtime_error("Failed to create logical device!");
+		SABLE_RUNTIME_ERROR("Failed to create logical device!");
 	}
 
 	vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
@@ -1015,8 +936,7 @@ void VkCore::pickPhysicalDevice()
 
 	if (deviceCount == 0)
 	{
-		SABLE_ERROR("Nah, youve got no GPUs with vulkan support?!");
-		throw std::runtime_error("Nah, youve got no GPUs with vulkan support?!");
+		SABLE_RUNTIME_ERROR("Nah, youve got no GPUs with vulkan support?!");
 	}
 
 	std::vector<VkPhysicalDevice> devices(deviceCount);
@@ -1033,8 +953,7 @@ void VkCore::pickPhysicalDevice()
 
 	if (physicalDevice == VK_NULL_HANDLE)
 	{
-		SABLE_ERROR("Failed to find a suitable GPU!");
-		throw std::runtime_error("Failed to find a suitable GPU!");
+		SABLE_RUNTIME_ERROR("Failed to find a suitable GPU!");
 	}
 	else
 	{
@@ -1049,8 +968,7 @@ void VkCore::createInstance(uint32_t glfwExtensionCount, const char** glfwExtens
 {
     if (enableValidationLayers && !checkValidationLayerSupport())
     {
-        SABLE_ERROR("Validation layers requested, but not available!");
-        exit(1);
+		SABLE_RUNTIME_ERROR("Validation layers requested, but not available!");
     }
 
     m_Extensions = std::vector<const char*>(glfwExtensions, glfwExtensions + glfwExtensionCount);
@@ -1111,9 +1029,9 @@ void VkCore::createInstance(uint32_t glfwExtensionCount, const char** glfwExtens
         createInfo.pNext = nullptr;
     }
 
-    if (vkCreateInstance(&createInfo, nullptr, &vkInstance) != VK_SUCCESS) {
-		SABLE_ERROR("failed to create vulkan instance! :cry:");
-        throw std::runtime_error("failed to create vulkan instance!");
+    if (vkCreateInstance(&createInfo, nullptr, &vkInstance) != VK_SUCCESS)
+	{
+		SABLE_RUNTIME_ERROR("failed to create vulkan instance! :cry:");
     }
 
     if (!displayExtensions) return;
@@ -1201,8 +1119,9 @@ void VkCore::setupDebugMessenger()
 	VkDebugUtilsMessengerCreateInfoEXT createInfo{};
 	populateDebugMessengerCreateInfo(createInfo);
 
-	if (CreateDebugUtilsMessengerEXT(vkInstance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
-		SABLE_ERROR("Failed to set up debug messenger!");
+	if (CreateDebugUtilsMessengerEXT(vkInstance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS)
+	{
+		SABLE_RUNTIME_ERROR("Failed to set up debug messenger!");
 	}
 }
 
@@ -1212,11 +1131,10 @@ void VkCore::SetFramebufferSize(int width, int height)
 	m_FramebufferHeight = height;
 }
 
-void VkCore::Draw()
+void VkCore::BeginFrame()
 {
 	vkWaitForFences(device, 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
-	uint32_t imageIndex;
 	VkResult result = vkAcquireNextImageKHR(device, swapchain, UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR)
@@ -1234,7 +1152,67 @@ void VkCore::Draw()
 	vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
 	vkResetCommandBuffer(commandBuffers[currentFrame], 0);
-	recordCommandBuffer(commandBuffers[currentFrame], imageIndex);
+
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+	if (vkBeginCommandBuffer(commandBuffers[currentFrame], &beginInfo) != VK_SUCCESS)
+	{
+		SABLE_RUNTIME_ERROR("Failed to begin recording command buffer!");
+	}
+
+	VkRenderPassBeginInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = renderPass;
+	renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
+	renderPassInfo.renderArea.offset = { 0, 0 };
+	renderPassInfo.renderArea.extent = swapChainExtent;
+
+	VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+
+	vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+	VkViewport viewport{};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = (float)swapChainExtent.width;
+	viewport.height = (float)swapChainExtent.height;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	vkCmdSetViewport(commandBuffers[currentFrame], 0, 1, &viewport);
+
+	VkRect2D scissor{};
+	scissor.offset = { 0, 0 };
+	scissor.extent = swapChainExtent;
+	vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &scissor);
+}
+
+void VkCore::Draw()
+{
+	VkBuffer vertexBuffers[] = { vertexBuffer };
+	VkDeviceSize offsets[] = { 0 };
+
+	vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
+
+	vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+
+	vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
+
+	vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+}
+
+void VkCore::EndFrame()
+{
+	vkCmdEndRenderPass(commandBuffers[currentFrame]);
+
+	if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS)
+	{
+		SABLE_RUNTIME_ERROR("Failed to record command buffer!");
+	}
 
 	VkSubmitInfo submitInfo{};
 	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -1252,8 +1230,9 @@ void VkCore::Draw()
 	submitInfo.signalSemaphoreCount = 1;
 	submitInfo.pSignalSemaphores = signalSemaphores;
 
-	if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
-		throw std::runtime_error("failed to submit draw command buffer!");
+	if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS)
+	{
+		SABLE_RUNTIME_ERROR("Failed to submit draw command buffer!");
 	}
 
 	VkPresentInfoKHR presentInfo{};
@@ -1268,7 +1247,7 @@ void VkCore::Draw()
 
 	presentInfo.pImageIndices = &imageIndex;
 
-	result = vkQueuePresentKHR(presentQueue, &presentInfo);
+	VkResult result = vkQueuePresentKHR(presentQueue, &presentInfo);
 
 	if (result == VK_ERROR_OUT_OF_DATE_KHR || result == VK_SUBOPTIMAL_KHR || framebufferResized)
 	{
@@ -1277,8 +1256,7 @@ void VkCore::Draw()
 	}
 	else if (result != VK_SUCCESS)
 	{	
-		SABLE_ERROR("Failed to present swap chain image!");
-		throw std::runtime_error("Failed to present swap chain image!");
+		SABLE_RUNTIME_ERROR("Failed to present swap chain image!");
 	}
 
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;

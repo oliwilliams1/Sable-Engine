@@ -37,6 +37,7 @@ namespace SB
 		static void Log(const char* format, const char* file, int line, const char* func, ...);
 		static void Warn(const char* format, const char* file, int line, const char* func, ...);
 		static void Error(const char* format, const char* file, int line, const char* func, ...);
+		static void RuntimeError(const char* format, const char* file, int line, const char* func, ...);
 
 	private:
 		Console();
@@ -46,6 +47,7 @@ namespace SB
 	};
 }
 
-#define SABLE_LOG(format, ...) Console::Log(format, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
-#define SABLE_WARN(format, ...) Console::Warn(format, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
-#define SABLE_ERROR(format, ...) Console::Error(format, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define SABLE_LOG(format, ...)           Console::Log(format, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define SABLE_WARN(format, ...)          Console::Warn(format, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define SABLE_ERROR(format, ...)         Console::Error(format, __FILE__, __LINE__, __func__, ##__VA_ARGS__)
+#define SABLE_RUNTIME_ERROR(format, ...) Console::RuntimeError(format, __FILE__, __LINE__, __func__, ##__VA_ARGS__)

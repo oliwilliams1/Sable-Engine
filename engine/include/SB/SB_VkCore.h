@@ -77,6 +77,9 @@ namespace SB
 
 		void Draw();
 
+		void BeginFrame();
+		void EndFrame();
+
 		using FuncPtr = void(*)(VkInstance, VkSurfaceKHR*);
 		void AttachCreateSurfaceFunction(FuncPtr func);
 
@@ -92,6 +95,8 @@ namespace SB
 		VkCommandPool commandPool;
 
 	private:
+		uint32_t imageIndex;
+
 		const std::vector<Vertex> vertices = {
 			{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
 			{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
