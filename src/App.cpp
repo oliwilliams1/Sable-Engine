@@ -203,9 +203,13 @@ void App::InitImGui()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	/* ImGuiIO& io = ImGui::GetIO();
-	   (void)io;
-	   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; */
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+#if defined(__linux__)
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+#else
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable | ImGuiConfigFlags_ViewportsEnable;
+#endif
 
 	ImGui_ImplGlfw_InitForVulkan(window, true);
 	SB::ImGuiInitInfo SbInitInfo{};
@@ -225,6 +229,8 @@ void App::InitImGui()
 	ImGuiInitInfo.RenderPass     = imguiRenderPass;
 
 	ImGui_ImplVulkan_Init(&ImGuiInitInfo);
+
+	SetupImGuiStyle();
 
 	VkCommandBuffer commandBuffer = vkCore.BeginSingleTimeCommands();
 	ImGui_ImplVulkan_CreateFontsTexture();
@@ -282,22 +288,69 @@ void App::ReiszePublicCallback()
 
 void App::Mainloop()
 {
+	ImGuiIO& io = ImGui::GetIO(); (void)io;
+
 	while (!glfwWindowShouldClose(window))
 	{
 		glfwPollEvents();
 
 		vkCore.BeginFrame();
-		vkCore.Draw();
+		//vkCore.Draw();
 
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
-		ImGui::ShowDemoWindow();
+
+		DisplayMenuBar();
+
+		ImGui::DockSpaceOverViewport();
+
+		ImGui::Begin("Docking");
+		ImGui::Text("Hello!");
+		ImGui::End();
+
+		if (imguiDemoWindowOpen)
+		{
+			ImGui::ShowDemoWindow();
+		}
+
+		if (consoleWindowOpen)
+		{
+			SB_EditorConsole::DisplayConsole();
+		}
+
+		if (assetManagerWindowOpen)
+		{
+			fileBrowser->Render();
+		}
+
+		if (sceneHeirachyWindowOpen)
+		{
+			sceneViewer->Draw();
+		}
+
+		if (newProjectWindowOpen)
+		{
+			SB::SB_Project project;
+			if (EditorProjManager::DisplayNewProjectWindow(&newProjectWindowOpen, project))
+			{
+				LoadProject(project.name);
+			}
+		}
+
 		ImGui::Render();
 
 		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), vkCore.GetCurrentCommandBuffer());
 
 		vkCore.EndFrame();
+
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			GLFWwindow* backup_current_window = glfwGetCurrentContext();
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			glfwMakeContextCurrent(backup_current_window);
+		}
 	}
 }
 
