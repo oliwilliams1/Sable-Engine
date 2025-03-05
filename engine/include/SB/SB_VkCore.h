@@ -96,6 +96,8 @@ namespace SB
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
+		VkCommandBuffer GetCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
+
 		VkRenderPass MakeImGuiRenderPass();
 
 		VkDevice GetDevice() const { return device; }
@@ -142,6 +144,8 @@ namespace SB
 		std::vector<VkImage> swapChainImages;
 		VkCommandPool commandPool;
 
+		std::vector<VkRenderPass> renderPasses;
+
 		VkDebugUtilsMessengerEXT debugMessenger;
 		VkSurfaceKHR surface;
 
@@ -174,6 +178,7 @@ namespace SB
 		std::vector<void*> uniformBuffersMapped;
 
 		VkDescriptorPool descriptorPool;
+		std::vector<VkDescriptorPool> descriptorPools;
 		std::vector<VkDescriptorSet> descriptorSets;
 
 		bool framebufferResized = false;

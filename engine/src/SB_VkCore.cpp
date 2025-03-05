@@ -366,6 +366,8 @@ void VkCore::createRenderPass()
 	{
 		SABLE_RUNTIME_ERROR("Failed to create render pass!");
 	}
+
+	renderPasses.push_back(renderPass);
 }
 
 void VkCore::createGraphicsPipeline()
@@ -756,6 +758,8 @@ void VkCore::createDescriptorPool()
 	{
 		SABLE_RUNTIME_ERROR("Failed to create descriptor pool!");
 	}
+
+	descriptorPools.push_back(descriptorPool);
 }
 
 void VkCore::createDescriptorSets()
@@ -1129,7 +1133,7 @@ VkDescriptorPool VkCore::MakeDescriptorPool(VkDescriptorPoolSize* poolSizes, uin
 {
 	VkDescriptorPoolCreateInfo poolCreateInfo = {};
 	poolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
-	poolCreateInfo.flags = 0;
+	poolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
 	poolCreateInfo.maxSets = 1000; 
 	poolCreateInfo.poolSizeCount = poolSizeCount;
 	poolCreateInfo.pPoolSizes = poolSizes;
@@ -1170,6 +1174,8 @@ void VkCore::GetImGuiInitInfo(ImGuiInitInfo& info)
 	info.graphicsQueue = graphicsQueue;
 	info.descriptorPool = imguiDescriptorPool;
 	info.imageCount = MAX_FRAMES_IN_FLIGHT;
+
+	descriptorPools.push_back(imguiDescriptorPool);
 }
 
 void VkCore::SetFramebufferSize(int width, int height)
@@ -1388,6 +1394,7 @@ VkRenderPass VkCore::MakeImGuiRenderPass()
 		SABLE_RUNTIME_ERROR("Could not create Dear ImGui's render pass");
 	}
 
+	renderPasses.push_back(imGuiRenderPass);
 	return imGuiRenderPass;
 }
 
@@ -1402,14 +1409,22 @@ void VkCore::ShutdownVk()
 
 	vkDestroyPipeline(device, graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-	vkDestroyRenderPass(device, renderPass, nullptr);
+	
+	for (const VkRenderPass& I_renderPass : renderPasses)
+	{
+		vkDestroyRenderPass(device, I_renderPass, nullptr);
+	}
 
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
 		vkDestroyBuffer(device, uniformBuffers[i], nullptr);
 		vkFreeMemory(device, uniformBuffersMemory[i], nullptr);
 	}
 
-	vkDestroyDescriptorPool(device, descriptorPool, nullptr);
+	for (const VkDescriptorPool& I_descriptorPool : descriptorPools)
+	{
+		vkDestroyDescriptorPool(device, I_descriptorPool, nullptr);
+	}
 
 	vkDestroyDescriptorSetLayout(device, descriptorSetLayout, nullptr);
 
@@ -1419,7 +1434,8 @@ void VkCore::ShutdownVk()
 	vkDestroyBuffer(device, vertexBuffer, nullptr);
 	vkFreeMemory(device, vertexBufferMemory, nullptr);
 
-	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+	for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++)
+	{
 		vkDestroySemaphore(device, renderFinishedSemaphores[i], nullptr);
 		vkDestroySemaphore(device, imageAvailableSemaphores[i], nullptr);
 		vkDestroyFence(device, inFlightFences[i], nullptr);

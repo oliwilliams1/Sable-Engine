@@ -203,11 +203,9 @@ void App::InitImGui()
 {
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	(void)io;
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-
-	ImGui::StyleColorsDark();
+	/* ImGuiIO& io = ImGui::GetIO();
+	   (void)io;
+	   io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; */
 
 	ImGui_ImplGlfw_InitForVulkan(window, true);
 	SB::ImGuiInitInfo SbInitInfo{};
@@ -296,6 +294,8 @@ void App::Mainloop()
 		ImGui::NewFrame();
 		ImGui::ShowDemoWindow();
 		ImGui::Render();
+
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), vkCore.GetCurrentCommandBuffer());
 
 		vkCore.EndFrame();
 	}
