@@ -10,7 +10,6 @@ find_package(Vulkan REQUIRED)
 
 # Include directories for libraries
 include_directories("vendor/glm")
-include_directories("vendor/stb")
 include_directories("vendor/glfw/include")
 
 # Include source files from src

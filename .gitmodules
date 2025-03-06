@@ -1,18 +1,12 @@
 [submodule "engine/vendor/glm"]
 	path = engine/vendor/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "engine/vendor/stb"]
-	path = engine/vendor/stb
-	url = https://github.com/nothings/stb.git
 [submodule "engine/vendor/assimp"]
 	path = engine/vendor/assimp
 	url = https://github.com/assimp/assimp.git
 [submodule "vendor/glm"]
 	path = vendor/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "vendor/stb"]
-	path = vendor/stb
-	url = https://github.com/nothings/stb.git
 [submodule "vendor/glfw"]
 	path = vendor/glfw
 	url = https://github.com/glfw/glfw.git
@@ -26,6 +20,6 @@
 [submodule "engine/vendor/yaml"]
 	path = engine/vendor/yaml
 	url = https://github.com/jbeder/yaml-cpp
-[submodule "engine/vendor/shaderc"]
-	path = engine/vendor/shaderc
-	url = https://github.com/google/shaderc
+[submodule "engine/vendor/stb"]
+	path = engine/vendor/stb
+	url = https://github.com/nothings/stb
