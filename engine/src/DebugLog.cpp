@@ -137,6 +137,7 @@ void Console::RuntimeError(const char* format, const char* file, int line, const
 	va_end(args);
 
 	std::string finalMessage = time + buffer;
+	finalMessage += "file: " + std::string(file) + " line: " + std::to_string(line), "func: " + std::string(func);
 
 	SetConsoleColour(RED);
 	std::cout << EnumToString(LogType::SB_ERROR) << finalMessage << std::endl;

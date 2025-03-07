@@ -77,6 +77,14 @@ namespace SB
 		uint32_t imageCount;
 	};
 
+	struct ImageData
+	{
+		VkImage image;
+		VkImageView imageView;
+		VkSampler sampler;
+		VkDeviceMemory imageMemory;
+	};
+
 	class VkCore
 	{
 	public:
@@ -92,6 +100,8 @@ namespace SB
 		void BeginFrame();
 		void Draw();
 		void EndFrame();
+		
+		ImageData LoadTexture(const std::string& filename);
 
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
@@ -182,6 +192,8 @@ namespace SB
 		std::vector<VkDescriptorSet> descriptorSets;
 
 		VkImage textureImage;
+		VkImageView textureImageView;
+		VkSampler textureSampler;
 		VkDeviceMemory textureImageMemory;
 
 		bool framebufferResized = false;
@@ -246,9 +258,13 @@ namespace SB
 		void createDescriptorPool();
 		void createDescriptorSets();
 
-		void createTextureImage();
+		void createTextureImage(const std::string& path, VkImage& textureImage, VkDeviceMemory& textureImageMemory);
 		void createImage(uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
 		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
 		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
+
+		void createTextureImageView();
+		VkImageView createImageView(VkImage& image, VkFormat format);
+		void createTextureSampler(VkSampler* sampler);
 	};
 }
