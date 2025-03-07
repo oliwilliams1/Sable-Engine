@@ -234,7 +234,7 @@ void FileBrowser::Render()
 		ImGui::PushTextWrapPos(ImGui::GetCursorPosX() + fileWidth);
 
 		// Render the text
-		ImGui::TextWrapped(file.name.c_str());
+		ImGui::TextWrapped("%s", file.name.c_str());
 
 		// Restore the previous wrap position
 		ImGui::PopTextWrapPos();

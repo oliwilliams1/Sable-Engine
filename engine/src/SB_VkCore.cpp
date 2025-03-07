@@ -205,7 +205,7 @@ bool VkCore::checkDeviceExtensionSupport(VkPhysicalDevice device)
 	std::vector<VkExtensionProperties> availableExtensions(extensionCount);
 	vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
 
-	std::set<std::string> requiredExtensions(m_DeviceExtensions.begin(), m_DeviceExtensions.end());
+	std::set<std::string> requiredExtensions(deviceExtensions.begin(), deviceExtensions.end());
 
 	for (const auto& extension : availableExtensions)
 	{
@@ -1110,13 +1110,13 @@ void VkCore::createLogicalDevice()
 
 	createInfo.pEnabledFeatures = &deviceFeatures;
 
-	createInfo.enabledExtensionCount = static_cast<uint32_t>(m_DeviceExtensions.size());
-	createInfo.ppEnabledExtensionNames = m_DeviceExtensions.data();
+	createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
+	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
 	if (enableValidationLayers)
 	{
-		createInfo.enabledLayerCount = static_cast<uint32_t>(m_ValidationLayers.size());
-		createInfo.ppEnabledLayerNames = m_ValidationLayers.data();
+		createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+		createInfo.ppEnabledLayerNames = validationLayers.data();
 	}
 	else
 	{
@@ -1217,8 +1217,8 @@ void VkCore::createInstance(uint32_t glfwExtensionCount, const char** glfwExtens
 
     if (enableValidationLayers)
     {
-        createInfo.enabledLayerCount = static_cast<uint32_t>(m_ValidationLayers.size());
-        createInfo.ppEnabledLayerNames = m_ValidationLayers.data();
+        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+        createInfo.ppEnabledLayerNames = validationLayers.data();
     }
     else
     {
@@ -1296,7 +1296,7 @@ bool VkCore::checkValidationLayerSupport()
         return false;
     }
 
-    for (const char* layerName : m_ValidationLayers)
+    for (const char* layerName : validationLayers)
 	{
         bool layerFound = false;
 
@@ -1523,6 +1523,8 @@ void VkCore::LoadTexture(const std::string& filename, ImageData& texture)
 	createTextureImage(filename, texture.image, texture.imageMemory);
 	createImageView(texture.image, texture.imageView, VK_FORMAT_R8G8B8A8_SRGB);
 	createTextureSampler(&texture.sampler);
+
+	images.push_back(texture);
 }
 
 VkCommandBuffer VkCore::BeginSingleTimeCommands()
@@ -1617,10 +1619,13 @@ VkCore::~VkCore()
 {
 	cleanupSwapchain();
 
-	vkDestroyImageView(device, textureImageView, nullptr);
-
-	vkDestroyImage(device, textureImage, nullptr);
-	vkFreeMemory(device, textureImageMemory, nullptr);
+	for (const ImageData& image : images)
+	{
+		vkDestroyImageView(device, image.imageView, nullptr);
+		vkDestroySampler(device, image.sampler,  nullptr);
+		vkDestroyImage(device, image.image, nullptr);
+		vkFreeMemory(device, image.imageMemory, nullptr);
+	}
 
 	vkDestroyPipeline(device, graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);

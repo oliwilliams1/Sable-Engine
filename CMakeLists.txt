@@ -68,8 +68,16 @@ add_custom_command(
 add_custom_command(
     TARGET SableEditor
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory $<TARGET_FILE_DIR:SableEngine>/../shaders
-            $<TARGET_FILE_DIR:SableEditor>/shaders)
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        $<TARGET_FILE_DIR:SableEngine>/../shaders
+        $<TARGET_FILE_DIR:SableEditor>/shaders
+)
 
-add_custom_target(copy_shaders_editor ALL DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/shaders)
+add_custom_target(copy_shaders_editor ALL
+    COMMAND ${CMAKE_COMMAND} -E echo "Copying shaders..."
+    DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/shaders
+)
+
 add_dependencies(SableEditor copy_shaders_editor)
+
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/shaders)

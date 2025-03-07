@@ -101,7 +101,7 @@ void SetupImGuiStyle()
 	ImGuiIO& io = ImGui::GetIO();
 	if (std::filesystem::exists(full_font_path)) 
 	{
-		io.Fonts->AddFontFromFileTTF(full_font_path.string().c_str(), 16.0f);
+		io.Fonts->AddFontFromFileTTF(full_font_path.string().c_str(), 18.0f);
 	}
 	else 
 	{

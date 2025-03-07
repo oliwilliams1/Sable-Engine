@@ -8,6 +8,7 @@
 #define GLM_FORCE_RADIANS
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#define VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME "VK_KHR_portability_subset"
 
 // Huge thanks to https://vulkan-tutorial.com/
 // And for vulkan imgui setup, https://frguthmann.github.io/posts/vulkan_imgui/
@@ -205,6 +206,7 @@ namespace SB
 		VkImageView textureImageView;
 		VkSampler textureSampler;
 		VkDeviceMemory textureImageMemory;
+		std::vector<ImageData> images;
 
 		bool framebufferResized = false;
 
@@ -213,12 +215,12 @@ namespace SB
 		const int MAX_FRAMES_IN_FLIGHT = 2;
 
 		std::vector<const char*> m_Extensions;
-		const std::vector<const char*> m_ValidationLayers = {
+		const std::vector<const char*> validationLayers = {
 			"VK_LAYER_KHRONOS_validation"
 		};
 
-		const std::vector<const char*> m_DeviceExtensions = {
-			VK_KHR_SWAPCHAIN_EXTENSION_NAME
+		const std::vector<const char*> deviceExtensions = {
+			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 		};
 
 		FuncPtr m_CreateSurfaceFuncPtr = nullptr;
