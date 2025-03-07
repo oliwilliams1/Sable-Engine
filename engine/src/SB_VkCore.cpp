@@ -82,6 +82,64 @@ static void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMesse
 
 using namespace SB;
 
+static VkCore* s_Instance = nullptr;
+
+void VkCore::Init()
+{
+	s_Instance = new VkCore();
+}
+
+VkCore& VkCore::Get()
+{
+	return *s_Instance;
+}
+
+void VkCore::Shutdown()
+{
+	delete s_Instance;
+	s_Instance = nullptr;
+}
+
+void VkCore::InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions)
+{
+	createInstance(glfwExtensionCount, glfwExtensions);
+	setupDebugMessenger();
+
+	if (m_CreateSurfaceFuncPtr == nullptr)
+	{
+		SABLE_RUNTIME_ERROR("No create surface function set!");
+	}
+	else
+	{
+		m_CreateSurfaceFuncPtr(vkInstance, &surface);
+	}
+
+	pickPhysicalDevice();
+	createLogicalDevice();
+	createSwapchain();
+	createImageViews();
+	createRenderPass();
+	createDescriptorSetLayout();
+	createGraphicsPipeline();
+	createFramebuffers();
+	createCommandPool();
+
+	ImageData textureData;
+	LoadTexture("icons/texture.jpg", textureData);
+	textureImage = textureData.image;
+	textureImageView = textureData.imageView;
+	textureSampler = textureData.sampler;
+	textureImageMemory = textureData.imageMemory;
+
+	createVertexBuffer();
+	createIndexBuffer();
+	createUniformBuffers();
+	createDescriptorPool();
+	createDescriptorSets();
+	createCommandBuffers();
+	createSyncObjects();
+}
+
 QueueFamilyIndices VkCore::findQueueFamilies(VkPhysicalDevice device) const
 {
 	QueueFamilyIndices indices{};
@@ -300,7 +358,7 @@ void VkCore::createImageViews()
 
 	for (uint32_t i = 0; i < swapChainImages.size(); i++)
 	{
-		swapChainImageViews[i] = createImageView(swapChainImages[i], swapChainImageFormat);
+		 createImageView(swapChainImages[i], swapChainImageViews[i], swapChainImageFormat);
 	}
 }
 
@@ -737,7 +795,7 @@ void VkCore::copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, u
 	EndSingleTimeCommands(commandBuffer);
 }
 
-VkImageView VkCore::createImageView(VkImage& image, VkFormat format)
+void VkCore::createImageView(VkImage& image, VkImageView& imageView, VkFormat format)
 {
 	VkImageViewCreateInfo viewInfo{};
 	viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
@@ -750,13 +808,10 @@ VkImageView VkCore::createImageView(VkImage& image, VkFormat format)
 	viewInfo.subresourceRange.baseArrayLayer = 0;
 	viewInfo.subresourceRange.layerCount = 1;
 
-	VkImageView imageView;
 	if (vkCreateImageView(device, &viewInfo, nullptr, &imageView) != VK_SUCCESS)
 	{
 		SABLE_RUNTIME_ERROR("Failed to create texture image view!");
 	}
-
-	return imageView;
 }
 
 void VkCore::createTextureSampler(VkSampler* sampler)
@@ -790,7 +845,7 @@ void VkCore::createTextureSampler(VkSampler* sampler)
 
 void VkCore::createTextureImageView()
 {
-	textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB);
+	 createImageView(textureImage, textureImageView, VK_FORMAT_R8G8B8A8_SRGB);
 }
 
 void VkCore::createDescriptorSetLayout()
@@ -1024,45 +1079,6 @@ void VkCore::createIndexBuffer()
 
 	vkDestroyBuffer(device, stagingBuffer, nullptr);
 	vkFreeMemory(device, stagingBufferMemory, nullptr);
-}
-
-void VkCore::InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions)
-{
-	createInstance(glfwExtensionCount, glfwExtensions);
-	setupDebugMessenger();
-
-	if (m_CreateSurfaceFuncPtr == nullptr)
-	{
-		SABLE_RUNTIME_ERROR("No create surface function set!");
-	}
-	else
-	{
-		m_CreateSurfaceFuncPtr(vkInstance, &surface);
-	}
-
-	pickPhysicalDevice();
-	createLogicalDevice();
-	createSwapchain();
-	createImageViews();
-	createRenderPass();
-	createDescriptorSetLayout();
-	createGraphicsPipeline();
-	createFramebuffers();
-	createCommandPool();
-
-	ImageData textureData = LoadTexture("icons/texture.jpg");
-	textureImage = textureData.image;
-	textureImageView = textureData.imageView;
-	textureSampler = textureData.sampler;
-	textureImageMemory = textureData.imageMemory;
-
-	createVertexBuffer();
-	createIndexBuffer();
-	createUniformBuffers();
-	createDescriptorPool();
-	createDescriptorSets();
-	createCommandBuffers();
-	createSyncObjects();
 }
 
 void VkCore::createLogicalDevice()
@@ -1502,18 +1518,11 @@ void VkCore::EndFrame()
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-ImageData VkCore::LoadTexture(const std::string& filename)
+void VkCore::LoadTexture(const std::string& filename, ImageData& texture)
 {
-	VkImage image{};
-	VkImageView imageView{};
-	VkSampler sampler{};
-	VkDeviceMemory imageMemory{};
-
-	createTextureImage(filename, image, imageMemory);
-	createImageView(image, VK_FORMAT_R8G8B8A8_SRGB);
-	createTextureSampler(&sampler);
-
-	return ImageData{ image, imageView, sampler, imageMemory };
+	createTextureImage(filename, texture.image, texture.imageMemory);
+	createImageView(texture.image, texture.imageView, VK_FORMAT_R8G8B8A8_SRGB);
+	createTextureSampler(&texture.sampler);
 }
 
 VkCommandBuffer VkCore::BeginSingleTimeCommands()
@@ -1604,7 +1613,7 @@ void VkCore::AttachCreateSurfaceFunction(FuncPtr func)
 	m_CreateSurfaceFuncPtr = func;
 }
 
-void VkCore::ShutdownVk()
+VkCore::~VkCore()
 {
 	cleanupSwapchain();
 

@@ -1,4 +1,6 @@
 #pragma once
+#include <chrono>
+
 #define GLFW_INCLUDE_VULKAN
 #define GLM_FORCE_RADIANS
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
@@ -37,7 +39,7 @@ private:
 	SceneViewer* sceneViewer = nullptr;
 
 	SB::SB_Project currentProject;
-	SB::VkCore vkCore;
+	SB::VkCore* vkCore = nullptr;
 
 	VkCommandBuffer imguiCommandBuffer;
 
@@ -51,4 +53,8 @@ private:
 	bool assetManagerWindowOpen = true, consoleWindowOpen = true, sceneHeirachyWindowOpen = true;
 	bool imguiDemoWindowOpen = false;
 	bool newProjectWindowOpen = false;
+
+	int frameCount;
+	double averageFPS;
+	std::chrono::high_resolution_clock::time_point lastTime;
 };

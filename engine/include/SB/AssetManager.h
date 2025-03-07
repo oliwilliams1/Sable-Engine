@@ -4,6 +4,7 @@
 #include <map>
 #include <string>
 #include <memory>
+#include "SB_VkCore.h"
 
 namespace SB
 {
@@ -12,12 +13,6 @@ namespace SB
 		SBE_ASSET_TEXTURE = 0,
 		SBE_ASSET_MESH = 1,
 		SBE_ASSET_MATERIAL = 2
-	};
-
-	struct SB_TEXTURE
-	{
-		int width, height, channels;
-		// GLuint id = -1;
 	};
 
 	struct SB_MESH
@@ -39,7 +34,6 @@ namespace SB
 		static void Init();
 		static void Shutdown();
 
-		static bool LoadTextureFromFile(const std::string& filename, SB_TEXTURE& texture);
 		static bool LoadMeshFromFile(const std::string& filename, SB_MESH& mesh);
 
 	private:
@@ -48,7 +42,7 @@ namespace SB
 		
 		static inline std::filesystem::path ms_ResourcePath;
 		// Possible but not thought through
-		static inline std::map<std::string, SB_TEXTURE> ms_TextureMap;
+		static inline std::map<std::string, SB::ImageData> ms_TextureMap;
 		static inline std::map<std::string, SB_MESH> ms_MeshMap;
 		static inline std::map<std::string, SB_MATERIAL> ms_MaterialMap;
 	};

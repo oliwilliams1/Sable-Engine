@@ -79,18 +79,25 @@ namespace SB
 
 	struct ImageData
 	{
+		VkDescriptorSet descriptorSet;
 		VkImage image;
 		VkImageView imageView;
 		VkSampler sampler;
 		VkDeviceMemory imageMemory;
+
+		ImageData() { memset(this, 0, sizeof(*this)); } // saw on imgui doc so its prob cool
 	};
 
 	class VkCore
 	{
 	public:
+		VkCore(const VkCore&) = delete;
+		VkCore& operator=(const VkCore&) = delete;
 
+		static void Init();
+		static void Shutdown();
+		static VkCore& Get();
 		void InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions);
-		void ShutdownVk();
 
 		void GetImGuiInitInfo(ImGuiInitInfo& info);
 		VkDescriptorPool MakeDescriptorPool(VkDescriptorPoolSize* poolSizes, uint32_t poolSizeCount);
@@ -101,7 +108,7 @@ namespace SB
 		void Draw();
 		void EndFrame();
 		
-		ImageData LoadTexture(const std::string& filename);
+		void LoadTexture(const std::string& filename, ImageData& texture);
 
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
@@ -118,6 +125,9 @@ namespace SB
 		void RecreateSwapchain();
 
 	private:
+		VkCore() {};
+		~VkCore();
+
 		uint32_t imageIndex;
 
 		const std::vector<Vertex> vertices = {
@@ -264,7 +274,7 @@ namespace SB
 		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 
 		void createTextureImageView();
-		VkImageView createImageView(VkImage& image, VkFormat format);
+		void createImageView(VkImage& image, VkImageView& imageView, VkFormat format);
 		void createTextureSampler(VkSampler* sampler);
 	};
 }

@@ -1,36 +1,45 @@
 #include <iostream>
 #include <imgui.h>
+#include <imgui_impl_vulkan.h>
 #include "FileBrowser.h"
 #include "SB/SableEngine.h"
 #include "SB/Utils.h"
 #include "SB/DebugLog.h"
 #include "App.h"
 
+void LoadTextureForImGui(SB::VkCore& vkCore, const std::string& path, SB::ImageData& image)
+{
+	vkCore.LoadTexture(path, image);
+	image.descriptorSet = ImGui_ImplVulkan_AddTexture(image.sampler, image.imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+}
+
 FileBrowser::FileBrowser()
 {
 	m_CurrentPath = GetRelPath("projects");
 
 	// Load all textures
-	/*SBEngine& engine = SBEngine::GetInstance();
-	engine.LoadTextureFromFile("icons/sb-icon-folder.png", m_FolderTexture);
-	engine.LoadTextureFromFile("icons/sb-icon-image.png", m_ImageFileTexture);
-	engine.LoadTextureFromFile("icons/sb-icon-unknown.png", m_UnknownFileTexture);
-	engine.LoadTextureFromFile("icons/sb-icon-folder-compressed.png", m_FolderCompressedTexture);
-	engine.LoadTextureFromFile("icons/sb-icon-document.png", m_DocumentFileTexture);
-	engine.LoadTextureFromFile("icons/sb-icon-config.png", m_ConfigFileTexture);
-	engine.LoadTextureFromFile("icons/sb-icon-code.png", m_ScriptFileTexture);
-	engine.LoadTextureFromFile("icons/sb-icon-audio.png", m_AudioFileTexture);
-	engine.LoadTextureFromFile("icons/sb-icon-fbx.png", m_FBX_FileTexture);
-	engine.LoadTextureFromFile("icons/sb-icon-gltf.png", m_GLTF_FileTexture);
-	engine.LoadTextureFromFile("icons/sb-icon-obj.png", m_OBJ_FileTexture);
-	engine.LoadTextureFromFile("icons/sb-icon-mtl.png", m_MTL_FileTexture);*/
+	SBEngine& engine = SBEngine::GetInstance();
+	SB::VkCore& vkCore = SB::VkCore::Get();
+
+	LoadTextureForImGui(vkCore, "icons/sb-icon-folder.png", m_FolderTexture);
+	LoadTextureForImGui(vkCore, "icons/sb-icon-image.png", m_ImageFileTexture);
+	LoadTextureForImGui(vkCore, "icons/sb-icon-unknown.png", m_UnknownFileTexture);
+	LoadTextureForImGui(vkCore, "icons/sb-icon-folder-compressed.png", m_FolderCompressedTexture);
+	LoadTextureForImGui(vkCore, "icons/sb-icon-document.png", m_DocumentFileTexture);
+	LoadTextureForImGui(vkCore, "icons/sb-icon-config.png", m_ConfigFileTexture);
+	LoadTextureForImGui(vkCore, "icons/sb-icon-code.png", m_ScriptFileTexture);
+	LoadTextureForImGui(vkCore, "icons/sb-icon-audio.png", m_AudioFileTexture);
+	LoadTextureForImGui(vkCore, "icons/sb-icon-fbx.png", m_FBX_FileTexture);
+	LoadTextureForImGui(vkCore, "icons/sb-icon-gltf.png", m_GLTF_FileTexture);
+	LoadTextureForImGui(vkCore, "icons/sb-icon-obj.png", m_OBJ_FileTexture);
+	LoadTextureForImGui(vkCore, "icons/sb-icon-mtl.png", m_MTL_FileTexture);
 	
 	UpdateCacheDirectoryFiles(m_CurrentPath);
 
 	m_ProjectRelativePath = GetRelPath("projects");
 }
 
-/*GLuint FileBrowser::GetFileTexture(SB_FILE_TYPE type) const
+SB::ImageData FileBrowser::GetFileTexture(SB_FILE_TYPE type) const
 {
 	switch (type)
 	{
@@ -70,7 +79,7 @@ FileBrowser::FileBrowser()
 	default:
 		return m_UnknownFileTexture;
 	}
-}*/
+}
 
 FileBrowser::SB_FILE_TYPE FileBrowser::GetFileType(const std::filesystem::path& path)
 {
@@ -129,7 +138,7 @@ void FileBrowser::UpdateCacheDirectoryFiles(const std::filesystem::path& path)
 			file.name = entry.path().filename().string();
 			file.path = entry.path();
 			file.type = GetFileType(entry.path());
-			// file.icon = GetFileTexture(file.type);
+			file.icon = GetFileTexture(file.type);
 
 			p_Files.emplace_back(file);
 		}
@@ -168,9 +177,9 @@ void FileBrowser::UpdateCacheDirectoryFiles(const std::filesystem::path& path)
 	// Update files vector
 	m_Files.clear();
 
-	// m_Files.push_back({ "..", m_CurrentPath.parent_path(), SB_ASSET_FOLDER, GetFileTexture(SB_ASSET_FOLDER) }); // Add parent dir button at start of vector
-	// m_Files.insert(m_Files.end(), p_Directories.begin(), p_Directories.end());
-	// m_Files.insert(m_Files.end(), p_Files.begin(), p_Files.end());
+	m_Files.push_back({ "..", m_CurrentPath.parent_path(), SB_ASSET_FOLDER, GetFileTexture(SB_ASSET_FOLDER) }); // Add parent dir button at start of vector
+	m_Files.insert(m_Files.end(), p_Directories.begin(), p_Directories.end());
+	m_Files.insert(m_Files.end(), p_Files.begin(), p_Files.end());
 }
 
 void FileBrowser::Render()
@@ -211,8 +220,7 @@ void FileBrowser::Render()
 
 		ImGui::BeginGroup();
 
-		// ImGui::Image((ImTextureID)(intptr_t)file.icon, ImVec2(fileWidth, fileWidth));
-
+		ImGui::Image((ImTextureID)file.icon.descriptorSet, ImVec2(fileWidth, fileWidth));
 		ImVec2 pos = ImGui::GetItemRectMin();
 		ImVec2 sizeImage = ImGui::GetItemRectSize();
 
@@ -296,7 +304,4 @@ void FileBrowser::SetCurrentProjectPath(const std::filesystem::path& path)
 	m_CurrentProjectPath = path;
 }
 
-FileBrowser::~FileBrowser()
-{
-	
-}
+FileBrowser::~FileBrowser() {};

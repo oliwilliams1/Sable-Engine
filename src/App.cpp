@@ -192,9 +192,11 @@ void App::InitWindow()
 	int fbW, fbH;
 	glfwGetFramebufferSize(window, &fbW, &fbH);
 
-	vkCore.AttachCreateSurfaceFunction(CreateWindowSurface);
-	vkCore.SetFramebufferSize(fbW, fbH);
-	vkCore.InitVk(glfwExtensionCount, glfwExtensions);
+	SB::VkCore::Init();
+	vkCore = &SB::VkCore::Get();
+	vkCore->AttachCreateSurfaceFunction(CreateWindowSurface);
+	vkCore->SetFramebufferSize(fbW, fbH);
+	vkCore->InitVk(glfwExtensionCount, glfwExtensions);
 
 	SB::SABLE_LOG("GLFW window created for Vulkan");
 }
@@ -215,26 +217,26 @@ void App::InitImGui()
 	SB::ImGuiInitInfo SbInitInfo{};
 	ImGui_ImplVulkan_InitInfo ImGuiInitInfo{};
 
-	vkCore.GetImGuiInitInfo(SbInitInfo);
-	VkRenderPass imguiRenderPass = vkCore.MakeImGuiRenderPass();
+	vkCore->GetImGuiInitInfo(SbInitInfo);
+	VkRenderPass imguiRenderPass = vkCore->MakeImGuiRenderPass();
 
 	// Copy my cool info over
-	ImGuiInitInfo.Instance       = SbInitInfo.instance;
+	ImGuiInitInfo.Instance = SbInitInfo.instance;
 	ImGuiInitInfo.PhysicalDevice = SbInitInfo.physicalDevice;
-	ImGuiInitInfo.Device         = SbInitInfo.device;
-	ImGuiInitInfo.Queue          = SbInitInfo.graphicsQueue;
+	ImGuiInitInfo.Device = SbInitInfo.device;
+	ImGuiInitInfo.Queue = SbInitInfo.graphicsQueue;
 	ImGuiInitInfo.DescriptorPool = SbInitInfo.descriptorPool;
-	ImGuiInitInfo.ImageCount     = SbInitInfo.imageCount;
-	ImGuiInitInfo.MinImageCount  = SbInitInfo.imageCount;
-	ImGuiInitInfo.RenderPass     = imguiRenderPass;
+	ImGuiInitInfo.ImageCount = SbInitInfo.imageCount;
+	ImGuiInitInfo.MinImageCount = SbInitInfo.imageCount;
+	ImGuiInitInfo.RenderPass = imguiRenderPass;
 
 	ImGui_ImplVulkan_Init(&ImGuiInitInfo);
 
 	SetupImGuiStyle();
 
-	VkCommandBuffer commandBuffer = vkCore.BeginSingleTimeCommands();
+	VkCommandBuffer commandBuffer = vkCore->BeginSingleTimeCommands();
 	ImGui_ImplVulkan_CreateFontsTexture();
-	vkCore.EndSingleTimeCommands(commandBuffer);
+	vkCore->EndSingleTimeCommands(commandBuffer);
 }
 
 void App::LoadProject(const std::string& path)
@@ -282,8 +284,8 @@ void App::ReiszePublicCallback()
 		glfwWaitEvents();
 	}
 
-	vkCore.SetFramebufferSize(width, height);
-	vkCore.RecreateSwapchain();
+	vkCore->SetFramebufferSize(width, height);
+	vkCore->RecreateSwapchain();
 }
 
 void App::Mainloop()
@@ -292,9 +294,22 @@ void App::Mainloop()
 
 	while (!glfwWindowShouldClose(window))
 	{
+		frameCount++;
+		auto currentTime = std::chrono::high_resolution_clock::now();
+
+		std::chrono::duration<double> elapsed = currentTime - lastTime;
+
+		if (elapsed.count() >= 1.0)
+		{
+			averageFPS = frameCount / elapsed.count();
+			lastTime = currentTime;
+			frameCount = 0;
+			glfwSetWindowTitle(window, ("Sable Engine - FPS: " + std::to_string((int)averageFPS)).c_str());
+		}
+
 		glfwPollEvents();
 
-		vkCore.BeginFrame();
+		vkCore->BeginFrame();
 		//vkCore.Draw();
 
 		ImGui_ImplVulkan_NewFrame();
@@ -340,9 +355,9 @@ void App::Mainloop()
 
 		ImGui::Render();
 
-		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), vkCore.GetCurrentCommandBuffer());
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), vkCore->GetCurrentCommandBuffer());
 
-		vkCore.EndFrame();
+		vkCore->EndFrame();
 
 		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
 		{
@@ -356,13 +371,13 @@ void App::Mainloop()
 
 App::~App()
 {
-	vkDeviceWaitIdle(vkCore.GetDevice());
+	vkDeviceWaitIdle(vkCore->GetDevice());
 
 	ImGui_ImplVulkan_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 
-	vkCore.ShutdownVk();
+	vkCore->Shutdown();
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
