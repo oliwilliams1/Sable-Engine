@@ -42,12 +42,12 @@ private:
         std::string name;
         std::filesystem::path path;
         SB_FILE_TYPE type;
-        SB::ImageData icon;
+        SB::ImGuiImageData icon;
     };
 
     int fileWidth = 125, fileHeight = 150;
 
-    SB::ImageData GetFileTexture(SB_FILE_TYPE type) const;
+    SB::ImGuiImageData GetFileTexture(SB_FILE_TYPE type) const;
 
     SB_FILE_TYPE GetFileType(const std::filesystem::path& path);
     void UpdateCacheDirectoryFiles(const std::filesystem::path& path);
@@ -56,7 +56,7 @@ private:
     std::filesystem::path m_ProjectRelativePath;
 	std::vector<File> m_Files;
 
-    SB::ImageData m_FolderTexture, m_ImageFileTexture, m_UnknownFileTexture, m_FolderCompressedTexture,
+    SB::ImGuiImageData m_FolderTexture, m_ImageFileTexture, m_UnknownFileTexture, m_FolderCompressedTexture,
        m_DocumentFileTexture, m_ConfigFileTexture, m_ScriptFileTexture, m_AudioFileTexture,
        m_FBX_FileTexture, m_GLTF_FileTexture, m_OBJ_FileTexture, m_MTL_FileTexture;
 };

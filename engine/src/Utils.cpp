@@ -9,14 +9,14 @@ std::filesystem::path GetRelPath(std::string otherPath)
 
 	std::filesystem::path full_other_path = parentPath / other_path;
 
-	if (std::filesystem::exists(full_other_path))
+	if (std::filesystem::exists(other_path))
 	{
 		// If in a build dir
-		return full_other_path;
+		return currentPath / other_path;
 	}
 	else
 	{
 		// Relative to executable
-		return currentPath / other_path;
+		return full_other_path;
 	}
 }

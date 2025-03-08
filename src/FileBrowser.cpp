@@ -7,7 +7,7 @@
 #include "SB/DebugLog.h"
 #include "App.h"
 
-void LoadTextureForImGui(SB::VkCore& vkCore, const std::string& path, SB::ImageData& image)
+void LoadTextureForImGui(SB::VkCore& vkCore, const std::string& path, SB::ImGuiImageData& image)
 {
 	vkCore.LoadTexture(path, image);
 	image.descriptorSet = ImGui_ImplVulkan_AddTexture(image.sampler, image.imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
@@ -39,7 +39,7 @@ FileBrowser::FileBrowser()
 	m_ProjectRelativePath = GetRelPath("projects");
 }
 
-SB::ImageData FileBrowser::GetFileTexture(SB_FILE_TYPE type) const
+SB::ImGuiImageData FileBrowser::GetFileTexture(SB_FILE_TYPE type) const
 {
 	switch (type)
 	{

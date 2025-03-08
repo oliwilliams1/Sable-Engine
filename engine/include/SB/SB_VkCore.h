@@ -78,7 +78,7 @@ namespace SB
 		uint32_t imageCount;
 	};
 
-	struct ImageData
+	struct ImGuiImageData
 	{
 		VkDescriptorSet descriptorSet;
 		VkImage image;
@@ -86,7 +86,23 @@ namespace SB
 		VkSampler sampler;
 		VkDeviceMemory imageMemory;
 
-		ImageData() { memset(this, 0, sizeof(*this)); } // saw on imgui doc so its prob cool
+		ImGuiImageData() { memset(this, 0, sizeof(*this)); } // saw on imgui doc so its prob cool
+	};
+
+	struct FrameAttachment
+	{
+		VkImage image;
+		VkImageView imageView;
+		VkFramebuffer framebuffer;
+		VkDeviceMemory imageMemory;
+		uint32_t width;
+		uint32_t height;
+	};
+
+	struct VulkanFrame
+	{
+		VkRenderPass renderPass;
+		std::vector<FrameAttachment> attachments;
 	};
 
 	class VkCore
@@ -103,13 +119,15 @@ namespace SB
 		void GetImGuiInitInfo(ImGuiInitInfo& info);
 		VkDescriptorPool MakeDescriptorPool(VkDescriptorPoolSize* poolSizes, uint32_t poolSizeCount);
 
+		void CreateSwapchainTexture(VkFormat format, VulkanFrame& frame);
+
 		void SetFramebufferSize(int width, int height);
 
 		void BeginFrame();
 		void Draw();
 		void EndFrame();
 		
-		void LoadTexture(const std::string& filename, ImageData& texture);
+		void LoadTexture(const std::string& filename, ImGuiImageData& texture);
 
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
@@ -128,6 +146,8 @@ namespace SB
 	private:
 		VkCore() {};
 		~VkCore();
+
+		VulkanFrame mainFrame;
 
 		uint32_t imageIndex;
 
@@ -159,7 +179,7 @@ namespace SB
 		VkInstance vkInstance;
 		VkDevice device;
 		VkPhysicalDevice physicalDevice;
-		VkRenderPass renderPass;
+		VkRenderPass m_renderPass;
 		VkQueue graphicsQueue;
 		uint32_t graphicsQueueFamilyIndex;
 		std::vector<VkImage> swapChainImages;
@@ -206,7 +226,7 @@ namespace SB
 		VkImageView textureImageView;
 		VkSampler textureSampler;
 		VkDeviceMemory textureImageMemory;
-		std::vector<ImageData> images;
+		std::vector<ImGuiImageData> images;
 
 		bool framebufferResized = false;
 
@@ -243,7 +263,7 @@ namespace SB
 		
 		void createSwapchain();
 		void createImageViews();
-		void createRenderPass();
+		void createRenderPass(VkFormat swapChainImageFormat, VkRenderPass& renderPass);
 		
 		void createGraphicsPipeline();
 		VkShaderModule createShaderModule(const std::vector<char>& code);
@@ -278,5 +298,7 @@ namespace SB
 		void createTextureImageView();
 		void createImageView(VkImage& image, VkImageView& imageView, VkFormat format);
 		void createTextureSampler(VkSampler* sampler);
+
+		void createFramebuffer(FrameAttachment& frameAttachments);
 	};
 }

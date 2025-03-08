@@ -79,5 +79,3 @@ add_custom_target(copy_shaders_editor ALL
 )
 
 add_dependencies(SableEditor copy_shaders_editor)
-
-file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/shaders)

@@ -42,7 +42,7 @@ namespace SB
 		
 		static inline std::filesystem::path ms_ResourcePath;
 		// Possible but not thought through
-		static inline std::map<std::string, SB::ImageData> ms_TextureMap;
+		static inline std::map<std::string, SB::ImGuiImageData> ms_TextureMap;
 		static inline std::map<std::string, SB_MESH> ms_MeshMap;
 		static inline std::map<std::string, SB_MATERIAL> ms_MaterialMap;
 	};

@@ -118,13 +118,13 @@ void VkCore::InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions)
 	createLogicalDevice();
 	createSwapchain();
 	createImageViews();
-	createRenderPass();
+	createRenderPass(VK_FORMAT_UNDEFINED, m_renderPass);
 	createDescriptorSetLayout();
 	createGraphicsPipeline();
 	createFramebuffers();
 	createCommandPool();
 
-	ImageData textureData;
+	ImGuiImageData textureData;
 	LoadTexture("icons/texture.jpg", textureData);
 	textureImage = textureData.image;
 	textureImageView = textureData.imageView;
@@ -138,6 +138,38 @@ void VkCore::InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions)
 	createDescriptorSets();
 	createCommandBuffers();
 	createSyncObjects();
+
+	CreateSwapchainTexture(VK_FORMAT_R8G8B8A8_UNORM, mainFrame);
+}
+
+void VkCore::CreateSwapchainTexture(VkFormat format, VulkanFrame& frame)
+{
+	if (frame.attachments.size() > 0)
+	{
+		SABLE_ERROR("Swapchain texture already created!");
+		return;
+	}
+
+	// set to swapchain size
+	frame.attachments.resize(swapChainImages.size());
+
+	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
+	VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+
+	createRenderPass(format, frame.renderPass);
+
+	for (size_t i = 0; i < frame.attachments.size(); i++)
+	{
+		frame.attachments[i].width = extent.width;
+		frame.attachments[i].height = extent.height;
+
+		createImage(extent.width, extent.height, format, VK_IMAGE_TILING_OPTIMAL, 
+			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
+			frame.attachments[i].image, frame.attachments[i].imageMemory);
+
+		createImageView(frame.attachments[i].image, frame.attachments[i].imageView, format);
+		createFramebuffer(frame.attachments[i]);
+	}
 }
 
 QueueFamilyIndices VkCore::findQueueFamilies(VkPhysicalDevice device) const
@@ -362,10 +394,17 @@ void VkCore::createImageViews()
 	}
 }
 
-void VkCore::createRenderPass()
+void VkCore::createRenderPass(VkFormat swapChainImageFormat, VkRenderPass& renderPass)
 {
 	VkAttachmentDescription colourAttachment{};
-	colourAttachment.format = swapChainImageFormat;
+	if (swapChainImageFormat == VK_FORMAT_UNDEFINED)
+	{
+		colourAttachment.format = VK_FORMAT_R8G8B8A8_UNORM; // TODO ensure format is available
+	}
+	else
+	{
+		colourAttachment.format = swapChainImageFormat;
+	}
 	colourAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 
 	colourAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -518,7 +557,7 @@ void VkCore::createGraphicsPipeline()
 	pipelineInfo.pColorBlendState = &colorBlending;
 	pipelineInfo.pDynamicState = &dynamicState;
 	pipelineInfo.layout = pipelineLayout;
-	pipelineInfo.renderPass = renderPass;
+	pipelineInfo.renderPass = m_renderPass;
 	pipelineInfo.subpass = 0;
 	pipelineInfo.basePipelineHandle = VK_NULL_HANDLE;
 
@@ -547,6 +586,27 @@ VkShaderModule VkCore::createShaderModule(const std::vector<char>& code)
 	return shaderModule;
 }
 
+void VkCore::createFramebuffer(FrameAttachment& frameAttachment)
+{
+	VkImageView attachments[] = {
+		frameAttachment.imageView
+	};
+
+	VkFramebufferCreateInfo framebufferInfo{};
+	framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
+	framebufferInfo.renderPass = m_renderPass;
+	framebufferInfo.attachmentCount = 1;
+	framebufferInfo.pAttachments = attachments;
+	framebufferInfo.width = frameAttachment.width;
+	framebufferInfo.height = frameAttachment.height;
+	framebufferInfo.layers = 1;
+
+	if (vkCreateFramebuffer(device, &framebufferInfo, nullptr, &frameAttachment.framebuffer) != VK_SUCCESS)
+	{
+		SABLE_RUNTIME_ERROR("Failed to create framebuffer!");
+	}
+}
+
 void VkCore::createFramebuffers()
 {
 	swapChainFramebuffers.resize(swapChainImageViews.size());
@@ -559,7 +619,7 @@ void VkCore::createFramebuffers()
 
 		VkFramebufferCreateInfo framebufferInfo{};
 		framebufferInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-		framebufferInfo.renderPass = renderPass;
+		framebufferInfo.renderPass = m_renderPass;
 		framebufferInfo.attachmentCount = 1;
 		framebufferInfo.pAttachments = attachments;
 		framebufferInfo.width = swapChainExtent.width;
@@ -1419,7 +1479,7 @@ void VkCore::BeginFrame()
 
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-	renderPassInfo.renderPass = renderPass;
+	renderPassInfo.renderPass = m_renderPass;
 	renderPassInfo.framebuffer = swapChainFramebuffers[imageIndex];
 	renderPassInfo.renderArea.offset = { 0, 0 };
 	renderPassInfo.renderArea.extent = swapChainExtent;
@@ -1518,7 +1578,7 @@ void VkCore::EndFrame()
 	currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
-void VkCore::LoadTexture(const std::string& filename, ImageData& texture)
+void VkCore::LoadTexture(const std::string& filename, ImGuiImageData& texture)
 {
 	createTextureImage(filename, texture.image, texture.imageMemory);
 	createImageView(texture.image, texture.imageView, VK_FORMAT_R8G8B8A8_SRGB);
@@ -1619,12 +1679,20 @@ VkCore::~VkCore()
 {
 	cleanupSwapchain();
 
-	for (const ImageData& image : images)
+	for (const ImGuiImageData& image : images)
 	{
 		vkDestroyImageView(device, image.imageView, nullptr);
 		vkDestroySampler(device, image.sampler,  nullptr);
 		vkDestroyImage(device, image.image, nullptr);
 		vkFreeMemory(device, image.imageMemory, nullptr);
+	}
+
+	for (const FrameAttachment attachment : mainFrame.attachments)
+	{
+		vkDestroyImageView(device, attachment.imageView, nullptr);
+		vkDestroyImage(device, attachment.image, nullptr);
+		vkFreeMemory(device, attachment.imageMemory, nullptr);
+		vkDestroyFramebuffer(device, attachment.framebuffer, nullptr);
 	}
 
 	vkDestroyPipeline(device, graphicsPipeline, nullptr);
