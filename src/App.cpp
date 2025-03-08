@@ -237,6 +237,11 @@ void App::InitImGui()
 	VkCommandBuffer commandBuffer = vkCore->BeginSingleTimeCommands();
 	ImGui_ImplVulkan_CreateFontsTexture();
 	vkCore->EndSingleTimeCommands(commandBuffer);
+
+	for (SB::FrameAttachment& image : vkCore->MainFrame.attachments)
+	{
+		PrepareTextureForImGui(image);
+	}
 }
 
 void App::LoadProject(const std::string& path)
@@ -309,8 +314,9 @@ void App::Mainloop()
 
 		glfwPollEvents();
 
+		vkCore->Draw();
+
 		vkCore->BeginFrame();
-		//vkCore.Draw();
 
 		ImGui_ImplVulkan_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
@@ -322,6 +328,10 @@ void App::Mainloop()
 
 		ImGui::Begin("Docking");
 		ImGui::Text("Hello!");
+		ImGui::End();
+
+		ImGui::Begin("Viewport");
+		ImGui::Image((ImTextureID)vkCore->GetViewportTexture(), ImVec2(600, 600));
 		ImGui::End();
 
 		if (imguiDemoWindowOpen)

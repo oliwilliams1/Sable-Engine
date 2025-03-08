@@ -1,5 +1,6 @@
 #include <iostream>
 #include <imgui.h>
+#include <imgui_impl_vulkan.h>
 #include "Utils.h"
 #include "SB/Utils.h"
 #include "SB/DebugLog.h"
@@ -107,4 +108,11 @@ void SetupImGuiStyle()
 	{
 		SB::SABLE_ERROR("Failed to load font: OpenSans-Regular.ttf");
 	}
+}
+
+void PrepareTextureForImGui(SB::FrameAttachment& image)
+{
+	SB::VkCore::Get().CreateTextureSampler(&image.sampler);
+	image.descriptorSet = ImGui_ImplVulkan_AddTexture(image.sampler, image.imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+	SB::VkCore::Get().samplers.push_back(image.sampler);
 }

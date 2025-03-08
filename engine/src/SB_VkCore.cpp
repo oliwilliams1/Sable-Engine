@@ -139,7 +139,7 @@ void VkCore::InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions)
 	createCommandBuffers();
 	createSyncObjects();
 
-	CreateSwapchainTexture(VK_FORMAT_R8G8B8A8_UNORM, mainFrame);
+	CreateSwapchainTexture(VK_FORMAT_R8G8B8A8_UNORM, MainFrame);
 }
 
 void VkCore::CreateSwapchainTexture(VkFormat format, VulkanFrame& frame)
@@ -164,8 +164,9 @@ void VkCore::CreateSwapchainTexture(VkFormat format, VulkanFrame& frame)
 		frame.attachments[i].height = extent.height;
 
 		createImage(extent.width, extent.height, format, VK_IMAGE_TILING_OPTIMAL, 
-			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, 
-			frame.attachments[i].image, frame.attachments[i].imageMemory);
+			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frame.attachments[i].image, 
+			frame.attachments[i].imageMemory);
 
 		createImageView(frame.attachments[i].image, frame.attachments[i].imageView, format);
 		createFramebuffer(frame.attachments[i]);
@@ -874,7 +875,7 @@ void VkCore::createImageView(VkImage& image, VkImageView& imageView, VkFormat fo
 	}
 }
 
-void VkCore::createTextureSampler(VkSampler* sampler)
+void VkCore::CreateTextureSampler(VkSampler* sampler)
 {
 	VkPhysicalDeviceProperties properties{};
 	vkGetPhysicalDeviceProperties(physicalDevice, &properties);
@@ -1509,16 +1510,51 @@ void VkCore::BeginFrame()
 
 void VkCore::Draw()
 {
+	VkRenderPassBeginInfo renderPassInfo{};
+	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+	renderPassInfo.renderPass = MainFrame.renderPass;
+	renderPassInfo.framebuffer = MainFrame.attachments[imageIndex].framebuffer;
+	renderPassInfo.renderArea.offset = { 0, 0 };
+	renderPassInfo.renderArea.extent = swapChainExtent;
+
+	VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
+	renderPassInfo.clearValueCount = 1;
+	renderPassInfo.pClearValues = &clearColor;
+
+	VkCommandBuffer cb = BeginSingleTimeCommands();
+
+	vkCmdBeginRenderPass(cb, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+
+	vkCmdBindPipeline(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+
+	VkViewport viewport{};
+	viewport.x = 0.0f;
+	viewport.y = 0.0f;
+	viewport.width = (float)swapChainExtent.width;
+	viewport.height = (float)swapChainExtent.height;
+	viewport.minDepth = 0.0f;
+	viewport.maxDepth = 1.0f;
+	vkCmdSetViewport(cb, 0, 1, &viewport);
+
+	VkRect2D scissor{};
+	scissor.offset = { 0, 0 };
+	scissor.extent = swapChainExtent;
+	vkCmdSetScissor(cb, 0, 1, &scissor);
+
 	VkBuffer vertexBuffers[] = { vertexBuffer };
 	VkDeviceSize offsets[] = { 0 };
 
-	vkCmdBindVertexBuffers(commandBuffers[currentFrame], 0, 1, vertexBuffers, offsets);
+	vkCmdBindVertexBuffers(cb, 0, 1, vertexBuffers, offsets);
 
-	vkCmdBindIndexBuffer(commandBuffers[currentFrame], indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+	vkCmdBindIndexBuffer(cb, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
 
-	vkCmdBindDescriptorSets(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
+	vkCmdBindDescriptorSets(cb, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets[currentFrame], 0, nullptr);
 
-	vkCmdDrawIndexed(commandBuffers[currentFrame], static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+	vkCmdDrawIndexed(cb, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+
+	vkCmdEndRenderPass(cb);
+
+	EndSingleTimeCommands(cb);
 }
 
 void VkCore::EndFrame()
@@ -1582,7 +1618,7 @@ void VkCore::LoadTexture(const std::string& filename, ImGuiImageData& texture)
 {
 	createTextureImage(filename, texture.image, texture.imageMemory);
 	createImageView(texture.image, texture.imageView, VK_FORMAT_R8G8B8A8_SRGB);
-	createTextureSampler(&texture.sampler);
+	CreateTextureSampler(&texture.sampler);
 
 	images.push_back(texture);
 }
@@ -1687,12 +1723,17 @@ VkCore::~VkCore()
 		vkFreeMemory(device, image.imageMemory, nullptr);
 	}
 
-	for (const FrameAttachment attachment : mainFrame.attachments)
+	for (const FrameAttachment attachment : MainFrame.attachments)
 	{
 		vkDestroyImageView(device, attachment.imageView, nullptr);
 		vkDestroyImage(device, attachment.image, nullptr);
 		vkFreeMemory(device, attachment.imageMemory, nullptr);
 		vkDestroyFramebuffer(device, attachment.framebuffer, nullptr);
+	}
+
+	for (const VkSampler& sampler : samplers)
+	{
+		vkDestroySampler(device, sampler, nullptr);
 	}
 
 	vkDestroyPipeline(device, graphicsPipeline, nullptr);

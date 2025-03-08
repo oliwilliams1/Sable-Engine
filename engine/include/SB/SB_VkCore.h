@@ -97,6 +97,10 @@ namespace SB
 		VkDeviceMemory imageMemory;
 		uint32_t width;
 		uint32_t height;
+
+		// for imgui
+		VkDescriptorSet descriptorSet;
+		VkSampler sampler;
 	};
 
 	struct VulkanFrame
@@ -143,13 +147,18 @@ namespace SB
 
 		void RecreateSwapchain();
 
+		void CreateTextureSampler(VkSampler* sampler);
+
+		VulkanFrame MainFrame;
+		std::vector<VkSampler> samplers;
+		VkDescriptorSet GetViewportTexture() { return MainFrame.attachments[imageIndex].descriptorSet; }
+
 	private:
 		VkCore() {};
 		~VkCore();
 
-		VulkanFrame mainFrame;
 
-		uint32_t imageIndex;
+		uint32_t imageIndex = 0;
 
 		const std::vector<Vertex> vertices = {
 			{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
@@ -297,7 +306,6 @@ namespace SB
 
 		void createTextureImageView();
 		void createImageView(VkImage& image, VkImageView& imageView, VkFormat format);
-		void createTextureSampler(VkSampler* sampler);
 
 		void createFramebuffer(FrameAttachment& frameAttachments);
 	};
