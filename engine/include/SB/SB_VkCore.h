@@ -272,7 +272,7 @@ namespace SB
 		
 		void createSwapchain();
 		void createImageViews();
-		void createRenderPass(VkFormat swapChainImageFormat, VkRenderPass& renderPass);
+		void createRenderPass(VkFormat swapChainImageFormat, VkRenderPass& renderPass, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
 		
 		void createGraphicsPipeline();
 		VkShaderModule createShaderModule(const std::vector<char>& code);

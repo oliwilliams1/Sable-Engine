@@ -156,7 +156,7 @@ void VkCore::CreateSwapchainTexture(VkFormat format, VulkanFrame& frame)
 	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
 	VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
-	createRenderPass(format, frame.renderPass);
+	createRenderPass(format, frame.renderPass, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
 	for (size_t i = 0; i < frame.attachments.size(); i++)
 	{
@@ -395,7 +395,7 @@ void VkCore::createImageViews()
 	}
 }
 
-void VkCore::createRenderPass(VkFormat swapChainImageFormat, VkRenderPass& renderPass)
+void VkCore::createRenderPass(VkFormat swapChainImageFormat, VkRenderPass& renderPass, VkImageLayout imageLayout)
 {
 	VkAttachmentDescription colourAttachment{};
 	if (swapChainImageFormat == VK_FORMAT_UNDEFINED)
@@ -406,6 +406,7 @@ void VkCore::createRenderPass(VkFormat swapChainImageFormat, VkRenderPass& rende
 	{
 		colourAttachment.format = swapChainImageFormat;
 	}
+
 	colourAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
 
 	colourAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
@@ -415,7 +416,7 @@ void VkCore::createRenderPass(VkFormat swapChainImageFormat, VkRenderPass& rende
 	colourAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
 
 	colourAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-	colourAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+	colourAttachment.finalLayout = imageLayout;
 
 	VkAttachmentReference colourAttachmentRef{};
 	colourAttachmentRef.attachment = 0;
