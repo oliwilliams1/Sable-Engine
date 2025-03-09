@@ -41,11 +41,15 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 	void* pUserData) {
 
-	if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+	if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
 	{
 		SB::SABLE_WARN("[VK debug callback] validation layer: %s", pCallbackData->pMessage);
 	}
 
+	if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+	{
+		SB::SABLE_ERROR("[VK debug callback] validation layer: %s", pCallbackData->pMessage);
+	}
 	return VK_FALSE;
 }
 
@@ -146,10 +150,54 @@ void VkCore::InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions)
 
 void VkCore::CreateSwapchainTexture(VkFormat format, VulkanFrame& frame)
 {
+	vkQueueWaitIdle(graphicsQueue);
+
 	if (frame.attachments.size() > 0)
 	{
 		SABLE_LOG("Recreating SB swapchain texture");
-		return;
+
+		for (size_t i = 0; i < renderPasses.size(); i++)
+		{
+			if (renderPasses[i] == frame.renderPass)
+			{
+				renderPasses.erase(renderPasses.begin() + i);
+				renderPasses.shrink_to_fit();
+			}
+		}
+
+		vkDestroyRenderPass(device, frame.renderPass, nullptr);
+
+		for (size_t i = 0; i < frame.attachments.size(); i++)
+		{
+			vkDestroyImageView(device, frame.attachments[i].imageView, nullptr);
+			vkDestroyImage(device, frame.attachments[i].image, nullptr);
+			vkFreeMemory(device, frame.attachments[i].imageMemory, nullptr);
+			vkDestroyFramebuffer(device, frame.attachments[i].framebuffer, nullptr);
+
+			std::vector<VkSampler> samplersToErase;
+
+			if (frame.attachments[i].sampler != VK_NULL_HANDLE)
+			{
+				vkDestroySampler(device, frame.attachments[i].sampler, nullptr);
+
+				for (size_t j = 0; j < samplers.size(); j++)
+				{
+					if (samplers[j] == frame.attachments[i].sampler)
+					{
+						samplersToErase.push_back(samplers[j]);
+					}
+				}
+			}
+
+			for (const auto& sampler : samplersToErase)
+			{
+				samplers.erase(std::remove(samplers.begin(), samplers.end(), sampler), samplers.end());
+			}
+
+			samplers.shrink_to_fit();
+		}
+
+		frame.attachments.clear();
 	}
 
 	// set to swapchain size
@@ -179,7 +227,22 @@ void VkCore::CreateSwapchainTexture(VkFormat format, VulkanFrame& frame)
 		createFramebuffer(frame.attachments[i]);
 	}
 
-	createCommandBuffers(frame.commandBuffers);
+	if (frame.commandBuffers.size() == 0)
+	{
+		createCommandBuffers(frame.commandBuffers);
+	}
+
+	vkQueueWaitIdle(graphicsQueue);
+}
+
+void VkCore::ResizeMainFrame(int width, int height)
+{
+	MainFrame.width = width;
+	MainFrame.height = height;
+
+	CreateSwapchainTexture(VK_FORMAT_R8G8B8A8_UNORM, MainFrame);
+
+	vkQueueWaitIdle(graphicsQueue);
 }
 
 QueueFamilyIndices VkCore::findQueueFamilies(VkPhysicalDevice device) const

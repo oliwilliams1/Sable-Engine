@@ -133,6 +133,8 @@ namespace SB
 		void Draw();
 		void EndFrame();
 		
+		void ResizeMainFrame(int width, int height);
+
 		void LoadTexture(const std::string& filename, ImGuiImageData& texture);
 
 		VkCommandBuffer BeginSingleTimeCommands();

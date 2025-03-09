@@ -331,7 +331,32 @@ void App::Mainloop()
 		ImGui::End();
 
 		ImGui::Begin("Viewport");
-		ImGui::Image((ImTextureID)vkCore->GetViewportTexture(), ImVec2(600, 600));
+		
+		static ImVec2 oldSize = ImVec2(0, 0);
+
+		ImVec2 size = ImGui::GetWindowSize();
+		size.x -= 10.0f; // Padding
+		size.y -= 40.0f; // Padding
+
+		if (oldSize.x != size.x || oldSize.y != size.y)
+		{
+			for (SB::FrameAttachment& image : vkCore->MainFrame.attachments)
+			{
+				ImGui_ImplVulkan_RemoveTexture(image.descriptorSet);
+			}
+
+			SB::SABLE_LOG("Must resize to x:%f, y:%f", size.x, size.y);
+			vkCore->ResizeMainFrame((int)size.x, (int)size.y);
+			oldSize = size;
+
+			for (SB::FrameAttachment& image : vkCore->MainFrame.attachments)
+			{
+				PrepareTextureForImGui(image);
+			}
+		}
+
+		ImGui::Image((ImTextureID)vkCore->GetViewportTexture(), size);
+
 		ImGui::End();
 
 		if (imguiDemoWindowOpen)
