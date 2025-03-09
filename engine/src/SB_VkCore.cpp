@@ -136,9 +136,11 @@ void VkCore::InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions)
 	createUniformBuffers();
 	createDescriptorPool();
 	createDescriptorSets();
-	createCommandBuffers();
+	createCommandBuffers(m_commandBuffers);
 	createSyncObjects();
 
+	MainFrame.width = 600;
+	MainFrame.height = 600;
 	CreateSwapchainTexture(VK_FORMAT_R8G8B8A8_UNORM, MainFrame);
 }
 
@@ -146,7 +148,7 @@ void VkCore::CreateSwapchainTexture(VkFormat format, VulkanFrame& frame)
 {
 	if (frame.attachments.size() > 0)
 	{
-		SABLE_ERROR("Swapchain texture already created!");
+		SABLE_LOG("Recreating SB swapchain texture");
 		return;
 	}
 
@@ -154,16 +156,21 @@ void VkCore::CreateSwapchainTexture(VkFormat format, VulkanFrame& frame)
 	frame.attachments.resize(swapChainImages.size());
 
 	SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice);
-	VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
 	createRenderPass(format, frame.renderPass, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 
+	if (frame.width == 0 || frame.height == 0)
+	{
+		SABLE_ERROR("Invalid texture size!");
+		return;
+	}
+
 	for (size_t i = 0; i < frame.attachments.size(); i++)
 	{
-		frame.attachments[i].width = extent.width;
-		frame.attachments[i].height = extent.height;
+		frame.attachments[i].width = frame.width;
+		frame.attachments[i].height = frame.height;
 
-		createImage(extent.width, extent.height, format, VK_IMAGE_TILING_OPTIMAL, 
+		createImage(frame.attachments[i].width, frame.attachments[i].height, format, VK_IMAGE_TILING_OPTIMAL,
 			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 
 			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frame.attachments[i].image, 
 			frame.attachments[i].imageMemory);
@@ -171,6 +178,8 @@ void VkCore::CreateSwapchainTexture(VkFormat format, VulkanFrame& frame)
 		createImageView(frame.attachments[i].image, frame.attachments[i].imageView, format);
 		createFramebuffer(frame.attachments[i]);
 	}
+
+	createCommandBuffers(frame.commandBuffers);
 }
 
 QueueFamilyIndices VkCore::findQueueFamilies(VkPhysicalDevice device) const
@@ -650,7 +659,7 @@ void VkCore::createCommandPool()
 	}
 }
 
-void VkCore::createCommandBuffers()
+void VkCore::createCommandBuffers(std::vector<VkCommandBuffer>& commandBuffers)
 {
 	commandBuffers.resize(MAX_FRAMES_IN_FLIGHT);
 
@@ -1469,12 +1478,12 @@ void VkCore::BeginFrame()
 
 	vkResetFences(device, 1, &inFlightFences[currentFrame]);
 
-	vkResetCommandBuffer(commandBuffers[currentFrame], 0);
+	vkResetCommandBuffer(m_commandBuffers[currentFrame], 0);
 
 	VkCommandBufferBeginInfo beginInfo{};
 	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-	if (vkBeginCommandBuffer(commandBuffers[currentFrame], &beginInfo) != VK_SUCCESS)
+	if (vkBeginCommandBuffer(m_commandBuffers[currentFrame], &beginInfo) != VK_SUCCESS)
 	{
 		SABLE_RUNTIME_ERROR("Failed to begin recording command buffer!");
 	}
@@ -1490,9 +1499,9 @@ void VkCore::BeginFrame()
 	renderPassInfo.clearValueCount = 1;
 	renderPassInfo.pClearValues = &clearColor;
 
-	vkCmdBeginRenderPass(commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
+	vkCmdBeginRenderPass(m_commandBuffers[currentFrame], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
-	vkCmdBindPipeline(commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
+	vkCmdBindPipeline(m_commandBuffers[currentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline);
 
 	VkViewport viewport{};
 	viewport.x = 0.0f;
@@ -1501,28 +1510,39 @@ void VkCore::BeginFrame()
 	viewport.height = (float)swapChainExtent.height;
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
-	vkCmdSetViewport(commandBuffers[currentFrame], 0, 1, &viewport);
+	vkCmdSetViewport(m_commandBuffers[currentFrame], 0, 1, &viewport);
 
 	VkRect2D scissor{};
 	scissor.offset = { 0, 0 };
 	scissor.extent = swapChainExtent;
-	vkCmdSetScissor(commandBuffers[currentFrame], 0, 1, &scissor);
+	vkCmdSetScissor(m_commandBuffers[currentFrame], 0, 1, &scissor);
 }
 
 void VkCore::Draw()
 {
+	VkCommandBuffer cb = MainFrame.commandBuffers[currentFrame];
+
+	vkResetCommandBuffer(cb, 0);
+
+	VkCommandBufferBeginInfo beginInfo{};
+	beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+
+	if (vkBeginCommandBuffer(cb, &beginInfo) != VK_SUCCESS)
+	{
+		SABLE_RUNTIME_ERROR("Failed to begin recording command buffer!");
+		return;
+	}
+
 	VkRenderPassBeginInfo renderPassInfo{};
 	renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
 	renderPassInfo.renderPass = MainFrame.renderPass;
 	renderPassInfo.framebuffer = MainFrame.attachments[imageIndex].framebuffer;
 	renderPassInfo.renderArea.offset = { 0, 0 };
-	renderPassInfo.renderArea.extent = swapChainExtent;
+	renderPassInfo.renderArea.extent = { MainFrame.width, MainFrame.height };
 
 	VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
 	renderPassInfo.clearValueCount = 1;
 	renderPassInfo.pClearValues = &clearColor;
-
-	VkCommandBuffer cb = BeginSingleTimeCommands();
 
 	vkCmdBeginRenderPass(cb, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
@@ -1531,20 +1551,19 @@ void VkCore::Draw()
 	VkViewport viewport{};
 	viewport.x = 0.0f;
 	viewport.y = 0.0f;
-	viewport.width = (float)swapChainExtent.width;
-	viewport.height = (float)swapChainExtent.height;
+	viewport.width = (float)MainFrame.width;
+	viewport.height = (float)MainFrame.height;
 	viewport.minDepth = 0.0f;
 	viewport.maxDepth = 1.0f;
 	vkCmdSetViewport(cb, 0, 1, &viewport);
 
 	VkRect2D scissor{};
 	scissor.offset = { 0, 0 };
-	scissor.extent = swapChainExtent;
+	scissor.extent = { MainFrame.width, MainFrame.height };
 	vkCmdSetScissor(cb, 0, 1, &scissor);
 
 	VkBuffer vertexBuffers[] = { vertexBuffer };
 	VkDeviceSize offsets[] = { 0 };
-
 	vkCmdBindVertexBuffers(cb, 0, 1, vertexBuffers, offsets);
 
 	vkCmdBindIndexBuffer(cb, indexBuffer, 0, VK_INDEX_TYPE_UINT16);
@@ -1555,14 +1574,26 @@ void VkCore::Draw()
 
 	vkCmdEndRenderPass(cb);
 
-	EndSingleTimeCommands(cb);
+	if (vkEndCommandBuffer(cb) != VK_SUCCESS)
+	{
+		SABLE_RUNTIME_ERROR("Failed to record command buffer!");
+	}
+
+	// Submit the command buffer
+	VkSubmitInfo submitInfo{};
+	submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+	submitInfo.commandBufferCount = 1;
+	submitInfo.pCommandBuffers = &cb;
+
+	vkQueueSubmit(graphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+	vkQueueWaitIdle(graphicsQueue);
 }
 
 void VkCore::EndFrame()
 {
-	vkCmdEndRenderPass(commandBuffers[currentFrame]);
+	vkCmdEndRenderPass(m_commandBuffers[currentFrame]);
 
-	if (vkEndCommandBuffer(commandBuffers[currentFrame]) != VK_SUCCESS)
+	if (vkEndCommandBuffer(m_commandBuffers[currentFrame]) != VK_SUCCESS)
 	{
 		SABLE_RUNTIME_ERROR("Failed to record command buffer!");
 	}
@@ -1577,7 +1608,7 @@ void VkCore::EndFrame()
 	submitInfo.pWaitDstStageMask = waitStages;
 
 	submitInfo.commandBufferCount = 1;
-	submitInfo.pCommandBuffers = &commandBuffers[currentFrame];
+	submitInfo.pCommandBuffers = &m_commandBuffers[currentFrame];
 
 	VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
 	submitInfo.signalSemaphoreCount = 1;

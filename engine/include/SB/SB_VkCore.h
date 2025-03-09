@@ -105,8 +105,10 @@ namespace SB
 
 	struct VulkanFrame
 	{
+		uint32_t width, height;
 		VkRenderPass renderPass;
 		std::vector<FrameAttachment> attachments;
+		std::vector<VkCommandBuffer> commandBuffers;
 	};
 
 	class VkCore
@@ -136,7 +138,7 @@ namespace SB
 		VkCommandBuffer BeginSingleTimeCommands();
 		void EndSingleTimeCommands(VkCommandBuffer commandBuffer);
 
-		VkCommandBuffer GetCurrentCommandBuffer() { return commandBuffers[currentFrame]; }
+		VkCommandBuffer GetCurrentCommandBuffer() { return m_commandBuffers[currentFrame]; }
 
 		VkRenderPass MakeImGuiRenderPass();
 
@@ -212,7 +214,7 @@ namespace SB
 		VkPipeline graphicsPipeline;
 
 		std::vector<VkFramebuffer> swapChainFramebuffers;
-		std::vector<VkCommandBuffer> commandBuffers;
+		std::vector<VkCommandBuffer> m_commandBuffers;
 
 		std::vector<VkSemaphore> imageAvailableSemaphores;
 		std::vector<VkSemaphore> renderFinishedSemaphores;
@@ -279,7 +281,7 @@ namespace SB
 
 		void createFramebuffers();
 		void createCommandPool();
-		void createCommandBuffers();
+		void createCommandBuffers(std::vector<VkCommandBuffer>& commandBuffers);
 
 		void createSyncObjects();
 
