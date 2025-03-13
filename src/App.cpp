@@ -331,7 +331,7 @@ void App::Mainloop()
 		ImGui::End();
 
 		ImGui::Begin("Viewport");
-		
+
 		static ImVec2 oldSize = ImVec2(0, 0);
 
 		ImVec2 size = ImGui::GetWindowSize();

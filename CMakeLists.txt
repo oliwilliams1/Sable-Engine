@@ -51,6 +51,11 @@ target_link_libraries(SableEditor SableEngine glfw Vulkan::Vulkan imgui)
 
 target_include_directories(SableEditor PUBLIC "engine/include")
 
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+# Compile the runtime
+add_subdirectory("sable")
+
 # Copy dependencies to output directory
 add_custom_command(
     TARGET SableEditor
@@ -79,3 +84,6 @@ add_custom_target(copy_shaders_editor ALL
 )
 
 add_dependencies(SableEditor copy_shaders_editor)
+
+# Copy imgui.ini to the build directory
+file(COPY "${CMAKE_SOURCE_DIR}/imgui.ini" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}")
