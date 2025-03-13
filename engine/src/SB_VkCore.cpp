@@ -41,12 +41,12 @@ static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 	const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 	void* pUserData) {
 
-	if (messageSeverity == VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
+	if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT)
 	{
 		SB::SABLE_WARN("[VK debug callback] validation layer: %s", pCallbackData->pMessage);
 	}
 
-	if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
+	if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT)
 	{
 		SB::SABLE_ERROR("[VK debug callback] validation layer: %s", pCallbackData->pMessage);
 	}

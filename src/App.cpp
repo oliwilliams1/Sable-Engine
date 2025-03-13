@@ -338,8 +338,11 @@ void App::Mainloop()
 		size.x -= 10.0f; // Padding
 		size.y -= 40.0f; // Padding
 
+		static int countdown = 0;
+
 		if (oldSize.x != size.x || oldSize.y != size.y)
 		{
+			countdown = 1;
 			for (SB::FrameAttachment& image : vkCore->MainFrame.attachments)
 			{
 				ImGui_ImplVulkan_RemoveTexture(image.descriptorSet);
@@ -355,7 +358,15 @@ void App::Mainloop()
 			}
 		}
 
-		ImGui::Image((ImTextureID)vkCore->GetViewportTexture(), size);
+
+		if (countdown == 0)
+		{
+			ImGui::Image((ImTextureID)vkCore->GetViewportTexture(), size);
+		}
+		else
+		{
+			countdown--;
+		}
 
 		ImGui::End();
 
