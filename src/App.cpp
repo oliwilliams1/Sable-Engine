@@ -342,7 +342,7 @@ void App::Mainloop()
 
 		if (oldSize.x != size.x || oldSize.y != size.y)
 		{
-			countdown = 1;
+			countdown = vkCore->MainFrame.attachments.size();
 			for (SB::FrameAttachment& image : vkCore->MainFrame.attachments)
 			{
 				ImGui_ImplVulkan_RemoveTexture(image.descriptorSet);
@@ -357,7 +357,6 @@ void App::Mainloop()
 				PrepareTextureForImGui(image);
 			}
 		}
-
 
 		if (countdown == 0)
 		{

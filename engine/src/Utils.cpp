@@ -2,21 +2,30 @@
 
 std::filesystem::path GetRelPath(std::string otherPath)
 {
-	std::filesystem::path relPath;
 	std::filesystem::path currentPath = std::filesystem::current_path();
-	std::filesystem::path parentPath = currentPath.parent_path();
-	std::filesystem::path other_path(otherPath);
 
-	std::filesystem::path full_other_path = parentPath / other_path;
+	// crawl all subfolders until we find otherpath in subdirectories
 
-	if (std::filesystem::exists(other_path))
+	if (std::filesystem::exists(currentPath / otherPath))
 	{
-		// If in a build dir
-		return currentPath / other_path;
+		return currentPath / otherPath;
 	}
-	else
+
+	std::vector<std::filesystem::path> subdirectories;
+
+	for (const auto& entry : std::filesystem::directory_iterator(currentPath))
 	{
-		// Relative to executable
-		return full_other_path;
+		if (entry.is_directory())
+		{
+			subdirectories.push_back(entry.path());
+		}
+	}
+
+	for (const auto& subdirectory : subdirectories)
+	{
+		if (std::filesystem::exists(subdirectory / otherPath))
+		{
+			return subdirectory / otherPath;
+		}
 	}
 }
