@@ -1,6 +1,5 @@
 #include "Mesh.h"
 #include "DebugLog.h"
-#include <type_traits>
 
 using namespace SB;
 
@@ -10,59 +9,61 @@ Mesh::Mesh(const std::string& parentNodeName)
 }
 
 template<typename T>
-void Mesh::SetObjectData(T data, SB_OBJECT_DATA_TYPE dataType)
+void ObjectData::SetObjectData(const std::vector<T>& data, SB_OBJECT_DATA_TYPE dataType)
 {
+    // Ensure the template is valid
     static_assert(std::is_same<T, glm::vec3>::value || std::is_same<T, glm::vec2>::value || std::is_same<T, unsigned int>::value,
-                "SetObjectData only accepts glm::vec3 glm::vec2, unsigned int");
+        "SetObjectData only accepts glm::vec3, glm::vec2, or unsigned int");
 
+    // Set the data based on user data type
     switch (dataType)
     {
-    case SB_OBJECT_DATA_VERTICES:
-        if (m_ObjData.vertices.empty())
+    case SB_OBJECT_DATA_TYPE::VERTICES:
+        if (!vertices.empty())
         {
             SABLE_WARN("Object of node %s already has vertex data... overwriting", m_ParentNodeName.c_str());
         }
-        m_ObjData.vertices = data;
+        vertices = data;
         break;
 
-    case SB_OBJECT_DATA_NORMALS:
-        if (m_ObjData.normals.empty())
+    case SB_OBJECT_DATA_TYPE::NORMALS:
+        if (!normals.empty())
         {
             SABLE_WARN("Object of node %s already has normal data... overwriting", m_ParentNodeName.c_str());
         }
-        m_ObjData.normals = data;
+        normals = data;
         break;
 
-    case SB_OBJECT_DATA_INDICES:
-        if (m_ObjData.indices.empty())
+    case SB_OBJECT_DATA_TYPE::INDICES:
+        if (!indices.empty())
         {
             SABLE_WARN("Object of node %s already has index data... overwriting", m_ParentNodeName.c_str());
         }
-        m_ObjData.indices = data;
+        indices = data;
         break;
 
-    case SB_OBJECT_DATA_UVS:
-        if (m_ObjData.uvs.empty())
+    case SB_OBJECT_DATA_TYPE::UVS:
+        if (!uvs.empty())
         {
             SABLE_WARN("Object of node %s already has UV data... overwriting", m_ParentNodeName.c_str());
         }
-        m_ObjData.uvs = data;
+        uvs = data;
         break;
 
-    case SB_OBJECT_DATA_TANGENTS:
-        if (m_ObjData.tangents.empty())
+    case SB_OBJECT_DATA_TYPE::TANGENTS:
+        if (!tangents.empty())
         {
             SABLE_WARN("Object of node %s already has tangent data... overwriting", m_ParentNodeName.c_str());
         }
-        m_ObjData.tangents = data;
+        tangents = data;
         break;
 
-    case SB_OBJECT_DATA_BITANGENTS:
-        if (m_ObjData.bitangents.empty())
+    case SB_OBJECT_DATA_TYPE::BITANGENTS:
+        if (!bitangents.empty())
         {
             SABLE_WARN("Object of node %s already has bitangent data... overwriting", m_ParentNodeName.c_str());
         }
-        m_ObjData.bitangents = data;
+        bitangents = data;
         break;
 
     default:
@@ -71,7 +72,18 @@ void Mesh::SetObjectData(T data, SB_OBJECT_DATA_TYPE dataType)
     }
 }
 
+
 Mesh::~Mesh() {}
+
+void Mesh::UploadMesh(ObjectData& objData)
+{
+    SB_MESH_DATA_TYPE selectedType = SB_MESH_DATA_TYPE::UNDDEF;
+
+    if (!objData.vertices.empty() && !objData.normals.empty())
+    {
+        selectedType = SB_MESH_DATA_TYPE::VN;
+    }
+}
 
 static MeshArena* s_MeshArenaInstance = nullptr;
 

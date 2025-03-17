@@ -2,17 +2,24 @@
 #include <vector>
 #include <string>
 #include <glm/glm.hpp>
+#include <type_traits>
 
 namespace SB
 {
-    enum SB_OBJECT_DATA_TYPE
+    enum class SB_OBJECT_DATA_TYPE
     {
-        SB_OBJECT_DATA_VERTICES = 0,
-        SB_OBJECT_DATA_NORMALS = 1,
-        SB_OBJECT_DATA_INDICES = 2,
-        SB_OBJECT_DATA_UVS = 3,
-        SB_OBJECT_DATA_TANGENTS = 4,
-        SB_OBJECT_DATA_BITANGENTS = 5
+        VERTICES = 0,
+        NORMALS = 1,
+        INDICES = 2,
+        UVS = 3,
+        TANGENTS = 4,
+        BITANGENTS = 5
+    };
+
+    enum class SB_MESH_DATA_TYPE
+    {
+        UNDDEF = 0,
+        VN = 1
     };
 
     struct ObjectData
@@ -23,6 +30,22 @@ namespace SB
         std::vector<glm::vec2> uvs;
         std::vector<glm::vec3> tangents;
         std::vector<glm::vec3> bitangents;
+        std::string m_ParentNodeName;
+
+        template<typename T>
+        void SetObjectData(const std::vector<T>& data, SB_OBJECT_DATA_TYPE dataType);
+    };
+
+    struct BasicVertex
+    {
+        glm::vec3 position;
+        glm::vec3 normal;
+    };
+
+    struct BasicMesh
+    {
+        std::vector<BasicVertex> vertices;
+        std::vector<unsigned int> indices;
     };
 
     class Mesh
@@ -31,11 +54,12 @@ namespace SB
         Mesh(const std::string& parentNodeName);
         ~Mesh();
         
-        template<typename T>
-        void SetObjectData(T data, SB_OBJECT_DATA_TYPE dataType);
+        void UploadMesh(ObjectData& objData);
 
     private:
-        ObjectData m_ObjData;
+        BasicMesh m_ObjData;
+        SB_MESH_DATA_TYPE m_DataType = SB_MESH_DATA_TYPE::UNDDEF;
+
         std::string m_ParentNodeName;
     };
 

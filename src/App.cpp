@@ -309,7 +309,15 @@ void App::Mainloop()
 			averageFPS = frameCount / elapsed.count();
 			lastTime = currentTime;
 			frameCount = 0;
-			glfwSetWindowTitle(window, ("Sable Engine - FPS: " + std::to_string((int)averageFPS)).c_str());
+
+			if (currentProject.name.empty())
+			{
+				glfwSetWindowTitle(window, ("Sable Engine - FPS: " + std::to_string((int)averageFPS)).c_str());
+			}
+			else
+			{
+				glfwSetWindowTitle(window, ("Sable Engine - " + currentProject.name + " - FPS: " + std::to_string((int)averageFPS)).c_str());
+			}
 		}
 
 		glfwPollEvents();
