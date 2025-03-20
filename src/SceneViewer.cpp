@@ -270,21 +270,7 @@ void SceneViewer::RenderPropertyWindow(SB::SceneNode* node)
 	ImGui::SameLine();
 	if (ImGui::Button("+", ImVec2(22, 0)))
 	{
-		switch (selectedComponent)
-		{
-		case 0:
-			node->AddMeshComponent();
-			break;
-		default:
-			SB::SABLE_LOG("Not implemented");
-			break;
-		}
-	}
-
-	if (node->GetMeshComponent() != nullptr)
-	{
-		ImGui::SeparatorText("Mesh");
-
+		
 	}
 
 	ImGui::End();

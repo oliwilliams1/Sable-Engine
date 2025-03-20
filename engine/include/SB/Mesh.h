@@ -1,84 +1,46 @@
 #pragma once
+
 #include <vector>
-#include <string>
 #include <glm/glm.hpp>
-#include <type_traits>
+#include <variant> // cry
+#include "SB_VkCore.h"
 
 namespace SB
 {
-    enum class SB_OBJECT_DATA_TYPE
-    {
-        VERTICES = 0,
-        NORMALS = 1,
-        INDICES = 2,
-        UVS = 3,
-        TANGENTS = 4,
-        BITANGENTS = 5
-    };
+	enum class VERTEX_DATA_TYPE
+	{
+		POSITION,
+		INDICES
+	};
 
-    enum class SB_MESH_DATA_TYPE
-    {
-        UNDDEF = 0,
-        VN = 1
-    };
+	struct PreMeshData
+	{
+		std::vector<glm::vec3> vertices;
+		std::vector<glm::vec2> uvs;
+		std::vector<unsigned int> indices;
+	};
 
-    struct ObjectData
-    {
-        std::vector<glm::vec3> vertices;
-        std::vector<glm::vec3> normals;
-        std::vector<unsigned int> indices;
-        std::vector<glm::vec2> uvs;
-        std::vector<glm::vec3> tangents;
-        std::vector<glm::vec3> bitangents;
-        std::string m_ParentNodeName;
+	class Mesh
+	{
+	public:
+		template<typename T>
+		void AddData(const T& data, VERTEX_DATA_TYPE type);
+		void UploadData();
 
-        template<typename T>
-        void SetObjectData(const std::vector<T>& data, SB_OBJECT_DATA_TYPE dataType);
-    };
+	private:
+		bool m_Uploaded = false;
+		PreMeshData* m_TempUploadData = nullptr;
 
-    struct BasicVertex
-    {
-        glm::vec3 position;
-        glm::vec3 normal;
-    };
+		VkBuffer m_IndexBuffer;
+		size_t m_IndicesSize = -1;
+	};
 
-    struct BasicMesh
-    {
-        std::vector<BasicVertex> vertices;
-        std::vector<unsigned int> indices;
-    };
+	class MeshArena
+	{
+	public:
+		Mesh& AddMesh();
 
-    class Mesh
-    {
-    public:
-        Mesh(const std::string& parentNodeName);
-        ~Mesh();
-        
-        void UploadMesh(ObjectData& objData);
-
-    private:
-        BasicMesh m_ObjData;
-        SB_MESH_DATA_TYPE m_DataType = SB_MESH_DATA_TYPE::UNDDEF;
-
-        std::string m_ParentNodeName;
-    };
-
-    class MeshArena
-    {
-    public:
-        MeshArena(const MeshArena&) = delete;
-        MeshArena& operator=(const MeshArena&) = delete;
-
-        static void Init();
-        static void Shutdown();
-
-        static MeshArena& GetInstance();
-
-        Mesh* AddMesh(const std::string& parentNodeName);
-
-    private:
-        MeshArena();
-        ~MeshArena();
-        std::vector<Mesh> m_Meshes;
-    };
+	private:
+		std::vector<Mesh> m_Meshes;
+	};
 }

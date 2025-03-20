@@ -3,115 +3,127 @@
 
 using namespace SB;
 
-Mesh::Mesh(const std::string& parentNodeName)
-{
-    m_ParentNodeName = parentNodeName;
-}
-
 template<typename T>
-void ObjectData::SetObjectData(const std::vector<T>& data, SB_OBJECT_DATA_TYPE dataType)
+void Mesh::AddData(const T& data, VERTEX_DATA_TYPE type)
 {
-    // Ensure the template is valid
-    static_assert(std::is_same<T, glm::vec3>::value || std::is_same<T, glm::vec2>::value || std::is_same<T, unsigned int>::value,
-        "SetObjectData only accepts glm::vec3, glm::vec2, or unsigned int");
+	static_assert(std::is_same_v<T, std::vector<glm::vec3>> ||
+		std::is_same_v<T, std::vector<glm::vec2>> ||
+		std::is_same_v<T, std::vector<float>> ||
+		std::is_same_v<T, std::vector<unsigned int>>,
+		"Type must be std::vector<glm::vec3>, std::vector<glm::vec2>, std::vector<float>, or std::vector<unsigned int>");
 
-    // Set the data based on user data type
-    switch (dataType)
-    {
-    case SB_OBJECT_DATA_TYPE::VERTICES:
-        if (!vertices.empty())
-        {
-            SABLE_WARN("Object of node %s already has vertex data... overwriting", m_ParentNodeName.c_str());
-        }
-        vertices = data;
-        break;
+	if (m_Uploaded)
+	{
+		SABLE_WARN("Mesh data already uploaded, skipping");
+		return;
+	}
 
-    case SB_OBJECT_DATA_TYPE::NORMALS:
-        if (!normals.empty())
-        {
-            SABLE_WARN("Object of node %s already has normal data... overwriting", m_ParentNodeName.c_str());
-        }
-        normals = data;
-        break;
+	if (!m_TempUploadData)
+	{
+		m_TempUploadData = new PreMeshData();
+	}
 
-    case SB_OBJECT_DATA_TYPE::INDICES:
-        if (!indices.empty())
-        {
-            SABLE_WARN("Object of node %s already has index data... overwriting", m_ParentNodeName.c_str());
-        }
-        indices = data;
-        break;
+	switch (type)
+	{
+	case VERTEX_DATA_TYPE::POSITION:
+	{
+		if (!std::is_same_v<T, std::vector<glm::vec3>>)
+		{
+			SABLE_RUNTIME_ERROR("Position data must be of type std::vector<glm::vec3>");
+			return;
+		}
 
-    case SB_OBJECT_DATA_TYPE::UVS:
-        if (!uvs.empty())
-        {
-            SABLE_WARN("Object of node %s already has UV data... overwriting", m_ParentNodeName.c_str());
-        }
-        uvs = data;
-        break;
+		m_TempUploadData->vertices = data;
+		break;
+	}
 
-    case SB_OBJECT_DATA_TYPE::TANGENTS:
-        if (!tangents.empty())
-        {
-            SABLE_WARN("Object of node %s already has tangent data... overwriting", m_ParentNodeName.c_str());
-        }
-        tangents = data;
-        break;
+	case VERTEX_DATA_TYPE::UV:
+	{
+		if (!std::is_same_v<T, std::vector<glm::vec2>>)
+		{
+			SABLE_RUNTIME_ERROR("UV data must be of type std::vector<glm::vec2>");
+			return;
+		}
 
-    case SB_OBJECT_DATA_TYPE::BITANGENTS:
-        if (!bitangents.empty())
-        {
-            SABLE_WARN("Object of node %s already has bitangent data... overwriting", m_ParentNodeName.c_str());
-        }
-        bitangents = data;
-        break;
+		m_TempUploadData->uvs = data;
+		break;
+	}
 
-    default:
-        SABLE_WARN("Unknown data type for object of node %s", m_ParentNodeName.c_str());
-        break;
-    }
+	case VERTEX_DATA_TYPE::INDICES:
+	{
+		if (!std::is_same_v<T, std::vector<unsigned int>>)
+		{
+			SABLE_RUNTIME_ERROR("Indices data must be of type std::vector<unsigned int>");
+			return;
+		}
+
+		m_TempUploadData->indices = data;
+		break;
+	}
+
+	default:
+		SABLE_RUNTIME_ERROR("Unknown VERTEX_DATA_TYPE");
+		return;
+	}
 }
 
-
-Mesh::~Mesh() {}
-
-void Mesh::UploadMesh(ObjectData& objData)
+void Mesh::UploadData()
 {
-    SB_MESH_DATA_TYPE selectedType = SB_MESH_DATA_TYPE::UNDDEF;
+	if (m_Uploaded)
+	{
+		SABLE_WARN("Mesh data already uploaded, skipping");
+		return;
+	}
 
-    if (!objData.vertices.empty() && !objData.normals.empty())
-    {
-        selectedType = SB_MESH_DATA_TYPE::VN;
-    }
+	if (!m_TempUploadData)
+	{
+		SABLE_WARN("No data to upload for mesh, skipping");
+		return;
+	}
+
+	size_t indicesSize = m_TempUploadData->indices.size();
+	bool hasIndices = indicesSize != 0;
+
+	if (!hasIndices)
+	{
+		SABLE_ERROR("Mesh does not have index data, skipping");
+		return;
+	}
+
+	m_IndicesSize = indicesSize;
+
+	size_t verticesSize = m_TempUploadData->vertices.size();
+	size_t uvsSize = m_TempUploadData->uvs.size();
+
+	bool hasVertices = verticesSize != 0;
+	bool hasUVs = uvsSize != 0;
+
+	if (!hasVertices)
+	{
+		SABLE_ERROR("Mesh does not have vertex data, skipping");
+		return;
+	}
+
+	std::vector<float> flatData;
+	flatData.reserve(verticesSize * 5);
+
+	for (size_t i = 0; i < verticesSize; i++)
+	{
+		flatData[i * 5 + 0] = m_TempUploadData->vertices[i].x;
+		flatData[i * 5 + 1] = m_TempUploadData->vertices[i].y;
+		flatData[i * 5 + 2] = m_TempUploadData->vertices[i].z;
+
+		flatData[i * 5 + 3] = hasUVs ? m_TempUploadData->uvs[i].x : 0.0f;
+		flatData[i * 5 + 4] = hasUVs ? m_TempUploadData->uvs[i].y : 0.0f;
+	}
+
+	delete m_TempUploadData;
+	m_TempUploadData = nullptr;
+	m_Uploaded = true;
 }
 
-static MeshArena* s_MeshArenaInstance = nullptr;
-
-MeshArena::MeshArena() {};
-
-void MeshArena::Init()
+Mesh& MeshArena::AddMesh()
 {
-    s_MeshArenaInstance = new MeshArena();
-}
-
-void MeshArena::Shutdown()
-{
-	delete s_MeshArenaInstance;
-	s_MeshArenaInstance = nullptr;
-}
-
-MeshArena& MeshArena::GetInstance()
-{
-    return *s_MeshArenaInstance;
-}
-
-Mesh* MeshArena::AddMesh(const std::string& parentNodeName)
-{
-    m_Meshes.emplace_back(parentNodeName);
-    return &m_Meshes.back();
-}
-
-MeshArena::~MeshArena()
-{
-    m_Meshes.clear();
+	m_Meshes.emplace_back();
+	return m_Meshes.back();
 }

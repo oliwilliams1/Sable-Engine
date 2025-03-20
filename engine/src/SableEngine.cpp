@@ -13,7 +13,6 @@ SBEngine::SBEngine()
     Console::Init();
     AssetManager::Init();
     Scene::Init();
-    MeshArena::Init();
 }
 
 SBEngine::~SBEngine()
@@ -21,18 +20,7 @@ SBEngine::~SBEngine()
     Console::Shutdown();
     AssetManager::Shutdown();
     Scene::Shutdown();
-    MeshArena::Shutdown();
 }
-
-/*bool SBEngine::LoadTextureFromFile(const std::string& filename, GLuint& id)
-{
-    SB_TEXTURE tempTexture;
-
-    bool res = AssetManager::LoadTextureFromFile(filename, tempTexture);
-
-    id = tempTexture.id;
-    return res;
-}*/
 
 void SBEngine::Init()
 {
