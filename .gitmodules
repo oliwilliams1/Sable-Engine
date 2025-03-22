@@ -1,9 +1,6 @@
 [submodule "engine/vendor/glm"]
 	path = engine/vendor/glm
 	url = https://github.com/g-truc/glm.git
-[submodule "engine/vendor/assimp"]
-	path = engine/vendor/assimp
-	url = https://github.com/assimp/assimp.git
 [submodule "vendor/glm"]
 	path = vendor/glm
 	url = https://github.com/g-truc/glm.git
@@ -23,3 +20,6 @@
 [submodule "engine/vendor/stb"]
 	path = engine/vendor/stb
 	url = https://github.com/nothings/stb
+[submodule "vendor/assimp"]
+	path = vendor/assimp
+	url = https://github.com/assimp/assimp
