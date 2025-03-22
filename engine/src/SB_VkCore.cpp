@@ -154,8 +154,6 @@ void VkCore::CreateSwapchainTexture(VkFormat format, VulkanFrame& frame)
 
 	if (frame.attachments.size() > 0)
 	{
-		SABLE_LOG("Recreating SB swapchain texture");
-
 		for (size_t i = 0; i < renderPasses.size(); i++)
 		{
 			if (renderPasses[i] == frame.renderPass)
@@ -801,6 +799,7 @@ uint32_t VkCore::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags prope
 	}
 
 	SABLE_RUNTIME_ERROR("Failed to find suitable memory type!");
+	return -1;
 }
 
 void VkCore::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory)

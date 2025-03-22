@@ -23,6 +23,15 @@ set(IMGUI_DIR "vendor/imgui")
 set(IMGUI_BACKEND_DIR "${IMGUI_DIR}/backends")
 include_directories(${IMGUI_DIR} ${IMGUI_BACKEND_DIR})
 
+# Assimp
+set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT
+	OFF
+	CACHE BOOL "Disable building all exporters by default")
+set(ASSIMP_INSTALL
+	OFF
+	CACHE BOOL "Disable assimp install") # using as submodule
+add_subdirectory("vendor/assimp")
+
 # Collect ImGui source files
 file(GLOB IMGUI_SOURCE "${IMGUI_DIR}/*.cpp" "${IMGUI_DIR}/*.h")
 
@@ -47,7 +56,7 @@ set_target_properties(SableEditor PROPERTIES
 )
 
 # Link the engine
-target_link_libraries(SableEditor SableEngine glfw Vulkan::Vulkan imgui)
+target_link_libraries(SableEditor SableEngine glfw Vulkan::Vulkan imgui assimp)
 
 target_include_directories(SableEditor PUBLIC "engine/include")
 

@@ -356,7 +356,6 @@ void App::Mainloop()
 				ImGui_ImplVulkan_RemoveTexture(image.descriptorSet);
 			}
 
-			SB::SABLE_LOG("Must resize to x:%f, y:%f", size.x, size.y);
 			vkCore->ResizeMainFrame((int)size.x, (int)size.y);
 			oldSize = size;
 

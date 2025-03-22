@@ -51,6 +51,8 @@ std::string Console::EnumToString(LogType type)
 
 	case LogType::SB_ERROR:
 		return "[ERROR]\t";
+	default:
+		return "[UNKNOWN LOGTYPE]";
 	}
 }
 

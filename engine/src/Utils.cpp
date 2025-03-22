@@ -1,6 +1,6 @@
 #include "Utils.h"
 
-std::filesystem::path GetRelPath(std::string otherPath)
+std::filesystem::path GetRelPath(const std::string& otherPath)
 {
 	std::filesystem::path currentPath = std::filesystem::current_path();
 
@@ -28,4 +28,12 @@ std::filesystem::path GetRelPath(std::string otherPath)
 			return subdirectory / otherPath;
 		}
 	}
+
+	return std::filesystem::path();
+}
+
+std::string StripExtension(const std::string& str)
+{
+	auto pos = str.find_last_of('.');
+	return str.substr(0, pos);
 }

@@ -255,6 +255,9 @@ void FileBrowser::Render()
 			// Basically see if the user clicked a button, but image is button
 			if (ImGui::IsMouseDoubleClicked(0))
 			{
+				static SB::Scene& instance = SB::Scene::GetInstance();
+				static SB::SceneNode* root = instance.GetRootNode();
+
 				switch (file.type)
 				{
 				case SB_ASSET_FOLDER:
@@ -263,6 +266,15 @@ void FileBrowser::Render()
 
 				case SB_ASSET_CONFIG:
 					App::GetInstance().LoadProject(file.path.string());
+					break;
+
+				case SB_ASSET_FBX:
+				case SB_ASSET_OBJ:
+				case SB_ASSET_GLTF:
+					instance.AddNode(StripExtension(file.path.filename().string()), root);
+					break;
+
+				default:
 					break;
 				}
 			}

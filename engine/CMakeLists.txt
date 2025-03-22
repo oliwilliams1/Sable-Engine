@@ -16,15 +16,6 @@ include_directories("vendor/glm")
 set(STB_DIR "vendor/stb")
 include_directories(${STB_DIR})
 
-# Assimp
-set(ASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT
-	OFF
-	CACHE BOOL "Disable building all exporters by default")
-set(ASSIMP_INSTALL
-	OFF
-	CACHE BOOL "Disable assimp install") # using as submodule
-add_subdirectory("vendor/assimp")
-
 include_directories("include/SB")
 # Include source files from src and headers from include
 file(GLOB_RECURSE SOURCES "src/*.cpp" "include/SB/*.h")
