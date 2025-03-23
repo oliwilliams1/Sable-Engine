@@ -217,8 +217,8 @@ void VkCore::CreateSwapchainTexture(VkFormat format, VulkanFrame& frame)
 		frame.attachments[i].height = frame.height;
 
 		createImage(frame.attachments[i].width, frame.attachments[i].height, format, VK_IMAGE_TILING_OPTIMAL,
-			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT, 
-			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frame.attachments[i].image, 
+			VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT | VK_IMAGE_USAGE_SAMPLED_BIT,
+			VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, frame.attachments[i].image,
 			frame.attachments[i].imageMemory);
 
 		createImageView(frame.attachments[i].image, frame.attachments[i].imageView, format);
@@ -1171,8 +1171,8 @@ void VkCore::createVertexBuffer()
 
 	VkBuffer stagingBuffer;
 	VkDeviceMemory stagingBufferMemory;
-	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, 
-		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, 
+	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+		VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
 		stagingBuffer, stagingBufferMemory);
 
 	void* data;
@@ -1180,7 +1180,7 @@ void VkCore::createVertexBuffer()
 	memcpy(data, vertices.data(), (size_t)bufferSize);
 	vkUnmapMemory(device, stagingBufferMemory);
 
-	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, 
+	createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
 		VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, vertexBuffer, vertexBufferMemory);
 
 	copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
@@ -1322,7 +1322,7 @@ void VkCore::createInstance(uint32_t glfwExtensionCount, const char** glfwExtens
 	if (portabillityEnumerationSupport)
 	{
 		m_Extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-	} 
+	}
 	else
 	{
 		SABLE_WARN("Vk Portability enumeration extension unavailable, vulkan instance may have problems initializing");
@@ -1470,7 +1470,7 @@ VkDescriptorPool VkCore::MakeDescriptorPool(VkDescriptorPoolSize* poolSizes, uin
 	VkDescriptorPoolCreateInfo poolCreateInfo = {};
 	poolCreateInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	poolCreateInfo.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
-	poolCreateInfo.maxSets = 1000; 
+	poolCreateInfo.maxSets = 1000;
 	poolCreateInfo.poolSizeCount = poolSizeCount;
 	poolCreateInfo.pPoolSizes = poolSizes;
 
@@ -1701,7 +1701,7 @@ void VkCore::EndFrame()
 		RecreateSwapchain();
 	}
 	else if (result != VK_SUCCESS)
-	{	
+	{
 		SABLE_RUNTIME_ERROR("Failed to present swap chain image!");
 	}
 
@@ -1832,7 +1832,7 @@ VkCore::~VkCore()
 
 	vkDestroyPipeline(device, graphicsPipeline, nullptr);
 	vkDestroyPipelineLayout(device, pipelineLayout, nullptr);
-	
+
 	for (const VkRenderPass& I_renderPass : renderPasses)
 	{
 		vkDestroyRenderPass(device, I_renderPass, nullptr);

@@ -61,7 +61,7 @@ namespace SB
 		}
 	};
 
-	struct SwapChainSupportDetails 
+	struct SwapChainSupportDetails
 	{
 		VkSurfaceCapabilitiesKHR capabilities;
 		std::vector<VkSurfaceFormatKHR> formats;
@@ -132,7 +132,7 @@ namespace SB
 		void BeginFrame();
 		void Draw();
 		void EndFrame();
-		
+
 		void ResizeMainFrame(int width, int height);
 
 		void LoadTexture(const std::string& filename, ImGuiImageData& texture);
@@ -185,7 +185,7 @@ namespace SB
 
 #ifdef NDEBUG
 		const bool enableValidationLayers = false;
-#else 
+#else
 		const bool enableValidationLayers = true;
 #endif
 
@@ -273,11 +273,11 @@ namespace SB
 		VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
 		VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
 		VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
-		
+
 		void createSwapchain();
 		void createImageViews();
 		void createRenderPass(VkFormat swapChainImageFormat, VkRenderPass& renderPass, VkImageLayout imageLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
-		
+
 		void createGraphicsPipeline();
 		VkShaderModule createShaderModule(const std::vector<char>& code);
 

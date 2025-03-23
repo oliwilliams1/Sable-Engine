@@ -37,18 +37,6 @@ void Mesh::AddData(const T& data, VERTEX_DATA_TYPE type)
 		break;
 	}
 
-	case VERTEX_DATA_TYPE::UV:
-	{
-		if (!std::is_same_v<T, std::vector<glm::vec2>>)
-		{
-			SABLE_RUNTIME_ERROR("UV data must be of type std::vector<glm::vec2>");
-			return;
-		}
-
-		m_TempUploadData->uvs = data;
-		break;
-	}
-
 	case VERTEX_DATA_TYPE::INDICES:
 	{
 		if (!std::is_same_v<T, std::vector<unsigned int>>)
