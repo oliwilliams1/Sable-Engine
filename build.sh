@@ -1,5 +1,5 @@
 #!/bin/bash
-
+clear
 mkdir -p build
 cd build || exit
 

@@ -122,7 +122,7 @@ void VkCore::InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions)
 	createLogicalDevice();
 	createSwapchain();
 	createImageViews();
-	createRenderPass(VK_FORMAT_UNDEFINED, m_renderPass);
+	createRenderPass(swapChainImageFormat, m_renderPass);
 	createDescriptorSetLayout();
 	createGraphicsPipeline();
 	createFramebuffers();
@@ -145,7 +145,7 @@ void VkCore::InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions)
 
 	MainFrame.width = 600;
 	MainFrame.height = 600;
-	CreateSwapchainTexture(VK_FORMAT_R8G8B8A8_UNORM, MainFrame);
+	CreateSwapchainTexture(swapChainImageFormat, MainFrame);
 }
 
 void VkCore::CreateSwapchainTexture(VkFormat format, VulkanFrame& frame)
@@ -238,7 +238,7 @@ void VkCore::ResizeMainFrame(int width, int height)
 	MainFrame.width = width;
 	MainFrame.height = height;
 
-	CreateSwapchainTexture(VK_FORMAT_R8G8B8A8_UNORM, MainFrame);
+	CreateSwapchainTexture(VK_FORMAT_B8G8R8A8_UNORM, MainFrame);
 
 	vkQueueWaitIdle(graphicsQueue);
 }
@@ -470,7 +470,7 @@ void VkCore::createRenderPass(VkFormat swapChainImageFormat, VkRenderPass& rende
 	VkAttachmentDescription colourAttachment{};
 	if (swapChainImageFormat == VK_FORMAT_UNDEFINED)
 	{
-		colourAttachment.format = VK_FORMAT_R8G8B8A8_UNORM; // TODO ensure format is available
+		colourAttachment.format = swapChainImageFormat; // TODO ensure format is available
 	}
 	else
 	{
@@ -1214,6 +1214,29 @@ void VkCore::createIndexBuffer()
 	vkFreeMemory(device, stagingBufferMemory, nullptr);
 }
 
+bool VkCore::checkPhysicalDeviceSupportsPortability(VkPhysicalDevice device)
+{
+    uint32_t extensionCount = 0;
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, nullptr);
+
+    std::vector<VkExtensionProperties> availableExtensions(extensionCount);
+    vkEnumerateDeviceExtensionProperties(device, nullptr, &extensionCount, availableExtensions.data());
+
+    bool supportsPortabilitySubset = false;
+    bool supportsGetPhysicalDeviceProperties2 = false;
+
+    for (const auto& extension : availableExtensions) {
+        if (strcmp(extension.extensionName, VK_KHR_PORTABILITY_SUBSET_EXTENSION_NAME) == 0) {
+            supportsPortabilitySubset = true;
+        }
+        if (strcmp(extension.extensionName, VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME) == 0) {
+            supportsGetPhysicalDeviceProperties2 = true;
+        }
+    }
+
+    return supportsPortabilitySubset && supportsGetPhysicalDeviceProperties2;
+}
+
 void VkCore::createLogicalDevice()
 {
 	QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
@@ -1243,6 +1266,9 @@ void VkCore::createLogicalDevice()
 
 	createInfo.pEnabledFeatures = &deviceFeatures;
 
+#if defined(__APPLE__)
+	deviceExtensions.push_back("VK_KHR_portability_subset");
+#endif
 	createInfo.enabledExtensionCount = static_cast<uint32_t>(deviceExtensions.size());
 	createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
@@ -1340,11 +1366,15 @@ void VkCore::createInstance(uint32_t glfwExtensionCount, const char** glfwExtens
     createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     createInfo.pApplicationInfo = &appInfo;
 
-	if (portabillityEnumerationSupport)
-	{
-		createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
-	}
+	// If macos
+#if defined(__APPLE__)
+	createInfo.flags |= VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
+	
+	m_Extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
 
+	m_Extensions.push_back(VK_KHR_GET_PHYSICAL_DEVICE_PROPERTIES_2_EXTENSION_NAME);
+#endif
+	
     createInfo.enabledExtensionCount = static_cast<uint32_t>(m_Extensions.size());
     createInfo.ppEnabledExtensionNames = m_Extensions.data();
 

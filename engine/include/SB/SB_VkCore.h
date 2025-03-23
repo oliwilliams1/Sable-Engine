@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vulkan/vulkan.h>
+#include <vulkan/vulkan_beta.h>
 #include <vector>
 #include <array>
 #include <chrono>
@@ -248,11 +249,12 @@ namespace SB
 		const int MAX_FRAMES_IN_FLIGHT = 2;
 
 		std::vector<const char*> m_Extensions;
+		
 		const std::vector<const char*> validationLayers = {
-			"VK_LAYER_KHRONOS_validation"
+			"VK_LAYER_KHRONOS_validation",
 		};
 
-		const std::vector<const char*> deviceExtensions = {
+		std::vector<const char*> deviceExtensions = {
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME,
 		};
 
@@ -312,5 +314,7 @@ namespace SB
 		void createImageView(VkImage& image, VkImageView& imageView, VkFormat format);
 
 		void createFramebuffer(FrameAttachment& frameAttachments);
+
+		bool checkPhysicalDeviceSupportsPortability(VkPhysicalDevice device);
 	};
 }
