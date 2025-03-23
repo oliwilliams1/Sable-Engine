@@ -21,6 +21,7 @@ namespace SB
 
         std::vector<SceneNode*> m_Children;
         
+        Mesh* m_Mesh = nullptr;
     private:
         std::string m_Name;
         SceneNode* m_Parent = nullptr;

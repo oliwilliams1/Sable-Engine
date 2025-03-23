@@ -31,6 +31,7 @@ namespace SB
 		bool m_Uploaded = false;
 		PreMeshData* m_TempUploadData = nullptr;
 
+		VkBuffer m_VertexBuffer;
 		VkBuffer m_IndexBuffer;
 		size_t m_IndicesSize = -1;
 	};
@@ -38,9 +39,18 @@ namespace SB
 	class MeshArena
 	{
 	public:
-		Mesh& AddMesh();
+		MeshArena(const MeshArena&) = delete;
+		MeshArena& operator=(const MeshArena&) = delete;
+
+		static void Init();
+		static void Destroy();
+
+		static Mesh* AddMesh();
 
 	private:
-		std::vector<Mesh> m_Meshes;
+		MeshArena();
+		~MeshArena();
+
+		static inline std::vector<Mesh> m_Meshes;
 	};
 }

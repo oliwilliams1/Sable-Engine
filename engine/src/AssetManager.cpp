@@ -9,8 +9,21 @@ using namespace SB;
 
 static AssetManager* s_Instance = nullptr;
 
+Mesh* AssetManager::GetMesh(const std::string& name)
+{
+	auto it = ms_MeshMap.find(name);
+	if (it != ms_MeshMap.end())
+	{
+		return it->second;
+	}
+	
+	ms_MeshMap[name] = MeshArena::AddMesh();
+	return ms_MeshMap[name];
+}
+
 AssetManager::AssetManager()
 {
+	MeshArena::Init();
 	ms_ResourcePath = GetRelPath("resources");
 	SABLE_LOG("Asset manager loaded for path: %s", ms_ResourcePath.string().c_str());
 }
@@ -24,6 +37,8 @@ AssetManager::~AssetManager()
 
 	ms_TextureMap.clear();
 	SABLE_LOG("Asset manager destroyed");
+
+	MeshArena::Destroy();
 }
 
 void AssetManager::Init()
@@ -35,9 +50,4 @@ void AssetManager::Shutdown()
 {
 	delete s_Instance;
 	s_Instance = nullptr;
-}
-
-bool AssetManager::LoadMeshFromFile(const std::string& filename, SB_MESH& mesh)
-{
-	return false;
 }

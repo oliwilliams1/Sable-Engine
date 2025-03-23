@@ -260,7 +260,7 @@ void SceneViewer::RenderPropertyWindow(SB::SceneNode* node)
 		node->SetName(nameBuffer);
 	}
 
-	const char* componentOptions[] = { "Mesh", "Script", "Int Variable", "Shader", "Rigid Body" };
+	const char* componentOptions[] = { "Script", "Int Variable", "Shader", "Rigid Body" };
 	static int selectedComponent = 0;
 
 	ImGui::SameLine();
@@ -270,7 +270,12 @@ void SceneViewer::RenderPropertyWindow(SB::SceneNode* node)
 	ImGui::SameLine();
 	if (ImGui::Button("+", ImVec2(22, 0)))
 	{
-		
+		SB::SABLE_WARN("Not implemented");
+	}
+
+	if (node->m_Mesh != nullptr)
+	{
+		ImGui::SeparatorText("Mesh");
 	}
 
 	ImGui::End();

@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include "SB_VkCore.h"
+#include "Mesh.h"
 
 namespace SB
 {
@@ -13,11 +14,6 @@ namespace SB
 		SBE_ASSET_TEXTURE = 0,
 		SBE_ASSET_MESH = 1,
 		SBE_ASSET_MATERIAL = 2
-	};
-
-	struct SB_MESH
-	{
-		int test;
 	};
 
 	struct SB_MATERIAL
@@ -34,7 +30,7 @@ namespace SB
 		static void Init();
 		static void Shutdown();
 
-		static bool LoadMeshFromFile(const std::string& filename, SB_MESH& mesh);
+		static Mesh* GetMesh(const std::string& name);
 
 	private:
 		AssetManager();
@@ -43,7 +39,7 @@ namespace SB
 		static inline std::filesystem::path ms_ResourcePath;
 		// Possible but not thought through
 		static inline std::map<std::string, SB::ImGuiImageData> ms_TextureMap;
-		static inline std::map<std::string, SB_MESH> ms_MeshMap;
+		static inline std::map<std::string, Mesh*> ms_MeshMap;
 		static inline std::map<std::string, SB_MATERIAL> ms_MaterialMap;
 	};
 }

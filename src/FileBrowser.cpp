@@ -5,6 +5,7 @@
 #include "SB/SableEngine.h"
 #include "SB/Utils.h"
 #include "SB/DebugLog.h"
+#include "SB/AssetManager.h"
 #include "App.h"
 
 void LoadTextureForImGui(SB::VkCore& vkCore, const std::string& path, SB::ImGuiImageData& image)
@@ -271,8 +272,12 @@ void FileBrowser::Render()
 				case SB_ASSET_FBX:
 				case SB_ASSET_OBJ:
 				case SB_ASSET_GLTF:
-					instance.AddNode(StripExtension(file.path.filename().string()), root);
+				{
+					SB::SceneNode* node = instance.AddNode(StripExtension(file.path.filename().string()), root);
+					node->m_Mesh = SB::AssetManager::GetMesh(file.path.string());
+					
 					break;
+				}
 
 				default:
 					break;

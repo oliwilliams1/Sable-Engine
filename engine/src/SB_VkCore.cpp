@@ -238,7 +238,7 @@ void VkCore::ResizeMainFrame(int width, int height)
 	MainFrame.width = width;
 	MainFrame.height = height;
 
-	CreateSwapchainTexture(VK_FORMAT_B8G8R8A8_UNORM, MainFrame);
+	CreateSwapchainTexture(swapChainImageFormat, MainFrame);
 
 	vkQueueWaitIdle(graphicsQueue);
 }
