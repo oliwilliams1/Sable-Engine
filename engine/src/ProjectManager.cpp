@@ -4,6 +4,7 @@
 #include "ProjectManager.h"
 #include "DebugLog.h"
 #include "Utils.h"
+#include "AssetManager.h"
 
 void SB::SaveProject(const std::string& filename, const SB_Project& projectData)
 {
@@ -38,6 +39,7 @@ void SB::SaveProject(const std::string& filename, const SB_Project& projectData)
 
 void SB::LoadProject(const std::string& filename, SB_Project& projectData)
 {
+	AssetManager::Shutdown();
 	std::filesystem::path relPath = GetRelPath("projects");
 
 	std::filesystem::path filenamePath = relPath / std::filesystem::path(filename);
@@ -63,4 +65,5 @@ void SB::LoadProject(const std::string& filename, SB_Project& projectData)
 	projectData.path = projectNode["path"].as<std::string>();
 
 	SABLE_LOG("Loaded project: %s located at: %s", projectData.name.c_str(), filenamePath.string().c_str());
+	AssetManager::Init();
 }

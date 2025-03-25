@@ -60,18 +60,25 @@ add_subdirectory("sable")
 add_custom_command(
     TARGET SableEditor
     POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:glfw>
+    COMMAND ${CMAKE_COMMAND} -E copy 
+            $<TARGET_FILE:glfw>
             $<TARGET_FILE_DIR:SableEditor>
-    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:SableEngine>
+    
+    COMMAND ${CMAKE_COMMAND} -E copy 
+            $<TARGET_FILE:SableEngine>
             $<TARGET_FILE_DIR:SableEditor>
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/resources
+    
+    COMMAND ${CMAKE_COMMAND} -E copy_directory 
+            ${CMAKE_CURRENT_SOURCE_DIR}/resources
             $<TARGET_FILE_DIR:SableEditor>/resources
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/projects
+    
+    COMMAND ${CMAKE_COMMAND} -E copy_directory 
+            ${CMAKE_CURRENT_SOURCE_DIR}/projects
             $<TARGET_FILE_DIR:SableEditor>/projects
 
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_CURRENT_BINARY_DIR}/engine/shaders
-        ${CMAKE_CURRENT_BINARY_DIR}/shaders
+    COMMAND ${CMAKE_COMMAND} -E copy_directory 
+            "${CMAKE_CURRENT_SOURCE_DIR}/build/shaders"
+            $<TARGET_FILE_DIR:SableEditor>/shaders
 )
 
 add_custom_target(copy_shaders_editor ALL)

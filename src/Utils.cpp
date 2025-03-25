@@ -1,9 +1,15 @@
 #include <iostream>
+#include <vector>
+
 #include <imgui.h>
 #include <imgui_impl_vulkan.h>
+#include <assimp/Importer.hpp>
+
 #include "Utils.h"
 #include "SB/Utils.h"
 #include "SB/DebugLog.h"
+#include "SB/Mesh.h"
+
 
 void SetupImGuiStyle()
 {
@@ -115,4 +121,47 @@ void PrepareTextureForImGui(SB::FrameAttachment& image)
 	SB::VkCore::Get().CreateTextureSampler(&image.sampler);
 	image.descriptorSet = ImGui_ImplVulkan_AddTexture(image.sampler, image.imageView, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
 	SB::VkCore::Get().samplers.push_back(image.sampler);
+}
+
+void LoadMeshesEditor(const std::string& projectName)
+{
+	using path = std::filesystem::path;
+	path engineResourcesRelPath = GetRelPath("resources");
+	engineResourcesRelPath /= "meshes";
+	path projectResourcesRelPath = GetRelPath("projects");
+	projectResourcesRelPath = projectResourcesRelPath / projectName / "meshes";
+
+	if (!std::filesystem::exists(projectResourcesRelPath))
+	{
+		SB::SABLE_ERROR("Cannot open project meshes folder: %s", projectResourcesRelPath.string().c_str());
+		return;
+	}
+
+	std::vector<path> pathsToResources;
+	std::vector<const char*> extensions = { ".obj", ".gltf", ".glTF", ".fbx" };
+
+	for (const auto& entry : std::filesystem::directory_iterator(projectResourcesRelPath))
+	{
+		if (entry.is_regular_file())
+		{
+			path filePath = entry.path();
+			
+			pathsToResources.push_back(filePath);
+		}
+	}
+
+	for (const auto& entry : std::filesystem::directory_iterator(engineResourcesRelPath))
+	{
+		if (entry.is_regular_file())
+		{
+			path filePath = entry.path();
+
+			pathsToResources.push_back(filePath);
+		}
+	}
+
+	for (const auto& meshPath : pathsToResources)
+	{
+		SB::SABLE_LOG("Loaded mesh: %s", meshPath.string().c_str());
+	}
 }
