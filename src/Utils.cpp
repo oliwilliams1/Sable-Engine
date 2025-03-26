@@ -4,12 +4,14 @@
 #include <imgui.h>
 #include <imgui_impl_vulkan.h>
 #include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 #include "Utils.h"
 #include "SB/Utils.h"
 #include "SB/DebugLog.h"
 #include "SB/Mesh.h"
-
+#include "SB/AssetManager.h"
 
 void SetupImGuiStyle()
 {
@@ -123,9 +125,59 @@ void PrepareTextureForImGui(SB::FrameAttachment& image)
 	SB::VkCore::Get().samplers.push_back(image.sampler);
 }
 
+using path = std::filesystem::path;
+static void LoadMeshFromFile(const path& path)
+{
+	SB::Mesh* mesh = SB::AssetManager::GetMesh(path.string());
+
+	Assimp::Importer importer;
+	const aiScene* scene = importer.ReadFile(path.string(), aiProcess_Triangulate);
+
+	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
+	{
+		SB::SABLE_ERROR("ASSIMP: Failed to load mesh %s", importer.GetErrorString());
+		return;
+	}
+
+	for (size_t i = 0; i < scene->mNumMeshes; i++)
+	{
+		aiMesh* aiMesh = scene->mMeshes[i];
+		std::vector<glm::vec3> vertices;
+		std::vector<unsigned int> indices;
+
+		for (unsigned int j = 0; j < aiMesh->mNumVertices; j++)
+		{
+			aiVector3D pos = aiMesh->mVertices[j];
+			vertices.push_back(glm::vec3(pos.x, pos.y, pos.z));
+		}
+
+		for (unsigned int j = 0; j < aiMesh->mNumFaces; j++)
+		{
+			aiFace face = aiMesh->mFaces[j];
+			for (unsigned int k = 0; k < face.mNumIndices; k++)
+			{
+				indices.push_back(face.mIndices[k]);
+			}
+		}
+
+		std::string meshName = path.stem().string();
+
+		if (i != 0)
+		{
+			meshName += "_" + std::to_string(i);
+		}
+
+		SB::Mesh* mesh = SB::AssetManager::GetMesh(meshName);
+		mesh->AddVertexPositionsData(vertices);
+		mesh->AddIndicesData(indices);
+		mesh->UploadData();
+	}
+
+	SB::SABLE_LOG("Loaded mesh: %s", path.string().c_str());
+}
+
 void LoadMeshesEditor(const std::string& projectName)
 {
-	using path = std::filesystem::path;
 	path engineResourcesRelPath = GetRelPath("resources");
 	engineResourcesRelPath /= "meshes";
 	path projectResourcesRelPath = GetRelPath("projects");
@@ -162,6 +214,6 @@ void LoadMeshesEditor(const std::string& projectName)
 
 	for (const auto& meshPath : pathsToResources)
 	{
-		SB::SABLE_LOG("Loaded mesh: %s", meshPath.string().c_str());
+		LoadMeshFromFile(meshPath);
 	}
 }

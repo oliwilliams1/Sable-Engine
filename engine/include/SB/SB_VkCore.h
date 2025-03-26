@@ -17,8 +17,8 @@ namespace SB
 {
 	struct Vertex
 	{
-		glm::vec2 pos;
-		glm::vec3 colour;
+		glm::vec3 pos;
+		glm::vec2 uv;
 
 		static VkVertexInputBindingDescription getBindingDescription() {
 			VkVertexInputBindingDescription bindingDescription{};
@@ -31,21 +31,21 @@ namespace SB
 
 		static std::array<VkVertexInputAttributeDescription, 2> getAttributeDescriptions() {
 			std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions{};
-			attributeDescriptions[0].binding = 0;
-			attributeDescriptions[0].location = 0;
-			attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-			attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
 			/*float: VK_FORMAT_R32_SFLOAT
 			  vec2: VK_FORMAT_R32G32_SFLOAT
 			  vec3 : VK_FORMAT_R32G32B32_SFLOAT
 			  vec4 : VK_FORMAT_R32G32B32A32_SFLOAT*/
 
+			attributeDescriptions[0].binding = 0;
+			attributeDescriptions[0].location = 0;
+			attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
+			attributeDescriptions[0].offset = offsetof(Vertex, pos);
 
 			attributeDescriptions[1].binding = 0;
 			attributeDescriptions[1].location = 1;
-			attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
-			attributeDescriptions[1].offset = offsetof(Vertex, colour);
+			attributeDescriptions[1].format = VK_FORMAT_R32G32_SFLOAT;
+			attributeDescriptions[1].offset = offsetof(Vertex, uv);
 
 			return attributeDescriptions;
 		}
@@ -162,24 +162,16 @@ namespace SB
 		VkCore() {};
 		~VkCore();
 
-
 		uint32_t imageIndex = 0;
-
-		const std::vector<Vertex> vertices = {
-			{{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-			{{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-			{{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-			{{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
-		};
-
-		const std::vector<uint16_t> indices = {
-			0, 1, 2, 2, 3, 0
-		};
 
 		struct UniformBufferObject {
 			glm::mat4 model;
 			glm::mat4 view;
 			glm::mat4 proj;
+		};
+
+		const std::vector<uint16_t> indices = {
+			0, 1, 2, 2, 3, 0
 		};
 
 		int m_FramebufferWidth, m_FramebufferHeight = 0;
@@ -291,7 +283,7 @@ namespace SB
 
 		void cleanupSwapchain();
 
-		void createVertexBuffer();
+		void createVertexBuffer(const std::vector<Vertex>& vertices);
 		void createIndexBuffer();
 		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 

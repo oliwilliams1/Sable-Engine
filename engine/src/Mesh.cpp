@@ -3,56 +3,60 @@
 
 using namespace SB;
 
-template<typename T>
-void Mesh::AddData(const T& data, VERTEX_DATA_TYPE type)
+void Mesh::AddVertexPositionsData(const std::vector<glm::vec3>& data)
 {
-	static_assert(std::is_same_v<T, std::vector<glm::vec3>> ||
-		std::is_same_v<T, std::vector<glm::vec2>> ||
-		std::is_same_v<T, std::vector<float>> ||
-		std::is_same_v<T, std::vector<unsigned int>>,
-		"Type must be std::vector<glm::vec3>, std::vector<glm::vec2>, std::vector<float>, or std::vector<unsigned int>");
-
-	if (m_Uploaded)
-	{
-		SABLE_WARN("Mesh data already uploaded, skipping");
-		return;
-	}
-
-	if (!m_TempUploadData)
+	if (m_TempUploadData == nullptr)
 	{
 		m_TempUploadData = new PreMeshData();
 	}
 
-	switch (type)
+	if (m_Uploaded)
 	{
-	case VERTEX_DATA_TYPE::POSITION:
-	{
-		if (!std::is_same_v<T, std::vector<glm::vec3>>)
-		{
-			SABLE_RUNTIME_ERROR("Position data must be of type std::vector<glm::vec3>");
-			return;
-		}
-
-		m_TempUploadData->vertices = data;
-		break;
-	}
-
-	case VERTEX_DATA_TYPE::INDICES:
-	{
-		if (!std::is_same_v<T, std::vector<unsigned int>>)
-		{
-			SABLE_RUNTIME_ERROR("Indices data must be of type std::vector<unsigned int>");
-			return;
-		}
-
-		m_TempUploadData->indices = data;
-		break;
-	}
-
-	default:
-		SABLE_RUNTIME_ERROR("Unknown VERTEX_DATA_TYPE");
+		SABLE_ERROR("Mesh data already uploaded, skipping");
 		return;
 	}
+
+	if (data.size() == 0)
+	{
+	SABLE_ERROR("Mesh does not have vertex position data, skipping");
+		return;
+	}
+
+	if (m_TempUploadData->vertices.size() != 0)
+	{
+		SABLE_ERROR("Mesh already has vertex position data, skipping");
+		return;
+	}
+
+	m_TempUploadData->vertices = data;
+}
+
+void Mesh::AddIndicesData(const std::vector<unsigned int>& data)
+{
+	if (m_TempUploadData == nullptr)
+	{
+		m_TempUploadData = new PreMeshData();
+	}
+
+	if (m_Uploaded)
+	{
+		SABLE_ERROR("Mesh data already uploaded, skipping");
+		return;
+	}
+
+	if (data.size() == 0)
+	{
+		SABLE_ERROR("Mesh does not have index data, skipping");
+		return;
+	}
+
+	if (m_TempUploadData->indices.size() != 0)
+	{
+		SABLE_ERROR("Mesh already has index data, skipping");
+		return;
+	}
+
+	m_TempUploadData->indices = data;
 }
 
 void Mesh::UploadData()
@@ -93,7 +97,7 @@ void Mesh::UploadData()
 	}
 
 	std::vector<float> flatData;
-	flatData.reserve(verticesSize * 5);
+	flatData.resize(verticesSize * 5);
 
 	for (size_t i = 0; i < verticesSize; i++)
 	{

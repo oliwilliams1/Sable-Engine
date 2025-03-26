@@ -7,12 +7,6 @@
 
 namespace SB
 {
-	enum class VERTEX_DATA_TYPE
-	{
-		POSITION,
-		INDICES
-	};
-
 	struct PreMeshData
 	{
 		std::vector<glm::vec3> vertices;
@@ -23,8 +17,8 @@ namespace SB
 	class Mesh
 	{
 	public:
-		template<typename T>
-		void AddData(const T& data, VERTEX_DATA_TYPE type);
+		void AddVertexPositionsData(const std::vector<glm::vec3>& data);
+		void AddIndicesData(const std::vector<unsigned int>& data);
 		void UploadData();
 
 	private:

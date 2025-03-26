@@ -135,7 +135,14 @@ void VkCore::InitVk(uint32_t glfwExtensionCount, const char** glfwExtensions)
 	textureSampler = textureData.sampler;
 	textureImageMemory = textureData.imageMemory;
 
-	createVertexBuffer();
+	const std::vector<Vertex> vertices = {
+		{{-0.5f, -0.5f, 0.5f}, {0.0f, 1.0f}},
+		{{ 0.5f, -0.5f, 0.0f}, {1.0f, 1.0f}},
+		{{ 0.5f,  0.5f, 0.0f}, {1.0f, 0.0f}},
+		{{-0.5f,  0.5f, 0.0f}, {0.0f, 0.0f}}
+	};
+
+	createVertexBuffer(vertices);
 	createIndexBuffer();
 	createUniformBuffers();
 	createDescriptorPool();
@@ -1164,7 +1171,7 @@ void VkCore::createImage(uint32_t width, uint32_t height, VkFormat format, VkIma
 	vkBindImageMemory(device, image, imageMemory, 0);
 }
 
-void VkCore::createVertexBuffer()
+void VkCore::createVertexBuffer(const std::vector<Vertex>& vertices)
 {
 	VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 	bufferSize = (bufferSize + 4095) & ~static_cast<VkDeviceSize>(4095);
