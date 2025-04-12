@@ -5,7 +5,6 @@
 #include "SB/SableEngine.h"
 #include "SB/Utils.h"
 #include "SB/DebugLog.h"
-#include "SB/AssetManager.h"
 #include "App.h"
 
 void LoadTextureForImGui(SB::VkCore& vkCore, const std::string& path, SB::ImGuiImageData& image)
@@ -256,8 +255,8 @@ void FileBrowser::Render()
 			// Basically see if the user clicked a button, but image is button
 			if (ImGui::IsMouseDoubleClicked(0))
 			{
-				static SB::Scene& instance = SB::Scene::GetInstance();
-				static SB::SceneNode* root = instance.GetRootNode();
+				/*static SB::Scene& instance = SB::Scene::GetInstance();
+				static SB::SceneNode* root = instance.GetRootNode();*/
 
 				switch (file.type)
 				{
@@ -273,8 +272,8 @@ void FileBrowser::Render()
 				case SB_ASSET_OBJ:
 				case SB_ASSET_GLTF:
 				{
-					SB::SceneNode* node = instance.AddNode(StripExtension(file.path.filename().string()), root);
-					node->m_Mesh = SB::AssetManager::GetMesh(file.path.string());
+					/*SB::SceneNode* node = instance.AddNode(StripExtension(file.path.filename().string()), root);
+					node->m_Mesh = SB::AssetManager::GetMesh(file.path.string());*/
 					
 					break;
 				}

@@ -3,4 +3,3 @@
 
 void SetupImGuiStyle();
 void PrepareTextureForImGui(SB::FrameAttachment& image);
-void LoadMeshesEditor(const std::string& projectName);

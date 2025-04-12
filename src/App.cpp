@@ -67,7 +67,6 @@ App::App()
 	currentProject = SB::SB_Project();
 
 	fileBrowser = new FileBrowser();
-	sceneViewer = new SceneViewer();
 }
 
 void App::DisplayMenuBar()
@@ -389,11 +388,6 @@ void App::Mainloop()
 		if (assetManagerWindowOpen)
 		{
 			fileBrowser->Render();
-		}
-
-		if (sceneHeirachyWindowOpen)
-		{
-			sceneViewer->Draw();
 		}
 
 		if (newProjectWindowOpen)

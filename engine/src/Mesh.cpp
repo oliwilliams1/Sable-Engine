@@ -113,25 +113,3 @@ void Mesh::UploadData()
 	m_TempUploadData = nullptr;
 	m_Uploaded = true;
 }
-
-static MeshArena* s_MeshArenaInstance = nullptr;
-
-void MeshArena::Init()
-{
-	s_MeshArenaInstance = new MeshArena();
-}
-
-void MeshArena::Destroy()
-{
-	delete s_MeshArenaInstance;
-	s_MeshArenaInstance = nullptr;
-}
-
-MeshArena::MeshArena() {};
-MeshArena::~MeshArena() {};
-
-Mesh* MeshArena::AddMesh()
-{
-	m_Meshes.emplace_back();
-	return &m_Meshes.back();
-}

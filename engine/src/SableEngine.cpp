@@ -1,8 +1,6 @@
 #include "SableEngine.h"
-#include "AssetManager.h"
-#include "Scene.h"
 #include "DebugLog.h"
-#include "Mesh.h"
+#include "ECS.h"
 
 using namespace SB;
 
@@ -11,15 +9,13 @@ static SBEngine* s_Instance = nullptr;
 SBEngine::SBEngine()
 {
     Console::Init();
-    AssetManager::Init();
-    Scene::Init();
+	ECS::Init();
 }
 
 SBEngine::~SBEngine()
 {
     Console::Shutdown();
-    AssetManager::Shutdown();
-    Scene::Shutdown();
+	ECS::Shutdown();
 }
 
 void SBEngine::Init()

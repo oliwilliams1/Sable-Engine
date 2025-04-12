@@ -6,7 +6,6 @@
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #include <GLFW/glfw3.h>
 #include "FileBrowser.h"
-#include "SceneViewer.h"
 #include "SB/SableEngine.h"
 #include "SB/ProjectManager.h"
 #include "SB/SB_VkCore.h"
@@ -36,7 +35,6 @@ private:
 	inline static GLFWwindow* window = nullptr;
 
 	FileBrowser* fileBrowser = nullptr;
-	SceneViewer* sceneViewer = nullptr;
 
 	SB::SB_Project currentProject;
 	SB::VkCore* vkCore = nullptr;

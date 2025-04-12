@@ -12,8 +12,6 @@ public:
 
     static SBEngine& GetInstance();
 
-    // bool LoadTextureFromFile(const std::string& filename, GLuint& id);
-
 private:
     SBEngine();
     ~SBEngine();

@@ -29,22 +29,4 @@ namespace SB
 		VkBuffer m_IndexBuffer;
 		size_t m_IndicesSize = -1;
 	};
-
-	class MeshArena
-	{
-	public:
-		MeshArena(const MeshArena&) = delete;
-		MeshArena& operator=(const MeshArena&) = delete;
-
-		static void Init();
-		static void Destroy();
-
-		static Mesh* AddMesh();
-
-	private:
-		MeshArena();
-		~MeshArena();
-
-		static inline std::vector<Mesh> m_Meshes;
-	};
 }

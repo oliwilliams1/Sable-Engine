@@ -59,6 +59,5 @@ bool EditorProjManager::DisplayNewProjectWindow(bool* open, SB::SB_Project& inpu
 bool EditorProjManager::LoadProject(const std::string& path, SB::SB_Project& project)
 {
     SB::LoadProject(path + ".sbproj", project);
-    LoadMeshesEditor(project.name);
     return true;
 }
