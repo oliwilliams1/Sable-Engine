@@ -3,9 +3,6 @@
 
 #include <imgui.h>
 #include <imgui_impl_vulkan.h>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 
 #include "Utils.h"
 #include "SB/Utils.h"

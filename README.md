@@ -3,6 +3,9 @@ Install the vulkan sdk based on your platform: https://vulkan.lunarg.com
 
 Ensure you have CMake installed, then clone this repo
 ## Windows
+Ensure you have Visual Studio (MSVC), as this is the build tool these instructions follow.
+You may have to restart to ensure CMake can detect the new Vulkan installation
+Then you can run the following commands in a new terminal to setup a .sln file
 ```bash
 cd <repo-name>
 mkdir build
